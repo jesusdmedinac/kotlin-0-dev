@@ -1,15 +1,15 @@
-# Roadmap y Progreso del Curso
+# Course Roadmap and Progress
 
-Este archivo rastrea el progreso del desarrollo de los cursos de Kotlin, sirviendo como guía de qué lecciones están completadas y cuáles faltan por redactar.
+This file tracks the progress of the Kotlin courses development, serving as a guide for which lessons are completed and which are pending.
 
-## Curso 2: Kotlin para Principiantes
-**Proyecto Final:** Chat de IA interactivo desde la terminal.
+## Course 2: Kotlin for Beginners
+**Final Project:** Interactive AI Chat from the terminal.
 
-- [ ] L1: Entorno y Hola Mundo
-- [ ] L2: Variables, Tipos y Null Safety (La Base de Kotlin)
-- [ ] L3: Control de Flujo Avanzado (Expresiones y `when`)
-- [ ] L4: Funciones y Lambdas (Enfoque Funcional)
-- [ ] L5: Colecciones y Operaciones (map, filter, fold)
-- [ ] L6: POO Idiomática (Data Classes y Sealed Classes)
-- [ ] L7: Programación Asíncrona (Corrutinas Básicas)
-- [ ] L8: Proyecto Final (Chat de IA desde la terminal)
+- [ ] L1: Environment Setup and Hello World
+- [ ] L2: Variables, Types, and Null Safety (Kotlin Basics)
+- [ ] L3: Advanced Control Flow (Expressions and `when`)
+- [ ] L4: Functions and Lambdas (Functional Approach)
+- [ ] L5: Collections and Operations (map, filter, fold)
+- [ ] L6: Idiomatic OOP (Data Classes and Sealed Classes)
+- [ ] L7: Asynchronous Programming (Basic Coroutines)
+- [ ] L8: Final Project (AI Chat from the terminal)
