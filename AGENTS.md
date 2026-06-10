@@ -34,6 +34,6 @@ All new features must follow the GitHub Local Management and Git Worktrees workf
 3. Commit atomic changes inside the worktree.
 4. Open a PR linked to the Issue (`gh pr create`).
 
-## 4. Tech Stack
+## 5. Tech Stack
 - Astro
 - Starlight
