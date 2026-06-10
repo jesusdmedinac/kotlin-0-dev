@@ -1,88 +1,88 @@
 Feature: Course 2 - Kotlin for Beginners
   As a developer with previous experience in other languages
-  I want to learn Kotlin idiomatically, from syntax to advanced OOP and basic coroutines
-  In order to build an interactive AI Chat from the terminal
+  I want to learn Kotlin idiomatically, balancing deep theory and practical application
+  In order to build an interactive AI Chat from the terminal incrementally
 
   # MODULE 1: Basics and Advanced Control Flow
   Scenario: Lesson 1 - Agnostic Environment and Hello World
-    Given that the student needs a platform-agnostic environment
-    When they set up IntelliJ IDEA (pure) or CLI
-    Then they understand what the JVM is and compile Kotlin independently of Android
+    Given that the student needs to understand the JVM and Kotlin compilation
+    When they study the theoretical basis of platform-agnostic Kotlin
+    Then they apply it by setting up the project shell and coding the "AI Chat CLI" welcome banner
 
   Scenario: Lesson 2 - Variables, Types, and the Truth about Null Safety
-    Given that Kotlin enforces strict null safety
-    When the student learns about read-only (`val`), mutability, and Platform Types (`String!`)
-    Then they understand why a Java `@NonNull` variable might still cause compiler warnings in Kotlin
+    Given that Kotlin enforces strict null safety and mutability rules
+    When the student explores read-only (`val`), Platform Types (`String!`), and Java interoperability
+    Then they build the CLI input module to safely capture the username without null crashes
 
   Scenario: Lesson 3 - Hierarchies and Exhaustive Control Flow
-    Given that `when` is more powerful than `switch`
-    When the student uses `when` with `enum class`, `sealed class`, and `sealed interface`
-    Then they understand when to nest `class`, `data class`, `object`, or `data object` inside a sealed hierarchy
+    Given that Kotlin's `when` is vastly superior to Java's `switch`
+    When the student learns the theoretical differences between `enum class`, `sealed class`, and `sealed interface`
+    Then they apply this by building the interactive Main Menu loop (1. Chat, 2. Settings, 3. Exit)
 
   # MODULE 2: Functional Thinking (FP)
   Scenario: Lesson 4 - Anatomy of Functions
-    Given that Kotlin has named and default arguments
-    When the student uses them to simplify function calls
-    Then they understand why Java lacks this feature due to bytecode parameter name erasure
+    Given that Java lacks named arguments and default values due to bytecode erasure
+    When the student learns how Kotlin handles these functional features under the hood
+    Then they refactor the initial spaghetti menu code into modular, readable functions
 
   Scenario: Lesson 5 - Extension and Infix Functions
-    Given that Kotlin allows extending existing classes
-    When the student learns the linguistics of code (`prefix`, `infix`, and `suffix`)
-    Then they can write expressive, readable DSL-like function calls
+    Given that Kotlin allows extending closed classes
+    When the student learns the linguistics of prefix, infix, and suffix functions
+    Then they create custom `String` extensions to add ANSI colors (e.g., `"Error".red()`) to the terminal output
 
   Scenario: Lesson 6 - Custom Higher-Order Functions
-    Given that the standard library uses lambdas extensively
-    When the student builds their own `myMap` and `myFilter` from scratch
-    Then they truly understand how functions are passed as parameters
+    Given that understanding lambdas is critical for Idiomatic Kotlin
+    When the student theoretically dissects how functions can be passed as parameters
+    Then they build a custom `myFilter` higher-order function to censor forbidden words in the chat input
 
   Scenario: Lesson 7 - Collections and Sequences (Lazy vs Eager)
     Given that data processing impacts performance
-    When the student learns `map`, `filter`, and `fold`
-    Then they can differentiate when to use `Iterable` (Eager) vs `Sequence` (Lazy)
+    When the student contrasts eager `Iterable` operations against lazy `Sequence` operations
+    Then they implement the in-memory "Chat History" using immutable lists and standard functional operations
 
   Scenario: Lesson 8 - Scope Functions (The Swiss Army Knife)
-    Given that scope functions are crucial for idiomatic Kotlin
-    When the student builds their own `myLet`, `myRun`, `myWith`, `myApply`, and `myAlso`
-    Then they master the difference between `this` vs `it` and their return values
+    Given that scope functions (`let`, `run`, `with`, `apply`, `also`) cause confusion for beginners
+    When the student theoretically builds their own `myLet` and `myApply` to understand `this` vs `it`
+    Then they use scope functions to cleanly instantiate and configure the User Profile state
 
   # MODULE 3: Advanced OOP and Typing (The Clash with Java)
   Scenario: Lesson 9 - Classes, Inheritance, and Visibility
-    Given that Kotlin's class structure differs heavily from Java
-    When the student learns why everything is an object in Kotlin (unlike Java primitives) and why classes are `public final` by default
-    Then they understand how `open` fosters "Composition over Inheritance"
+    Given that Kotlin defaults to `public final` to favor composition over inheritance
+    When the student contrasts Kotlin's object model with Java primitives
+    Then they encapsulate the scattered chat logic into a robust, object-oriented `ChatEngine` class
 
   Scenario: Lesson 10 - Companion Objects and Object Declarations
-    Given the need for singletons and static-like members
-    When the student learns `object`, `companion object`, and `data object`
-    Then they understand exactly what the `data` modifier generates in bytecode (`equals`, `hashCode`, `copy` vs just `toString`)
+    Given that singletons and static-like members are needed
+    When the student analyzes the bytecode generated by `data class` vs `data object`
+    Then they strictly model the chat states using a `sealed class Message` and `data objects`
 
   Scenario: Lesson 11 - Advanced Generics
-    Given that variance is a complex topic
-    When the student explores `in` (Contravariance), `out` (Covariance), and `*` (Star projection)
-    Then they can safely design generic classes and functions
+    Given that variance is a notoriously complex topic
+    When the student learns `in` (Contravariance), `out` (Covariance), and `*` (Star projection)
+    Then they design a generic `Result<T>` wrapper to handle successful AI responses or network failures
 
   Scenario: Lesson 12 - Delegation and Delegated Properties
-    Given that delegation simplifies code reuse
-    When the student learns the Delegate pattern and implements a custom `ReadWriteProperty`
-    Then they can create custom delegates beyond the standard `by lazy`
+    Given that the Delegate pattern is built into the language
+    When the student learns how to implement a custom `ReadWriteProperty`
+    Then they build a custom delegate that automatically saves the Chat History to a `.txt` file upon modification
 
   # MODULE 4: Asynchrony and Final Project
   Scenario: Lesson 13 - Coroutines vs Traditional Asynchrony
-    Given the need for non-blocking code
-    When the student compares threads, callbacks (RxJava/Promises), and suspension
-    Then they grasp the core concept of a coroutine
+    Given that blocking the main thread degrades user experience
+    When the student theoretically compares threads, callbacks (RxJava), and Kotlin suspension
+    Then they prepare the codebase for asynchronous operations by identifying blocking I/O calls
 
   Scenario: Lesson 14 - Suspension and Scopes
-    Given that coroutines need a lifecycle
-    When the student learns what a `suspend` function is and uses `CoroutineScope`
-    Then they understand the lifecycle of a coroutine and how `launch` works
+    Given that coroutines require a structured lifecycle
+    When the student dissects the `suspend` keyword and the `CoroutineScope`
+    Then they program a concurrent "Typing..." animation in the terminal while waiting for the AI
 
   Scenario: Lesson 15 - Contexts and Dispatchers
-    Given that different tasks require different threads
-    When the student uses `Dispatchers.IO` and `Dispatchers.Main` with `async` and `await`
-    Then they can safely switch threads for I/O operations
+    Given that thread management is crucial for performance
+    When the student learns to switch contexts using `Dispatchers.IO` and `Dispatchers.Main`
+    Then they offload the heavy (simulated) network requests to the IO dispatcher safely
 
   Scenario: Lesson 16 - Final Project (AI Chat)
-    Given that the student has completed all theoretical modules
-    When they integrate Null safety, OOP, FP, and Coroutines
-    Then they build a fully functional AI Chat CLI
+    Given that the student has mastered the core concepts
+    When they review the entire architecture of the built application
+    Then they compile the final executable JAR, completing the incremental lab
