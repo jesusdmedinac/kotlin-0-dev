@@ -23,7 +23,10 @@ To ensure consistency across the ecosystem, we maintain a strict boundary betwee
   - The actual lessons and documentation read by the students (`.mdx` files)
   - Code comments inside the lessons intended for students.
 
-## 3. Development Workflow
+## 3. Pedagogical Content Generation
+- **Content Style Guide:** All course content generation (`.mdx` lessons) MUST adhere to the strict pedagogical rules defined in `docs/CONTENT_STYLE.md`. Agents MUST read this file before writing any lesson.
+
+## 4. Development Workflow
 All new features must follow the GitHub Local Management and Git Worktrees workflow:
 1. Create a GitHub Issue (`gh issue create`).
 2. Create a git worktree (`git worktree add ../<branch> -b <branch>`).

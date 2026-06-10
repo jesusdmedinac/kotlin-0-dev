@@ -5,11 +5,26 @@ This file tracks the progress of the Kotlin courses development, serving as a gu
 ## Course 2: Kotlin for Beginners
 **Final Project:** Interactive AI Chat from the terminal.
 
-- [ ] L1: Environment Setup and Hello World
-- [ ] L2: Variables, Types, and Null Safety (Kotlin Basics)
-- [ ] L3: Advanced Control Flow (Expressions and `when`)
-- [ ] L4: Functions and Lambdas (Functional Approach)
-- [ ] L5: Collections and Operations (map, filter, fold)
-- [ ] L6: Idiomatic OOP (`data class` and `sealed class`)
-- [ ] L7: Asynchronous Programming (Basic Coroutines)
-- [ ] L8: Final Project (AI Chat from the terminal)
+### Module 1: Basics and Advanced Control Flow
+- [ ] L1: Agnostic Environment and Hello World
+- [ ] L2: Variables, Types, and the Truth about Null Safety
+- [ ] L3: Hierarchies and Exhaustive Control Flow
+
+### Module 2: Functional Thinking (FP)
+- [ ] L4: Anatomy of Functions
+- [ ] L5: Extension and Infix Functions
+- [ ] L6: Custom Higher-Order Functions
+- [ ] L7: Collections and Sequences (Lazy vs Eager)
+- [ ] L8: Scope Functions (The Swiss Army Knife)
+
+### Module 3: Advanced OOP and Typing (The Clash with Java)
+- [ ] L9: Classes, Inheritance, and Visibility
+- [ ] L10: Companion Objects and Object Declarations
+- [ ] L11: Advanced Generics
+- [ ] L12: Delegation and Delegated Properties
+
+### Module 4: Asynchrony and Final Project
+- [ ] L13: Coroutines vs Traditional Asynchrony
+- [ ] L14: Suspension and Scopes
+- [ ] L15: Contexts and Dispatchers
+- [ ] L16: Final Project (AI Chat)
