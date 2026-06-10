@@ -25,6 +25,7 @@ To ensure consistency across the ecosystem, we maintain a strict boundary betwee
 
 ## 3. Pedagogical Content Generation
 - **Content Style Guide:** All course content generation (`.mdx` lessons) MUST adhere to the strict pedagogical rules defined in `docs/CONTENT_STYLE.md`. Agents MUST read this file before writing any lesson.
+- **Incremental Lab (Project-Based Learning):** The course is designed as an incremental lab. Each lesson MUST include a deep theoretical explanation (analogies, under-the-hood details, bytecode when applicable) followed immediately by a practical application where the student builds a piece of the Final Project (e.g., an AI Chat CLI).
 
 ## 4. Development Workflow
 All new features must follow the GitHub Local Management and Git Worktrees workflow:
