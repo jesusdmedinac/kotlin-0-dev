@@ -16,11 +16,12 @@ To ensure consistency across the ecosystem, we maintain a strict boundary betwee
   - GitHub Issues
   - Source code variables, functions, and configuration files
   - Architectural documents (`AGENTS.md`)
+  - Planning and tracking files (`PROGRESS.md`)
+  - **Syllabus definitions in Gherkin (`.feature` files)**
 
-- **Course Content & Syllabus (STRICTLY IN SPANISH):**
-  - The actual lessons and documentation (`.mdx` files)
-  - Syllabus descriptions and Gherkin feature scenarios inside `.feature` files
-  - Progress tracking files (`PROGRESS.md`)
+- **Course Content (STRICTLY IN SPANISH):**
+  - The actual lessons and documentation read by the students (`.mdx` files)
+  - Code comments inside the lessons intended for students.
 
 ## 3. Development Workflow
 All new features must follow the GitHub Local Management and Git Worktrees workflow:

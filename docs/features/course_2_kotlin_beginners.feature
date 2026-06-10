@@ -1,44 +1,44 @@
-Feature: Curso 2 - Kotlin para Principiantes
-  Como programador con experiencia previa en otros lenguajes
-  Quiero aprender Kotlin de forma idiomática, desde su sintaxis hasta corrutinas básicas
-  Para poder construir un Chat de IA interactivo desde la terminal
+Feature: Course 2 - Kotlin for Beginners
+  As a developer with previous experience in other languages
+  I want to learn Kotlin idiomatically, from syntax to basic coroutines
+  In order to build an interactive AI Chat from the terminal
 
-  Scenario: Lección 1 - Entorno y Hola Mundo
-    Dado que el estudiante ya sabe programar
-    Cuando configura su entorno (IntelliJ o CLI)
-    Entonces comprende la estructura básica de un archivo y compila su primer "Hola Mundo"
+  Scenario: Lesson 1 - Environment Setup and Hello World
+    Given that the student already knows how to program
+    When they set up their environment (IntelliJ or CLI)
+    Then they understand the basic structure of a file and compile their first "Hello World"
   
-  Scenario: Lección 2 - Variables, Tipos y Null Safety (La Base de Kotlin)
-    Dado que Kotlin tiene un sistema de tipos fuerte y es seguro contra nulos
-    Cuando el estudiante define variables mutables (`var`) y de solo lectura (`val`), y tipos nulables (`?`)
-    Entonces puede crear el estado inicial del Chat (ej. nombre de usuario, API key simulada)
+  Scenario: Lesson 2 - Variables, Types, and Null Safety (Kotlin Basics)
+    Given that Kotlin has a strong type system and is null-safe
+    When the student defines mutable (`var`) and read-only (`val`) variables, and nullable types (`?`)
+    Then they can create the initial state of the Chat (e.g., username, simulated API key)
 
-  Scenario: Lección 3 - Control de Flujo Avanzado (Expresiones y `when`)
-    Dado que el estudiante necesita lógica condicional para el Chat
-    Cuando utiliza `if` como expresión y el poderoso bloque `when`
-    Entonces implementa la lógica del menú principal y comandos del Chat
+  Scenario: Lesson 3 - Advanced Control Flow (Expressions and `when`)
+    Given that the student needs conditional logic for the Chat
+    When they use `if` as an expression and the powerful `when` block
+    Then they implement the logic for the main menu and Chat commands
 
-  Scenario: Lección 4 - Funciones y Lambdas (Enfoque Funcional)
-    Dado que Kotlin trata a las funciones como ciudadanos de primera clase
-    Cuando el estudiante crea funciones de extensión, funciones de orden superior y lambdas
-    Entonces refactoriza el procesamiento de los mensajes del usuario usando un enfoque funcional
+  Scenario: Lesson 4 - Functions and Lambdas (Functional Approach)
+    Given that Kotlin treats functions as first-class citizens
+    When the student creates extension functions, higher-order functions, and lambdas
+    Then they refactor the user message processing using a functional approach
 
-  Scenario: Lección 5 - Colecciones y Operaciones (map, filter, fold)
-    Dado que el historial del chat debe almacenarse en memoria
-    Cuando utiliza Listas y Mapas junto con operaciones de colección
-    Entonces gestiona y transforma el historial de mensajes del chat de manera inmutable
+  Scenario: Lesson 5 - Collections and Operations (map, filter, fold)
+    Given that the chat history must be stored in memory
+    When they use Lists and Maps along with collection operations
+    Then they manage and transform the chat history in an immutable way
 
-  Scenario: Lección 6 - POO Idiomática (data class y sealed class)
-    Dado que los mensajes tienen diferentes estados y estructuras
-    Cuando utiliza clases de datos (`data class`) para el modelo de datos y clases selladas (`sealed class`) para los tipos de mensajes (Usuario, Sistema, IA, Error)
-    Entonces el estado del chat queda modelado de forma robusta, segura y tipada
+  Scenario: Lesson 6 - Idiomatic OOP (`data class` and `sealed class`)
+    Given that messages have different states and structures
+    When they use `data class` for the data model and `sealed class` for message types (User, System, AI, Error)
+    Then the chat state is modeled in a robust, safe, and typed manner
 
-  Scenario: Lección 7 - Programación Asíncrona (Corrutinas Básicas)
-    Dado que el Chat de IA debe simular un tiempo de respuesta de red (delay)
-    Cuando el estudiante introduce las funciones suspendidas (`suspend`), `runBlocking` y la función `delay`
-    Entonces la aplicación procesa la "respuesta de la IA" sin bloquear el hilo de ejecución principal
+  Scenario: Lesson 7 - Asynchronous Programming (Basic Coroutines)
+    Given that the AI Chat must simulate network response time (delay)
+    When the student introduces `suspend` functions, `runBlocking`, and the `delay` function
+    Then the application processes the "AI response" without blocking the main execution thread
 
-  Scenario: Lección 8 - Proyecto Final (Chat de IA desde la terminal)
-    Dado que el estudiante ha completado las lecciones teóricas
-    Cuando une todos los conceptos previos (Null safety, POO, Lambdas y Corrutinas) en su repositorio final
-    Entonces finaliza la CLI del "Chat de IA" y completa el Entregable Final del curso
+  Scenario: Lesson 8 - Final Project (AI Chat from the terminal)
+    Given that the student has completed the theoretical lessons
+    When they bring together all previous concepts (Null safety, OOP, Lambdas, and Coroutines) in their final repository
+    Then they finish the "AI Chat" CLI and complete the Final Course Deliverable
