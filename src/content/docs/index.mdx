@@ -1,40 +1,40 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: Kotlin Desde0
+description: Kotlin para todos
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Curso de Kotlin desde 0!
   image:
     file: ../../assets/houston.webp
-  actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## Next steps
+## Cursos de Kotlin
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+<CardGrid>
+  <LinkCard
+    title="1. Kotlin para no programadoras"
+    description="Aprende las bases de la programación y la lógica desde cero absoluto."
+    href="/course-1-non-programmers/"
+  />
+  <LinkCard
+    title="2. Kotlin para principiantes"
+    description="Da tus primeros pasos en Kotlin de forma agnóstica a la plataforma y crea un Chat de IA."
+    href="/course-2-beginners/01-environment-and-hello-world/"
+  />
+  <LinkCard
+    title="3. Kotlin para desarrolladores Android"
+    description="Aprende paradigmas avanzados de Kotlin en Android más allá de la POO."
+    href="/course-3-android/"
+  />
+  <LinkCard
+    title="4. Kotlin para desarrolladores móviles"
+    description="Domina Kotlin Multiplatform (KMP/CMP) y el motor de sus librerías principales."
+    href="/course-4-mobile/"
+  />
+  <LinkCard
+    title="5. Kotlin para ingenieros"
+    description="Explora patrones de diseño, arquitecturas y la ingeniería detrás del lenguaje."
+    href="/course-5-engineers/"
+  />
 </CardGrid>
