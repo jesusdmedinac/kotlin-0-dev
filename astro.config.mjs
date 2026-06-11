@@ -7,6 +7,13 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Desde0: Cursos Kotlin',
+			defaultLocale: 'root',
+			locales: {
+				root: {
+					label: 'Español',
+					lang: 'es',
+				},
+			},
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/jesusdmedinac/kotlin-0-dev' }],
 			sidebar: [
 				{
