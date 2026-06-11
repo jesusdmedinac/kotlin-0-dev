@@ -1,5 +1,7 @@
 # Course 2: Kotlin for Beginners - Progress
 
+[← Back to System Progress](../../../PROGRESS.md)
+
 ## Infrastructure
 - [ ] Setup Course 2 Starlight routing & base folders
 
