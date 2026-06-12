@@ -1,12 +1,121 @@
 ---
 title: "L1: Entorno Agnóstico y Hola Mundo"
-description: "Configuración del entorno de desarrollo IntelliJ IDEA y el primer Hola Mundo en Kotlin."
+description: "Descubre cómo funciona la Máquina Virtual de Java (JVM), prepara tu entorno de desarrollo profesional y construye el cascarón de tu Chat de IA."
 sidebar:
   order: 1
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+## El propósito de los compiladores
+
+Si alguna vez has intentado ejecutar un programa `.exe` (de Windows) en una Mac, o una aplicación de iOS en un teléfono Android, te habrás dado cuenta de que simplemente **no funcionan**. 
+
+Esto sucede porque históricamente, los lenguajes de programación (como C o C++) se compilan directamente a **código máquina**. Es decir, se traducen al lenguaje físico y específico del procesador y sistema operativo de esa computadora en particular. Si compilas para Windows, la Mac no entiende ni una palabra. 
+
+¿Te imaginas tener que reescribir y recompilar tu aplicación del Chat de IA para que tus amigos con Mac, Linux y Windows puedan usarla? Aquí es donde entra la magia del ecosistema Java y Kotlin.
+
+---
+
+## La Analogía del Traductor Universal
+
+Imagina que eres un aclamado guionista de cine y acabas de escribir una obra maestra (tu código en Kotlin). Quieres que esta obra se actúe en teatros de todo el mundo: en Japón, en Francia y en México (Windows, Mac y Linux).
+
+Tienes dos opciones:
+1. **La vía tradicional (C++):** Traduces y adaptas el guion manualmente a cada idioma y cultura antes de enviarlo. (Un esfuerzo titánico).
+2. **La vía de la JVM:** Traduces tu guion a un idioma inventado, un **idioma universal** que nadie habla de forma nativa, pero que es perfecto. Luego, en cada teatro del mundo, contratas a un director de orquesta que sí entiende este idioma universal y dirige a los actores locales en tiempo real.
+
+En el desarrollo de software:
+- El "idioma universal" se llama **Bytecode**.
+- El "director de orquesta" instalado en cada computadora se llama **Máquina Virtual de Java (JVM)**.
+
+---
+
+## Bajo el capó: ¿Por qué Kotlin es "Agnóstico"?
+
+Kotlin (cuando se compila para la JVM) no crea programas ejecutables directos (`.exe` o `.app`). Cuando escribes código en Kotlin y presionas "Compilar", el compilador de Kotlin (`kotlinc`) lee tu código y genera archivos con extensión `.class` llenos de Bytecode.
 
 <Aside type="note">
-Lección en construcción...
+**Agnóstico a la Plataforma**: Significa que a tu código (el bytecode) no le importa en absoluto en qué computadora se va a ejecutar. Es completamente ignorante de si la máquina es Mac, Windows o Linux.
 </Aside>
+
+Para que este código agnóstico corra, la computadora destino debe tener instalada la JVM. La JVM toma ese bytecode, lo lee sobre la marcha y le da las instrucciones nativas al procesador. Es por esto que la filosofía principal de este ecosistema es: *"Escribe una vez, ejecuta en cualquier lugar"*.
+
+---
+
+## Laboratorio Incremental: El Cascarón del Chat
+
+A lo largo de este curso, no haremos ejercicios aislados. Construiremos paso a paso un **Chat de IA interactivo en la Terminal (CLI)**. Hoy, nuestra misión es preparar el terreno, instalar las herramientas profesionales y levantar el estandarte de nuestro proyecto con un "Hola Mundo".
+
+### Entregables del Laboratorio
+
+Clona el repositorio oficial del curso. Usaremos un sistema de *Tags* de Git para que puedas viajar en el tiempo a cualquier lección.
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla)" 
+  description="El estado del proyecto ANTES de iniciar esta lección." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L1-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto" 
+  description="El estado final de tu proyecto al completar esta lección." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L1-done" 
+/>
+
+### Paso 1: Abrir el proyecto en IntelliJ IDEA
+En la industria profesional de Kotlin y Java, no usamos editores de texto ligeros. Usamos **Entornos de Desarrollo Integrados (IDEs)** increíblemente poderosos.
+1. Descarga e instala [IntelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/) (es gratuito).
+2. Al abrirlo, selecciona **Open** y busca la carpeta del repositorio que clonaste en el paso anterior.
+3. Asegúrate de que el proyecto esté configurado para usar el JDK (Java Development Kit) versión 17 o superior.
+
+### Paso 2: El punto de entrada
+
+Todo programa necesita un "punto de entrada", el lugar exacto donde la JVM sabe que debe comenzar a leer. En Kotlin, esto es simplemente una función llamada `main`.
+
+Abre el archivo `src/main/kotlin/Main.kt` que se generó y borra su contenido. Vamos a escribir el banner de bienvenida de nuestro Chat.
+
+```kotlin
+/**
+ * Punto de entrada principal de nuestra aplicación Kotlin.
+ *
+ * La JVM buscará exactamente esta función 'main' en todo nuestro proyecto
+ * para comenzar la ejecución.
+ */
+fun main() {
+    // println es una función de la librería estándar de Kotlin.
+    // Lo que hace es imprimir el texto en la consola de la computadora
+    // y añadir un salto de línea (Enter) invisible al final.
+    
+    println("===============================")
+    println("🤖 Welcome to AI Chat CLI")
+    println("===============================")
+}
+```
+
+### Paso 3: Ejecutar
+Abre el archivo y, justo al lado izquierdo de la palabra `fun main()`, verás un pequeño botón verde de **Play** (▶️) en el margen. Haz clic ahí y selecciona **Run**. 
+IntelliJ llamará al compilador de Kotlin, transformará este texto en Bytecode, y luego llamará a la JVM para que lo ejecute en tu terminal. 
+
+Si ves el banner de bienvenida... ¡Felicidades! Tienes tu entorno agnóstico configurado y listo para empezar a programar lógica en la siguiente lección.
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+Para profundizar en el funcionamiento interno de la JVM y el ecosistema Kotlin, revisa la documentación oficial:
+
+<LinkCard
+  title="Kotlin Playground"
+  description="Juega con Kotlin en línea"
+  href="https://play.kotlinlang.org/"
+></LinkCard>
+<LinkCard 
+  title="Kotlin for Server Side (JVM)" 
+  description="Documentación oficial de JetBrains sobre cómo Kotlin interactúa con la JVM." 
+  href="https://kotlinlang.org/docs/server-overview.html" 
+/>
+<LinkCard 
+  title="The Java Virtual Machine Specification" 
+  description="Documentación técnica de Oracle sobre la arquitectura interna del Bytecode y la JVM." 
+  href="https://docs.oracle.com/javase/specs/jvms/se17/html/index.html" 
+/>
