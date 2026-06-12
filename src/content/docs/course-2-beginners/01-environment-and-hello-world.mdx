@@ -7,7 +7,7 @@ sidebar:
 
 import { Aside, LinkCard } from '@astrojs/starlight/components';
 
-## El Gran Problema de los Idiomas
+## El propósito de los compiladores
 
 Si alguna vez has intentado ejecutar un programa `.exe` (de Windows) en una Mac, o una aplicación de iOS en un teléfono Android, te habrás dado cuenta de que simplemente **no funcionan**. 
 
@@ -31,9 +31,9 @@ En el desarrollo de software:
 
 ---
 
-## Under the Hood: ¿Por qué Kotlin es "Agnóstico"?
+## Bajo el capó: ¿Por qué Kotlin es "Agnóstico"?
 
-Kotlin no crea programas ejecutables directos (`.exe` o `.app`). Cuando escribes código en Kotlin y presionas "Compilar", el compilador de Kotlin (`kotlinc`) lee tu código y genera archivos con extensión `.class` llenos de Bytecode.
+Kotlin (cuando se compila para la JVM) no crea programas ejecutables directos (`.exe` o `.app`). Cuando escribes código en Kotlin y presionas "Compilar", el compilador de Kotlin (`kotlinc`) lee tu código y genera archivos con extensión `.class` llenos de Bytecode.
 
 <Aside type="note">
 **Agnóstico a la Plataforma**: Significa que a tu código (el bytecode) no le importa en absoluto en qué computadora se va a ejecutar. Es completamente ignorante de si la máquina es Mac, Windows o Linux.
@@ -62,13 +62,13 @@ Clona el repositorio oficial del curso. Usaremos un sistema de *Tags* de Git par
   href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L1-done" 
 />
 
-### Paso 1: Instalar IntelliJ IDEA
+### Paso 1: Abrir el proyecto en IntelliJ IDEA
 En la industria profesional de Kotlin y Java, no usamos editores de texto ligeros. Usamos **Entornos de Desarrollo Integrados (IDEs)** increíblemente poderosos.
 1. Descarga e instala [IntelliJ IDEA Community Edition](https://www.jetbrains.com/idea/download/) (es gratuito).
-2. Al abrirlo, selecciona **New Project**.
-3. En las opciones, elige **Kotlin**, selecciona **Gradle** como Build System, y asegúrate de elegir el JDK (Java Development Kit) versión 17 o superior.
+2. Al abrirlo, selecciona **Open** y busca la carpeta del repositorio que clonaste en el paso anterior.
+3. Asegúrate de que el proyecto esté configurado para usar el JDK (Java Development Kit) versión 17 o superior.
 
-### Paso 2: Creando el Entry Point
+### Paso 2: El punto de entrada
 
 Todo programa necesita un "punto de entrada", el lugar exacto donde la JVM sabe que debe comenzar a leer. En Kotlin, esto es simplemente una función llamada `main`.
 
@@ -76,7 +76,7 @@ Abre el archivo `src/main/kotlin/Main.kt` que se generó y borra su contenido. V
 
 ```kotlin
 /**
- * Punto de entrada principal (Entry Point) de nuestra aplicación Kotlin.
+ * Punto de entrada principal de nuestra aplicación Kotlin.
  *
  * La JVM buscará exactamente esta función 'main' en todo nuestro proyecto
  * para comenzar la ejecución.
@@ -93,7 +93,7 @@ fun main() {
 ```
 
 ### Paso 3: Ejecutar
-En la parte superior derecha de tu IntelliJ, o justo al lado de la palabra `main`, verás un botón verde de **Play** (▶️). Presiónalo. 
+Abre el archivo y, justo al lado izquierdo de la palabra `fun main()`, verás un pequeño botón verde de **Play** (▶️) en el margen. Haz clic ahí y selecciona **Run**. 
 IntelliJ llamará al compilador de Kotlin, transformará este texto en Bytecode, y luego llamará a la JVM para que lo ejecute en tu terminal. 
 
 Si ves el banner de bienvenida... ¡Felicidades! Tienes tu entorno agnóstico configurado y listo para empezar a programar lógica en la siguiente lección.
