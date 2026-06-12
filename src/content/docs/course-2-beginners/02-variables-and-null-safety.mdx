@@ -1,0 +1,162 @@
+---
+title: "L2: Variables, Tipos y la Verdad sobre Null Safety"
+description: "Aprende el sistema de tipos de Kotlin, domina la seguridad contra nulos para evitar colapsos, y descubre cómo los Platform Types ocultan peligros."
+sidebar:
+  order: 2
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+## El Error del Billón de Dólares
+
+En 1965, el científico de la computación Sir Tony Hoare introdujo el concepto de la "referencia nula" (`null`) al diseñar el lenguaje ALGOL W. Décadas después, él mismo se disculpó públicamente llamándolo su "error del billón de dólares", porque ha causado incontables caídas de sistemas, vulnerabilidades y horas de depuración en lenguajes como Java y C++.
+
+El famoso **`NullPointerException` (NPE)** ocurre cuando intentas interactuar con algo que creías que existía, pero en realidad está vacío (`null`). Imagina intentar encender un auto, pero el motor literalmente no existe dentro del chasis.
+
+Kotlin fue diseñado desde cero para solucionar este problema de raíz.
+
+---
+
+## Las Cajas: `val` vs `var`
+
+En Kotlin, puedes imaginar que las variables son cajas donde guardas datos. Hay dos tipos fundamentales de cajas:
+
+### La caja abierta: `var` (Variable)
+Es una caja normal. Puedes meter un dato, sacarlo, y meter otro dato diferente en cualquier momento. Su contenido puede mutar o variar.
+
+```kotlin
+var age = 25
+age = 26 // Perfecto, podemos cambiar el contenido.
+```
+
+### La caja sellada con cinta: `val` (Value)
+Es una caja donde guardas un dato y **la sellas**. Una vez que le asignas un valor, no puedes cambiar la caja para que apunte a otro objeto. Esto se conoce como una variable de **Solo Lectura** (*Read-Only*).
+
+```kotlin
+val username = "jesusdmedinac"
+username = "guest" // ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned.
+```
+
+<Aside type="important">
+**¿Es `val` verdaderamente Inmutable?** No. 
+
+En la teoría pura de Kotlin, `val` significa *Solo Lectura*. La caja en sí no se puede cambiar, pero si dentro de la caja guardaste una mochila (un objeto con estado), puedes seguir metiendo y sacando cosas de esa mochila.
+Por ejemplo, si tienes un `val lista = mutableListOf("A")`, no puedes hacer que `lista` apunte a una nueva lista, pero *sí* puedes añadirle elementos: `lista.add("B")`.
+</Aside>
+
+---
+
+## Null Safety: Agitando las cajas transparentes
+
+El sistema de tipos de Kotlin distingue entre referencias que **pueden ser nulas** (cajas que podrían estar vacías) y las que **no pueden serlo** (cajas que te garantizan que tienen algo dentro).
+
+Para decirle a Kotlin que una caja *podría* contener `null`, le agregamos un signo de interrogación `?` al tipo:
+
+```kotlin
+var name: String = "Jesus"
+name = null // ❌ ERROR: Null can not be a value of a non-null type String
+
+var nullableName: String? = "Daniel"
+nullableName = null // ✅ Perfecto, el tipo es String?
+```
+
+### Operadores Seguros
+
+Si tienes una caja que podría estar vacía (`String?`), Kotlin **no te dejará** usar su contenido directamente, porque si estuviera vacía, explotaría el programa. Tienes que agitarla primero.
+
+- **Safe Call (`?.`)**: Ejecuta la acción solo si no es nulo.
+  `val length = nullableName?.length` (Si es nulo, devuelve null, no explota).
+- **El Operador Elvis (`?:`)**: Si el valor de la izquierda es nulo, usa el valor por defecto de la derecha (se llama así porque parece el copete de Elvis Presley volteado de lado).
+  `val finalName = nullableName ?: "Invitado"`
+
+---
+
+## Bajo el capó: Tipos de Plataforma (`String!`)
+
+Hay un secreto oscuro en el que Kotlin no te puede proteger. Dado que Kotlin corre sobre la JVM, es 100% interoperable con Java. Puedes llamar a librerías escritas en Java directamente desde Kotlin.
+
+El problema es que Java **no tiene null safety estricto**. Cuando Kotlin recibe un objeto desde Java, no sabe si es seguro (`String`) o si podría ser nulo (`String?`).
+
+Para resolver esto sin volver locos a los desarrolladores, Kotlin introduce los **Platform Types** (representados con un `!` al final, como `String!`). 
+
+<Aside type="caution">
+Un Platform Type (`String!`) significa: *"Este valor viene de Java. No sé si es nulo o no. Confío en ti. Si te equivocas, lanzaré un `NullPointerException`"*. Aquí es donde el error del billón de dólares puede volver a atacarte.
+</Aside>
+
+---
+
+## Laboratorio Incremental: Capturando el Input
+
+Hoy evolucionaremos nuestro Chat CLI. En lugar de solo imprimir un banner estático, le pediremos al usuario su nombre y lo saludaremos.
+Pero, ¿qué pasa si el usuario presiona `Ctrl+D` (Fin del archivo) y no manda nada? La lectura será nula. Aquí es donde brillan nuestros conocimientos.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla)" 
+  description="Partiremos exactamente desde donde dejamos la lección anterior." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto" 
+  description="El código completo y seguro contra nulos." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-done" 
+/>
+
+### Instrucciones
+
+1. Abre tu proyecto en IntelliJ IDEA y ubica tu archivo `Main.kt`.
+2. Borra el código anterior y pega esta nueva implementación. Analiza cuidadosamente los comentarios, en especial cómo usamos el Operador Elvis para manejar el input nulo de la terminal de forma elegante y robusta.
+
+```kotlin
+/**
+ * Punto de entrada principal de nuestra aplicación Kotlin.
+ *
+ * En la Lección 1 aprendimos que la JVM buscará una función llamada 'main'.
+ * En la Lección 2 aprenderemos a recibir datos del usuario de forma segura.
+ */
+fun main() {
+    println("===============================")
+    println("🤖 Bienvenido al Chat de IA CLI")
+    println("===============================")
+
+    // Usamos print (sin 'ln') para que el cursor se quede en la misma línea
+    print("Por favor, introduce tu nombre: ")
+    
+    // readlnOrNull() captura lo que el usuario escribe en la terminal.
+    // Devuelve un String nullable (String?) porque el usuario podría forzar el cierre (EOF).
+    val input: String? = readlnOrNull()
+
+    // Usamos el Operador Elvis (?:) para asignar "Invitado" si el input es null.
+    // Además, usamos .takeIf para asegurarnos de que no sea solo un string vacío.
+    // Declaramos 'username' usando 'val' (Read-Only) porque no queremos reasignarlo después.
+    val username: String = input?.takeIf { it.isNotBlank() } ?: "Invitado"
+
+    println("\n¡Hola, $username! ¿En qué te puedo ayudar hoy?")
+}
+```
+
+3. Ejecuta la aplicación dando clic en el botón de **Play** verde en el margen izquierdo junto a `fun main()`.
+4. Cuando te pregunte tu nombre, escríbelo y presiona Enter.
+
+¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de colapsos.
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Null Safety" 
+  description="Aprende más sobre cómo Kotlin implementa operadores seguros en su documentación." 
+  href="https://kotlinlang.org/docs/null-safety.html" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Calling Java from Kotlin" 
+  description="Conoce los detalles de los Platform Types y cómo Kotlin infiere tipos al interoperar con Java." 
+  href="https://kotlinlang.org/docs/java-interop.html#null-safety-and-platform-types" 
+/>
+<LinkCard 
+  title="Null References: The Billion Dollar Mistake" 
+  description="La presentación icónica de Tony Hoare en QCon." 
+  href="https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/" 
+/>
