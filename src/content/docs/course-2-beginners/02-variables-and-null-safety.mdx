@@ -40,8 +40,9 @@ username = "guest" // ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned.
 <Aside type="important">
 **¿Es `val` verdaderamente Inmutable?** No. 
 
-En la teoría pura de Kotlin, `val` significa *Solo Lectura*. La caja en sí no se puede cambiar, pero si dentro de la caja guardaste una mochila (un objeto con estado), puedes seguir metiendo y sacando cosas de esa mochila.
-Por ejemplo, si tienes un `val lista = mutableListOf("A")`, no puedes hacer que `lista` apunte a una nueva lista, pero *sí* puedes añadirle elementos: `lista.add("B")`.
+En la teoría pura de Kotlin, `val` significa *Solo Lectura*. Esto significa dos cosas:
+1. La caja en sí no se puede reasignar, pero si dentro de la caja guardaste un objeto mutable (como una lista), puedes seguir modificando sus elementos internos.
+2. Una propiedad `val` puede tener un **Custom Getter**. Bajo el capó (en el bytecode de Java), una propiedad `val` se compila como una función (un método `get()`). Esto significa que puedes programarla para que devuelva un valor distinto cada vez que la llamas (por ejemplo, `val horaActual get() = ...`), por lo que no siempre es estrictamente constante.
 </Aside>
 
 ---
@@ -64,23 +65,30 @@ nullableName = null // ✅ Perfecto, el tipo es String?
 
 Si tienes una caja que podría estar vacía (`String?`), Kotlin **no te dejará** usar su contenido directamente, porque si estuviera vacía, explotaría el programa. Tienes que agitarla primero.
 
-- **Safe Call (`?.`)**: Ejecuta la acción solo si no es nulo.
-  `val length = nullableName?.length` (Si es nulo, devuelve null, no explota).
-- **El Operador Elvis (`?:`)**: Si el valor de la izquierda es nulo, usa el valor por defecto de la derecha (se llama así porque parece el copete de Elvis Presley volteado de lado).
-  `val finalName = nullableName ?: "Invitado"`
+La forma más directa y segura de hacerlo, muy conocida por los programadores de Java, es usar un bloque condicional clásico: verificar si la caja no es nula antes de intentar abrirla.
+
+```kotlin
+if (nullableName != null) {
+    // Aquí adentro, Kotlin automáticamente promueve nullableName a un tipo seguro (String normal)
+    // porque ya demostraste matemáticamente que no es nulo. A esto se le llama Smart Cast.
+    println(nullableName.length)
+}
+```
 
 ---
 
-## Bajo el capó: Tipos de Plataforma (`String!`)
+## Detrás de cámaras: Tipos de Plataforma (`String!`)
 
-Hay un secreto oscuro en el que Kotlin no te puede proteger. Dado que Kotlin corre sobre la JVM, es 100% interoperable con Java. Puedes llamar a librerías escritas en Java directamente desde Kotlin.
+Hay un secreto oscuro en el que Kotlin no te puede proteger mágicamente. Dado que Kotlin corre sobre la JVM, es **altamente interoperable con Java**. Puedes llamar a librerías escritas en Java directamente desde Kotlin.
 
-El problema es que Java **no tiene null safety estricto**. Cuando Kotlin recibe un objeto desde Java, no sabe si es seguro (`String`) o si podría ser nulo (`String?`).
+El problema radica en que Java **no tiene null safety estricto** y la nulabilidad de sus retornos no siempre se conoce en tiempo de compilación. Cuando Kotlin recibe un objeto desde Java, a menudo no sabe si es seguro (`String`) o si podría ser nulo (`String?`).
 
-Para resolver esto sin volver locos a los desarrolladores, Kotlin introduce los **Platform Types** (representados con un `!` al final, como `String!`). 
+Para resolver esto sin volver locos a los desarrolladores llenando el código de errores, Kotlin introduce los **Platform Types** (representados visualmente en el IDE con un `!` al final, como `String!`). 
 
 <Aside type="caution">
-Un Platform Type (`String!`) significa: *"Este valor viene de Java. No sé si es nulo o no. Confío en ti. Si te equivocas, lanzaré un `NullPointerException`"*. Aquí es donde el error del billón de dólares puede volver a atacarte.
+Un Platform Type (`String!`) significa: *"Este valor viene de Java y no sé su nulabilidad en tiempo de compilación. Relajaré mis reglas y confiaré en ti. Si te equivocas, lanzaré un `NullPointerException`"*. 
+
+**Aviso importante:** Nunca intentes escribir un tipo como `val nombre: String!` manualmente en tu código. Es puramente una notación visual del compilador para avisarte del peligro; no es sintaxis válida de Kotlin.
 </Aside>
 
 ---
@@ -103,43 +111,56 @@ Pero, ¿qué pasa si el usuario presiona `Ctrl+D` (Fin del archivo) y no manda n
   href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-done" 
 />
 
-### Instrucciones
+### Instrucciones Paso a Paso
 
-1. Abre tu proyecto en IntelliJ IDEA y ubica tu archivo `Main.kt`.
-2. Borra el código anterior y pega esta nueva implementación. Analiza cuidadosamente los comentarios, en especial cómo usamos el Operador Elvis para manejar el input nulo de la terminal de forma elegante y robusta.
+En la Lección 1 creamos nuestra función `main` y un pequeño banner. **No borres ese código**, ¡vamos a construir sobre él!
+
+#### Paso 1: Pedir el nombre del usuario
+Justo debajo de los `println` de tu banner de bienvenida, vamos a imprimir una instrucción para el usuario. Usa `print` (sin la terminación `ln`) para que el cursor de la terminal se quede esperando en la misma línea:
 
 ```kotlin
-/**
- * Punto de entrada principal de nuestra aplicación Kotlin.
- *
- * En la Lección 1 aprendimos que la JVM buscará una función llamada 'main'.
- * En la Lección 2 aprenderemos a recibir datos del usuario de forma segura.
- */
-fun main() {
-    println("===============================")
-    println("🤖 Bienvenido al Chat de IA CLI")
-    println("===============================")
+print("Por favor, introduce tu nombre: ")
+```
 
-    // Usamos print (sin 'ln') para que el cursor se quede en la misma línea
-    print("Por favor, introduce tu nombre: ")
-    
-    // readlnOrNull() captura lo que el usuario escribe en la terminal.
-    // Devuelve un String nullable (String?) porque el usuario podría forzar el cierre (EOF).
-    val input: String? = readlnOrNull()
+#### Paso 2: Capturar el Input
+Ahora, vamos a leer lo que el usuario escriba. Para ello usamos la función `readlnOrNull()`.
+Agrega esta línea debajo de tu `print`:
 
-    // Usamos el Operador Elvis (?:) para asignar "Invitado" si el input es null.
-    // Además, usamos .takeIf para asegurarnos de que no sea solo un string vacío.
-    // Declaramos 'username' usando 'val' (Read-Only) porque no queremos reasignarlo después.
-    val username: String = input?.takeIf { it.isNotBlank() } ?: "Invitado"
+```kotlin
+// readlnOrNull() devuelve un String nullable (String?) porque la lectura 
+// de la terminal podría fallar o interrumpirse inesperadamente.
+val input: String? = readlnOrNull()
+```
 
-    println("\n¡Hola, $username! ¿En qué te puedo ayudar hoy?")
+#### Paso 3: Validar la nulabilidad de forma segura
+Como `input` es de tipo `String?`, Kotlin no nos dejará usarlo ciegamente. Vamos a usar un bloque `if/else` clásico para validar matemáticamente si el usuario ingresó algo o si nos devolvió un nulo.
+Agrega la siguiente lógica:
+
+```kotlin
+// Declaramos 'username' como val (Solo Lectura) porque no cambiará en este flujo.
+val username: String
+
+// Validamos que input no sea nulo Y que no esté compuesto solo de espacios en blanco
+if (input != null && input.isNotBlank()) {
+    username = input // ¡Smart Cast en acción! Aquí 'input' ya es un String seguro
+} else {
+    username = "Invitado" // Nuestro valor por defecto
 }
 ```
 
-3. Ejecuta la aplicación dando clic en el botón de **Play** verde en el margen izquierdo junto a `fun main()`.
-4. Cuando te pregunte tu nombre, escríbelo y presiona Enter.
+#### Paso 4: Saludar al usuario
+Finalmente, agreguemos un saludo personalizado utilizando **String Templates** (inyectando la variable con `$`).
 
-¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de colapsos.
+```kotlin
+println("\n¡Hola, $username! ¿En qué te puedo ayudar hoy?")
+```
+
+#### Paso 5: ¡Ejecuta y prueba!
+1. Haz clic en el botón verde de **Play** junto a tu función `main`.
+2. Cuando la consola te pregunte tu nombre, escríbelo y presiona Enter.
+3. Vuelve a ejecutar el programa, pero esta vez simplemente presiona Enter sin escribir nada para comprobar que tu lógica de validación te asigna el nombre "Invitado" y evita un colapso.
+
+¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de un `NullPointerException`.
 
 ---
 
