@@ -25,16 +25,24 @@ En Kotlin, puedes imaginar que las variables son cajas donde guardas datos. Hay 
 Es una caja normal. Puedes meter un dato, sacarlo, y meter otro dato diferente en cualquier momento. Su contenido puede mutar o variar.
 
 ```kotlin
+// 'var' viene de Variable. Al usar var, le decimos al compilador de Kotlin
+// que esta caja está diseñada para ser abierta y reasignada en el futuro.
 var age = 25
-age = 26 // Perfecto, podemos cambiar el contenido.
+// Como age es un 'var', es perfectamente legal cambiar hacia dónde apunta.
+age = 26 
 ```
 
 ### La caja sellada con cinta: `val` (Value)
 Es una caja donde guardas un dato y **la sellas**. Una vez que le asignas un valor, no puedes cambiar la caja para que apunte a otro objeto. Esto se conoce como una variable de **Solo Lectura** (*Read-Only*).
 
 ```kotlin
+// 'val' viene de Value. Al usar val, creamos un enlace de Solo Lectura.
+// Le decimos a Kotlin: "Una vez que metas el dato aquí, sella la caja".
+// Esto hace que el código sea más predecible y seguro.
 val username = "jesusdmedinac"
-username = "guest" // ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned.
+// ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned.
+// Kotlin bloquea esta acción porque rompimos la promesa del 'val'.
+username = "guest" 
 ```
 
 <Aside type="important">
@@ -54,18 +62,26 @@ El sistema de tipos de Kotlin distingue entre referencias que **pueden ser nulas
 Para decirle a Kotlin que una caja *podría* contener `null`, le agregamos un signo de interrogación `?` al tipo:
 
 ```kotlin
+// Al declarar explícitamente el tipo como 'String' (sin el signo ?),
+// le prometemos a Kotlin que esta caja NUNCA estará vacía.
 var name: String = "Jesus"
-name = null // ❌ ERROR: Null can not be a value of a non-null type String
+// ❌ ERROR: Kotlin nos protege de meter un null aquí, porque 
+// romperíamos la promesa del tipo no-nulo.
+name = null 
 
+// Al agregar el '?', creamos un tipo Nullable (String?). 
+// Es como decirle a Kotlin: "Soy consciente de que esto podría estar vacío en el futuro".
 var nullableName: String? = "Daniel"
-nullableName = null // ✅ Perfecto, el tipo es String?
+// ✅ Perfecto. Como el tipo es String?, Kotlin permite que la caja se vacíe.
+nullableName = null 
 ```
 
-### Operadores Seguros
+### Formas de agitar la caja (Validar Nulabilidad)
 
-Si tienes una caja que podría estar vacía (`String?`), Kotlin **no te dejará** usar su contenido directamente, porque si estuviera vacía, explotaría el programa. Tienes que agitarla primero.
+Kotlin nos ofrece un arsenal completo para manejar tipos nulos de forma segura. Explorémoslos del más básico al más peligroso.
 
-La forma más directa y segura de hacerlo, muy conocida por los programadores de Java, es usar un bloque condicional clásico: verificar si la caja no es nula antes de intentar abrirla.
+#### 1. El clásico `if != null` (Smart Cast)
+La forma más directa y conocida por los programadores de Java es usar un bloque condicional.
 
 ```kotlin
 if (nullableName != null) {
@@ -73,6 +89,31 @@ if (nullableName != null) {
     // porque ya demostraste matemáticamente que no es nulo. A esto se le llama Smart Cast.
     println(nullableName.length)
 }
+```
+
+#### 2. Safe Call (`?.`)
+Ejecuta la acción **solo si** el valor no es nulo. Si la caja está vacía, simplemente devuelve `null` en lugar de explotar.
+
+```kotlin
+// Si nullableName es null, la variable 'length' valdrá null. ¡El programa no colapsa!
+val length = nullableName?.length
+```
+
+#### 3. Operador Elvis (`?:`)
+Se llama así porque parece el copete de Elvis Presley volteado de lado `?:`. Se usa en combinación con el Safe Call para proveer un **valor por defecto** en caso de que la caja esté vacía.
+
+```kotlin
+// "Usa el nombre, pero si es nulo, entonces usa 'Invitado'"
+val finalName = nullableName ?: "Invitado"
+```
+
+#### 4. Not-Null Assertion (`!!`)
+El botón de autodestrucción. Le dice a Kotlin: *"Confía en mí, estoy 100% seguro de que esto no es nulo, y si me equivoco, asumo la responsabilidad de que el programa explote"*.
+
+```kotlin
+// 💥 ADVERTENCIA: Si nullableName resulta ser null en tiempo de ejecución, 
+// esta línea lanzará un NullPointerException y matará la aplicación.
+val dangerLength = nullableName!!.length
 ```
 
 ---
@@ -116,11 +157,18 @@ Pero, ¿qué pasa si el usuario presiona `Ctrl+D` (Fin del archivo) y no manda n
 En la Lección 1 creamos nuestra función `main` y un pequeño banner. **No borres ese código**, ¡vamos a construir sobre él!
 
 #### Paso 1: Pedir el nombre del usuario
-Justo debajo de los `println` de tu banner de bienvenida, vamos a imprimir una instrucción para el usuario. Usa `print` (sin la terminación `ln`) para que el cursor de la terminal se quede esperando en la misma línea:
+Justo debajo de los `println` de tu banner de bienvenida, vamos a imprimir una instrucción para el usuario. Usa `print` (sin la terminación `ln`) para que el cursor se quede esperando en la misma línea:
 
 ```kotlin
 print("Por favor, introduce tu nombre: ")
 ```
+
+<Aside type="note">
+**¿Consola o Terminal?**
+En IntelliJ IDEA verás que tienes una pestaña llamada **Run** (la Consola) y otra llamada **Terminal**. 
+- La **Terminal** es la línea de comandos de tu sistema operativo (como si abrieras Bash o PowerShell).
+- La **Consola (Run)** es la salida estándar donde se ejecuta y muestra tu programa de Kotlin dentro del IDE. Cuando decimos que el usuario "escribirá en la consola", nos referimos a esta pestaña de ejecución.
+</Aside>
 
 #### Paso 2: Capturar el Input
 Ahora, vamos a leer lo que el usuario escriba. Para ello usamos la función `readlnOrNull()`.
