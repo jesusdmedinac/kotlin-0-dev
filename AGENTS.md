@@ -34,6 +34,13 @@ All new features must follow the GitHub Local Management and Git Worktrees workf
 3. Commit atomic changes inside the worktree.
 4. Open a PR linked to the Issue (`gh pr create`).
 
+**CRITICAL RULE FOR LAB REPOSITORIES (e.g., `kotlin-course-2-lab`):**
+To ensure the highest engineering standards while preserving the pedagogical "One commit per lesson" structure, any modifications to lab repositories MUST follow the PR workflow.
+1. NEVER commit directly to `master`. Create a `feat/lesson-X` branch starting from the previous lesson tag (e.g., `L1-done`).
+2. Open a Pull Request.
+3. The Pull Request MUST be merged using the **"Squash and Merge"** strategy. This compresses all branch commits into a single, clean commit on `master`.
+4. After merging, create the `LX-done` tag pointing to that single squashed merge commit.
+
 ## 5. Tech Stack
 - Astro
 - Starlight

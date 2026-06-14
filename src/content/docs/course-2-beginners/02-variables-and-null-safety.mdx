@@ -1,0 +1,231 @@
+---
+title: "L2: Variables, Tipos y la Verdad sobre Null Safety"
+description: "Aprende el sistema de tipos de Kotlin, domina la seguridad contra nulos para evitar colapsos, y descubre cómo los Platform Types ocultan peligros."
+sidebar:
+  order: 2
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+## El Error del Billón de Dólares
+
+En 1965, el científico de la computación Sir Tony Hoare introdujo el concepto de la "referencia nula" (`null`) al diseñar el lenguaje ALGOL W. Décadas después, él mismo se disculpó públicamente llamándolo su "error del billón de dólares", porque ha causado incontables caídas de sistemas, vulnerabilidades y horas de depuración en lenguajes como Java y C++.
+
+El famoso **`NullPointerException` (NPE)** ocurre cuando intentas interactuar con algo que creías que existía, pero en realidad está vacío (`null`). Imagina intentar encender un auto, pero el motor literalmente no existe dentro del chasis.
+
+Kotlin fue diseñado desde cero para solucionar este problema de raíz.
+
+---
+
+## Las Cajas: `val` vs `var`
+
+En Kotlin, puedes imaginar que las variables son cajas donde guardas datos. Hay dos tipos fundamentales de cajas:
+
+### La caja abierta: `var` (Variable)
+Es una caja normal. Puedes meter un dato, sacarlo, y meter otro dato diferente en cualquier momento. Su contenido puede mutar o variar.
+
+```kotlin
+// 'var' viene de Variable. Al usar var, le decimos al compilador de Kotlin
+// que esta caja está diseñada para ser abierta y reasignada en el futuro.
+var age = 25
+// Como age es un 'var', es perfectamente legal cambiar hacia dónde apunta.
+age = 26 
+```
+
+### La caja sellada con cinta: `val` (Value)
+Es una caja donde guardas un dato y **la sellas**. Una vez que le asignas un valor, no puedes cambiar la caja para que apunte a otro objeto. Esto se conoce como una variable de **Solo Lectura** (*Read-Only*).
+
+```kotlin
+// 'val' viene de Value. Al usar val, creamos un enlace de Solo Lectura.
+// Le decimos a Kotlin: "Una vez que metas el dato aquí, sella la caja".
+// Esto hace que el código sea más predecible y seguro.
+val username = "jesusdmedinac"
+// ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned.
+// Kotlin bloquea esta acción porque rompimos la promesa del 'val'.
+username = "guest" 
+```
+
+<Aside type="important">
+**¿Es `val` verdaderamente Inmutable?** No. 
+
+En la teoría pura de Kotlin, `val` significa *Solo Lectura*. Esto significa dos cosas:
+1. La caja en sí no se puede reasignar, pero si dentro de la caja guardaste un objeto mutable (como una lista), puedes seguir modificando sus elementos internos.
+2. Una propiedad `val` puede tener un **Custom Getter**. Bajo el capó (en el bytecode de Java), una propiedad `val` se compila como una función (un método `get()`). Esto significa que puedes programarla para que devuelva un valor distinto cada vez que la llamas (por ejemplo, `val horaActual get() = ...`), por lo que no siempre es estrictamente constante.
+</Aside>
+
+---
+
+## Null Safety: Agitando las cajas transparentes
+
+El sistema de tipos de Kotlin distingue entre referencias que **pueden ser nulas** (cajas que podrían estar vacías) y las que **no pueden serlo** (cajas que te garantizan que tienen algo dentro).
+
+Para decirle a Kotlin que una caja *podría* contener `null`, le agregamos un signo de interrogación `?` al tipo:
+
+```kotlin
+// Al declarar explícitamente el tipo como 'String' (sin el signo ?),
+// le prometemos a Kotlin que esta caja NUNCA estará vacía.
+var name: String = "Jesus"
+// ❌ ERROR: Kotlin nos protege de meter un null aquí, porque 
+// romperíamos la promesa del tipo no-nulo.
+name = null 
+
+// Al agregar el '?', creamos un tipo Nullable (String?). 
+// Es como decirle a Kotlin: "Soy consciente de que esto podría estar vacío en el futuro".
+var nullableName: String? = "Daniel"
+// ✅ Perfecto. Como el tipo es String?, Kotlin permite que la caja se vacíe.
+nullableName = null 
+```
+
+### Formas de agitar la caja (Validar Nulabilidad)
+
+Kotlin nos ofrece un arsenal completo para manejar tipos nulos de forma segura. Explorémoslos del más básico al más peligroso.
+
+#### 1. El clásico `if != null` (Smart Cast)
+La forma más directa y conocida por los programadores de Java es usar un bloque condicional.
+
+```kotlin
+if (nullableName != null) {
+    // Aquí adentro, Kotlin automáticamente promueve nullableName a un tipo seguro (String normal)
+    // porque ya demostraste matemáticamente que no es nulo. A esto se le llama Smart Cast.
+    println(nullableName.length)
+}
+```
+
+#### 2. Safe Call (`?.`)
+Ejecuta la acción **solo si** el valor no es nulo. Si la caja está vacía, simplemente devuelve `null` en lugar de explotar.
+
+```kotlin
+// Si nullableName es null, la variable 'length' valdrá null. ¡El programa no colapsa!
+val length = nullableName?.length
+```
+
+#### 3. Operador Elvis (`?:`)
+Se llama así porque parece el copete de Elvis Presley volteado de lado `?:`. Se usa en combinación con el Safe Call para proveer un **valor por defecto** en caso de que la caja esté vacía.
+
+```kotlin
+// "Usa el nombre, pero si es nulo, entonces usa 'Invitado'"
+val finalName = nullableName ?: "Invitado"
+```
+
+#### 4. Not-Null Assertion (`!!`)
+El botón de autodestrucción. Le dice a Kotlin: *"Confía en mí, estoy 100% seguro de que esto no es nulo, y si me equivoco, asumo la responsabilidad de que el programa explote"*.
+
+```kotlin
+// 💥 ADVERTENCIA: Si nullableName resulta ser null en tiempo de ejecución, 
+// esta línea lanzará un NullPointerException y matará la aplicación.
+val dangerLength = nullableName!!.length
+```
+
+---
+
+## Detrás de cámaras: Tipos de Plataforma (`String!`)
+
+Hay un secreto oscuro en el que Kotlin no te puede proteger mágicamente. Dado que Kotlin corre sobre la JVM, es **altamente interoperable con Java**. Puedes llamar a librerías escritas en Java directamente desde Kotlin.
+
+El problema radica en que Java **no tiene null safety estricto** y la nulabilidad de sus retornos no siempre se conoce en tiempo de compilación. Cuando Kotlin recibe un objeto desde Java, a menudo no sabe si es seguro (`String`) o si podría ser nulo (`String?`).
+
+Para resolver esto sin volver locos a los desarrolladores llenando el código de errores, Kotlin introduce los **Platform Types** (representados visualmente en el IDE con un `!` al final, como `String!`). 
+
+<Aside type="caution">
+Un Platform Type (`String!`) significa: *"Este valor viene de Java y no sé su nulabilidad en tiempo de compilación. Relajaré mis reglas y confiaré en ti. Si te equivocas, lanzaré un `NullPointerException`"*. 
+
+**Aviso importante:** Nunca intentes escribir un tipo como `val nombre: String!` manualmente en tu código. Es puramente una notación visual del compilador para avisarte del peligro; no es sintaxis válida de Kotlin.
+</Aside>
+
+---
+
+## Laboratorio Incremental: Capturando el Input
+
+Hoy evolucionaremos nuestro Chat CLI. En lugar de solo imprimir un banner estático, le pediremos al usuario su nombre y lo saludaremos.
+Pero, ¿qué pasa si el usuario presiona `Ctrl+D` (Fin del archivo) y no manda nada? La lectura será nula. Aquí es donde brillan nuestros conocimientos.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla)" 
+  description="Partiremos exactamente desde donde dejamos la lección anterior." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto" 
+  description="El código completo y seguro contra nulos." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-done" 
+/>
+
+### Instrucciones Paso a Paso
+
+En la Lección 1 creamos nuestra función `main` y un pequeño banner. **No borres ese código**, ¡vamos a construir sobre él!
+
+#### Paso 1: Pedir el nombre del usuario
+Justo debajo de los `println` de tu banner de bienvenida, vamos a imprimir una instrucción para el usuario. Usa `print` (sin la terminación `ln`) para que el cursor se quede esperando en la misma línea:
+
+```kotlin
+print("Por favor, introduce tu nombre: ")
+```
+
+<Aside type="note">
+**¿Consola o Terminal?**
+En IntelliJ IDEA verás que tienes una pestaña llamada **Run** (la Consola) y otra llamada **Terminal**. 
+- La **Terminal** es la línea de comandos de tu sistema operativo (como si abrieras Bash o PowerShell).
+- La **Consola (Run)** es la salida estándar donde se ejecuta y muestra tu programa de Kotlin dentro del IDE. Cuando decimos que el usuario "escribirá en la consola", nos referimos a esta pestaña de ejecución.
+</Aside>
+
+#### Paso 2: Capturar el Input
+Ahora, vamos a leer lo que el usuario escriba. Para ello usamos la función `readlnOrNull()`.
+Agrega esta línea debajo de tu `print`:
+
+```kotlin
+// readlnOrNull() devuelve un String nullable (String?) porque la lectura 
+// de la terminal podría fallar o interrumpirse inesperadamente.
+val input: String? = readlnOrNull()
+```
+
+#### Paso 3: Validar la nulabilidad de forma segura
+Como `input` es de tipo `String?`, Kotlin no nos dejará usarlo ciegamente. Vamos a usar un bloque `if/else` clásico para validar matemáticamente si el usuario ingresó algo o si nos devolvió un nulo.
+Agrega la siguiente lógica:
+
+```kotlin
+// Declaramos 'username' como val (Solo Lectura) porque no cambiará en este flujo.
+val username: String
+
+// Validamos que input no sea nulo Y que no esté compuesto solo de espacios en blanco
+if (input != null && input.isNotBlank()) {
+    username = input // ¡Smart Cast en acción! Aquí 'input' ya es un String seguro
+} else {
+    username = "Invitado" // Nuestro valor por defecto
+}
+```
+
+#### Paso 4: Saludar al usuario
+Finalmente, agreguemos un saludo personalizado utilizando **String Templates** (inyectando la variable con `$`).
+
+```kotlin
+println("\n¡Hola, $username! ¿En qué te puedo ayudar hoy?")
+```
+
+#### Paso 5: ¡Ejecuta y prueba!
+1. Haz clic en el botón verde de **Play** junto a tu función `main`.
+2. Cuando la consola te pregunte tu nombre, escríbelo y presiona Enter.
+3. Vuelve a ejecutar el programa, pero esta vez simplemente presiona Enter sin escribir nada para comprobar que tu lógica de validación te asigna el nombre "Invitado" y evita un colapso.
+
+¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de un `NullPointerException`.
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Null Safety" 
+  description="Aprende más sobre cómo Kotlin implementa operadores seguros en su documentación." 
+  href="https://kotlinlang.org/docs/null-safety.html" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Calling Java from Kotlin" 
+  description="Conoce los detalles de los Platform Types y cómo Kotlin infiere tipos al interoperar con Java." 
+  href="https://kotlinlang.org/docs/java-interop.html#null-safety-and-platform-types" 
+/>
+<LinkCard 
+  title="Null References: The Billion Dollar Mistake" 
+  description="La presentación icónica de Tony Hoare en QCon." 
+  href="https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/" 
+/>
