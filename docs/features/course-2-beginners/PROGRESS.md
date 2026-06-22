@@ -8,7 +8,7 @@
 ## Course Content
 - [x] L1: Agnostic Environment and Hello World
 - [x] L2: Variables, Types, and the Truth about Null Safety
-- [ ] L3: Hierarchies and Exhaustive Control Flow
+- [x] L3: Hierarchies and Exhaustive Control Flow
 - [ ] L4: Anatomy of Functions
 - [ ] L5: Extension and Infix Functions
 - [ ] L6: Custom Higher-Order Functions
