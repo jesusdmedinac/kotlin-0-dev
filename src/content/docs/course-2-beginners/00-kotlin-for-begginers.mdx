@@ -1,34 +1,140 @@
 ---
 title: "Kotlin para Principiantes"
-description: "16 lecciones divididas por módulos. Desarrollaremos un Chat de IA paso a paso."
+description: "Aprende Kotlin moderno desde cero de forma agnóstica a la plataforma y construye un asistente AI Chat CLI paso a paso."
 sidebar:
   order: 0
 ---
 
-## Módulo 1: Fundamentos y Control de Flujo Avanzado
+import { Aside, Card, CardGrid, LinkCard, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
 
-1. [Entorno y Hola Mundo: Teoría de la JVM/Bytecode y armar el proyecto en Gradle con un banner de bienvenida.](../../course-2-beginners/01-environment-and-hello-world)
-2. [Variables y Null Safety: Mutabilidad y un módulo de entrada seguro (cero caídas por nulos).](../../course-2-beginners/02-variables-and-null-safety)
-3. [Jerarquías y Control de Flujo: Expresiones if/when, enums, sealed classes y el bucle del menú.](../../course-2-beginners/03-hierarchies-and-control-flow)
-4. [Anatomía de Funciones: Argumentos, sobrecargas y refactorización del chat a funciones limpias.](../../course-2-beginners/04-anatomy-of-functions)
+# Conciso. Seguro. Expresivo. Multiplataforma.
 
-## Módulo 2: Pensamiento Funcional (FP)
+> *"Un lenguaje de programación moderno que hace a los desarrolladores más felices, productivos y seguros."* — Inspirado en la filosofía de JetBrains.
 
-5. [Extensiones e Infix: Sintaxis fluida para colorear la terminal (ej. "Error".red()).](../../course-2-beginners/05-extension-and-infix-functions)
-6. [Higher-Order Functions: Funciones personalizadas como un myFilter para censurar palabras prohibidas.](../../course-2-beginners/06-higher-order-functions)
-7. [Colecciones y Secuencias: Lazy vs Eager memory y armado del historial de mensajes.](../../course-2-beginners/07-collections-and-sequences)
-8. [Scope Functions (La navaja suiza): Cuándo usar let, run, apply, etc., para instanciar y mutar el perfil del usuario.](../../course-2-beginners/08-scope-functions)
+Bienvenido al curso definitivo de **Kotlin para Principiantes**. Ya sea que vengas de lenguajes como Java, Python o JavaScript, o estés buscando dominar el lenguaje líder del desarrollo moderno en la JVM, Android, backend y multiplataforma, este curso está diseñado para llevarte desde los fundamentos mecánicos hasta patrones de ingeniería avanzados.
 
-## Módulo 3: POO Avanzada y Tipado (El Choque con Java)
+---
 
-9. [Clases y Visibilidad: Composición sobre herencia y encapsulación del ChatEngine.](../../course-2-beginners/09-classes-and-visibility)
-10. [Companion y Object Declarations: Singletons idiomáticos y modelado estricto de mensajes con sealed classes y data objects.](../../course-2-beginners/10-companion-and-object-declarations)
-11. [Genéricos Avanzados: Varianza (in/out) y un envoltorio Result\<T\> para las respuestas de la IA.](../../course-2-beginners/11-advanced-generics)
-12. [Delegación: Patrón Delegate para autoguardar el historial en un .txt cada que haya cambios.](../../course-2-beginners/12-delegation)
+## ¿Por qué elegir Kotlin?
 
-## Módulo 4: Asincronía y Proyecto Final
+Kotlin fue diseñado por ingenieros de JetBrains para resolver los dolores de cabeza reales de los desarrolladores: eliminar el código repetitivo (*boilerplate*), erradicar las excepciones en tiempo de ejecución por referencias nulas y ofrecer interoperabilidad transparente con el ecosistema Java.
 
-13. [Corrutinas vs Asincronía: Hilos vs suspensión y detección de bloqueos de I/O en consola.](../../course-2-beginners/13-coroutines-vs-asynchrony)
-14. [Suspensión y Scopes: Animación concurrente de "Escribiendo..." en la terminal usando suspend.](../../course-2-beginners/14-suspension-and-scopes)
-15. [Contextos y Dispatchers: Cambiar entre IO/Default/Main de forma segura para peticiones pesadas.](../../course-2-beginners/15-contexts-and-dispatchers)
-16. [Proyecto Final (AI Chat CLI): Revisión de arquitectura, ciclo de vida y empaquetar todo en un JAR ejecutable listo para distribuir.](../../course-2-beginners/16-final-project-ai-chat)
+<CardGrid stagger>
+  <Card title="⚡ Conciso y Productivo" icon="seti:kotlin">
+    Escribe hasta un **40% menos de código**. Despídete de los getters, setters y constructores ceremoniales gracias a las *data classes*, inferencia de tipos y funciones de extensión.
+  </Card>
+  <Card title="🛡️ Seguro por Defecto (Null Safety)" icon="shield">
+    El sistema de tipos de Kotlin distingue entre referencias que pueden ser nulas y las que no. **Elimina de raíz el `NullPointerException`** en tiempo de compilación.
+  </Card>
+  <Card title="🔄 100% Interoperable con Java" icon="puzzle">
+    Llama a cualquier biblioteca o framework de Java desde Kotlin y viceversa sin adaptadores ni penalización de rendimiento.
+  </Card>
+  <Card title="🚀 Concurrencia con Corrutinas" icon="rocket">
+    Maneja operaciones asíncronas y programación no bloqueante de manera secuencial, legible y con un uso ultra eficiente de memoria.
+  </Card>
+</CardGrid>
+
+---
+
+## La Elegancia de Kotlin en Código
+
+Observa cómo Kotlin combina simplicidad declarativa con máxima seguridad en solo unas líneas:
+
+```kotlin
+// 1. Modelado inmutable con valores por defecto en una sola línea
+data class Message(val author: String, val text: String, val isAi: Boolean = false)
+
+fun main() {
+    // 2. Colecciones de solo lectura con inferencia de tipos
+    val history = listOf(
+        Message(author = "Estudiante", text = "¿Por qué Kotlin es tan popular?"),
+        Message(author = "AI Assistant", text = "¡Porque es seguro, expresivo y divertido!", isAi = true)
+    )
+
+    // 3. Programación funcional fluida y Template Strings
+    history
+        .filter { it.isAi }
+        .forEach { println("🤖 [${it.author}]: ${it.text}") }
+}
+```
+
+---
+
+## Nuestra Metodología: Laboratorio Incremental
+
+<Aside type="tip" title="Aprender Haciendo: Tu Proyecto de Extremo a Extremo">
+A diferencia de los cursos tradicionales que enseñan sintaxis con ejercicios desconectados, en este curso construirás de forma incremental un **AI Chat CLI** (un asistente de inteligencia artificial para la terminal). Cada lección te enseña un concepto teórico profundo e inmediatamente lo aplicas para añadir una nueva capacidad al proyecto.
+</Aside>
+
+---
+
+## Ruta de Aprendizaje y Temario
+
+El curso está estructurado en **4 módulos formativos** con **16 lecciones prácticas**:
+
+### Módulo 1: Fundamentos y Control de Flujo Avanzado
+Comprende cómo se ejecuta el código en la JVM y domina el flujo de tu aplicación.
+
+1. [L1: Entorno Agnóstico y Hola Mundo](../../course-2-beginners/01-environment-and-hello-world) <Badge text="Disponible" variant="success" />  
+   *La JVM, Bytecode, compilador `kotlinc`, Gradle y banner inicial de bienvenida.*
+2. [L2: Variables, Tipos y Null Safety](../../course-2-beginners/02-variables-and-null-safety) <Badge text="Disponible" variant="success" />  
+   *Mutabilidad `val`/`var`, el error del billón de dólares, Platform Types y validación segura de entradas.*
+3. [L3: Jerarquías y Control de Flujo Exhaustivo](../../course-2-beginners/03-hierarchies-and-control-flow) <Badge text="WIP" variant="caution" />  
+   *Expresiones `if`/`when`, `enum`, `sealed classes/interfaces` y el bucle principal del menú.*
+4. [L4: Anatomía de Funciones](../../course-2-beginners/04-anatomy-of-functions) <Badge text="WIP" variant="caution" />  
+   *Named arguments, default parameters, single-expression functions y modularización del chat.*
+
+### Módulo 2: Pensamiento Funcional (FP)
+Aprende a pensar de forma declarativa y a construir interfaces fluidas.
+
+5. [L5: Extensiones y Funciones Infix](../../course-2-beginners/05-extension-and-infix-functions) <Badge text="WIP" variant="caution" />  
+   *Extension functions, extension properties, sintaxis `infix` y coloreado dinámico de la terminal.*
+6. [L6: Funciones de Orden Superior y Lambdas](../../course-2-beginners/06-higher-order-functions) <Badge text="WIP" variant="caution" />  
+   *Tipos de función, trailing lambdas, `inline functions` y pipeline de sanitización de mensajes.*
+7. [L7: Colecciones y Secuencias (Lazy vs Eager)](../../course-2-beginners/07-collections-and-sequences) <Badge text="WIP" variant="caution" />  
+   *List/Set/Map, operaciones funcionales (`map`, `filter`), evaluación perezosa con `Sequence` e historial.*
+8. [L8: Funciones de Ámbito (Scope Functions)](../../course-2-beginners/08-scope-functions) <Badge text="WIP" variant="caution" />  
+   *`let`, `run`, `with`, `apply` y `also`: la navaja suiza para inicializar y mutar perfiles de usuario.*
+
+### Módulo 3: POO Avanzada y Tipado (El Choque con Java)
+Diseña arquitecturas robustas, desacopladas y fuertemente tipadas.
+
+9. [L9: Clases, Herencia y Visibilidad](../../course-2-beginners/09-classes-and-visibility) <Badge text="WIP" variant="caution" />  
+   *Constructores, visibilidad, clases `open` vs `final` por defecto y encapsulación del `ChatEngine`.*
+10. [L10: Companion Objects y Object Declarations](../../course-2-beginners/10-companion-and-object-declarations) <Badge text="WIP" variant="caution" />  
+    *Singletons thread-safe, `companion object`, `data object` y modelado formal de eventos.*
+11. [L11: Genéricos Avanzados y Varianza](../../course-2-beginners/11-advanced-generics) <Badge text="WIP" variant="caution" />  
+    *Varianza (`in`/`out`), tipos reificados (`reified`) y envoltorio `Result<T>` para la IA.*
+12. [L12: Delegación y Propiedades Delegadas](../../course-2-beginners/12-delegation) <Badge text="WIP" variant="caution" />  
+    *Delegación nativa con `by`, `lazy`, `observable` y persistencia automática del historial en disco.*
+
+### Módulo 4: Asincronía y Proyecto Final
+Domina la concurrencia moderna y distribuye tu aplicación.
+
+13. [L13: Corrutinas vs Asincronía Tradicional](../../course-2-beginners/13-coroutines-vs-asynchrony) <Badge text="WIP" variant="caution" />  
+    *Hilos de la JVM vs Corrutinas ligeras, suspensión no bloqueante y benchmarks de I/O.*
+14. [L14: Suspensión y Scopes de Concurrencia](../../course-2-beginners/14-suspension-and-scopes) <Badge text="WIP" variant="caution" />  
+    *Funciones `suspend`, `CoroutineScope`, `launch`/`async` y animación concurrente de "IA escribiendo...".*
+15. [L15: Contextos y Dispatchers](../../course-2-beginners/15-contexts-and-dispatchers) <Badge text="WIP" variant="caution" />  
+    *`Dispatchers.IO` vs `Default`, `withContext` y llamadas concurrentes seguras a APIs.*
+16. [L16: Proyecto Final: Empaquetado y Distribución](../../course-2-beginners/16-final-project-ai-chat) <Badge text="WIP" variant="caution" />  
+    *Integración arquitectónica completa, JVM Shutdown Hooks, Fat JAR con Gradle y distribución multiplataforma.*
+
+---
+
+## ¿Listo para comenzar tu viaje en Kotlin?
+
+El mejor momento para aprender Kotlin moderno es hoy. Da el primer paso preparando tu entorno y descubriendo la potencia del Bytecode.
+
+<CardGrid>
+  <LinkCard
+    title="🚀 Comenzar la Lección 1: Entorno y Hola Mundo"
+    description="Prepara tu entorno con Gradle, comprende el Bytecode de la JVM y crea tu primer proyecto."
+    href="/course-2-beginners/01-environment-and-hello-world"
+  />
+  <LinkCard
+    title="💻 Repositorio del Proyecto en GitHub"
+    description="Accede al código fuente, plantillas y soluciones paso a paso del laboratorio."
+    href="https://github.com/jesusdmedinac/kotlin-0-dev"
+  />
+</CardGrid>
