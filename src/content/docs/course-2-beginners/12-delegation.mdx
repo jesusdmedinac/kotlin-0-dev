@@ -1,0 +1,41 @@
+---
+title: "L12: Delegación y Propiedades Delegadas"
+description: "Lección en preparación. Patrón de delegación nativo con by, lazy, observable y delegados personalizados."
+sidebar:
+  order: 12
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lección en Construcción (WIP)">
+Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+</Aside>
+
+## ¿Qué aprenderás en esta lección?
+
+En esta lección exploraremos:
+- **Teoría a fondo:** Delegación de interfaces de primera clase (`by`), delegados de propiedades estándar de la biblioteca (`lazy`, `Delegates.observable`, `Delegates.vetoable`) y creación de Custom Property Delegates implementando `ReadOnlyProperty` / `ReadWriteProperty`.
+- **Bajo el capó:** Cómo el compilador genera campos sintéticos ocultos (`$$delegate`) y métodos de acceso para redirigir llamadas a los métodos `getValue` y `setValue`.
+- **Laboratorio Incremental (AI Chat CLI):** Implementación de un delegado personalizado para autoguardar y persistir automáticamente el historial en disco (`history.txt`) ante cualquier cambio de estado.
+
+---
+
+## Navegación
+
+<CardGrid>
+  <LinkCard
+    title="← Temario del Curso"
+    description="Volver al índice general de lecciones."
+    href="/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Lección Anterior (L11)"
+    description="Genéricos Avanzados y Varianza."
+    href="/course-2-beginners/11-advanced-generics"
+  />
+  <LinkCard
+    title="Siguiente Lección (L13) →"
+    description="Corrutinas vs Asincronía Tradicional."
+    href="/course-2-beginners/13-coroutines-vs-asynchrony"
+  />
+</CardGrid>

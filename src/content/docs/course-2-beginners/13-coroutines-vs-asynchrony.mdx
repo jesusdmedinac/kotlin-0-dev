@@ -1,0 +1,41 @@
+---
+title: "L13: Corrutinas vs Asincronía Tradicional"
+description: "Lección en preparación. Hilos del SO vs corrutinas, suspensión vs bloqueo, y concurrencia cooperativa."
+sidebar:
+  order: 13
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lección en Construcción (WIP)">
+Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+</Aside>
+
+## ¿Qué aprenderás en esta lección?
+
+En esta lección exploraremos:
+- **Teoría a fondo:** Hilos del sistema operativo (Java Threads) vs Corrutinas (hilos ligeros), suspensión no bloqueante vs bloqueo de hilos, y el modelo de concurrencia estructurada.
+- **Bajo el capó:** Comparativa de consumo de memoria en la JVM (1 MB de stack por hilo del SO vs pocos bytes por corrutina) y cómo la JVM agenda corrutinas sobre ThreadPools.
+- **Laboratorio Incremental (AI Chat CLI):** Detección de bloqueos de I/O en la consola y diseño de tareas concurrentes cooperativas.
+
+---
+
+## Navegación
+
+<CardGrid>
+  <LinkCard
+    title="← Temario del Curso"
+    description="Volver al índice general de lecciones."
+    href="/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Lección Anterior (L12)"
+    description="Delegación y Propiedades Delegadas."
+    href="/course-2-beginners/12-delegation"
+  />
+  <LinkCard
+    title="Siguiente Lección (L14) →"
+    description="Suspensión y Scopes de Concurrencia."
+    href="/course-2-beginners/14-suspension-and-scopes"
+  />
+</CardGrid>

@@ -1,0 +1,41 @@
+---
+title: "L11: Genéricos Avanzados y Varianza"
+description: "Lección en preparación. Varianza (in/out), tipos reificados, proyección de estrellas y tipado seguro."
+sidebar:
+  order: 11
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lección en Construcción (WIP)">
+Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+</Aside>
+
+## ¿Qué aprenderás en esta lección?
+
+En esta lección exploraremos:
+- **Teoría a fondo:** Clases y funciones genéricas `<T>`, límites superiores (`T : Any`), Varianza en el sitio de declaración (Declaration-site variance con `out` / Covarianza e `in` / Contravarianza), Proyecciones de estrellas (`*`) y tipos reificados (`reified`) con funciones `inline`.
+- **Bajo el capó:** Borrado de tipos en la JVM (Type Erasure) y cómo Kotlin elude esta restricción mediante inlining de bytecode.
+- **Laboratorio Incremental (AI Chat CLI):** Creación de un envoltorio de resultados fuertemente tipado `Result<T>` y adaptadores genéricos para procesar respuestas de la IA.
+
+---
+
+## Navegación
+
+<CardGrid>
+  <LinkCard
+    title="← Temario del Curso"
+    description="Volver al índice general de lecciones."
+    href="/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Lección Anterior (L10)"
+    description="Companion Objects y Object Declarations."
+    href="/course-2-beginners/10-companion-and-object-declarations"
+  />
+  <LinkCard
+    title="Siguiente Lección (L12) →"
+    description="Delegación y Propiedades Delegadas."
+    href="/course-2-beginners/12-delegation"
+  />
+</CardGrid>
