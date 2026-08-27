@@ -4,14 +4,16 @@
 - **Form Name:** Kotlin para Principiantes - Comunidad y Acceso Anticipado
 - **Slug / Purpose:** `course-2-funnel`
 - **Target Audience:** Students following Course 2 (Kotlin for Beginners) and building the AI Chat CLI.
+- **Live Online Classes:** Saturdays 9:00 AM - 11:00 AM (2 hours/week).
+- **Pricing:** 600 MXN per class (Pay-per-session model).
 
 ---
 
 ## Strategic Placements
 
 ### 1. Course 2 Welcome Funnel (`00-kotlin-for-begginers.mdx`)
-- **Placement:** Section before CTA / Next steps.
-- **Goal:** Early lead capture, notifying students when WIP lessons (L3-L16) are published, and granting access to GitHub community channels.
+- **Placement:** Section before CTA / Next steps ("Clases en Vivo y Formato del Curso").
+- **Goal:** Conversion for Saturday live cohorts (600 MXN/session) and general early access.
 
 ### 2. Global Index / Portal (`index.mdx`)
 - **Placement:** CardGrid at the bottom ("Comunidad y Soporte").
