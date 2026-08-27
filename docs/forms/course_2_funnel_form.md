@@ -4,16 +4,17 @@
 - **Form Name:** Kotlin para Principiantes - Comunidad y Acceso Anticipado
 - **Slug / Purpose:** `course-2-funnel`
 - **Target Audience:** Students following Course 2 (Kotlin for Beginners) and building the AI Chat CLI.
-- **Live Online Classes:** Saturdays 9:00 AM - 11:00 AM (2 hours/week).
+- **Live Online Classes:** Saturdays 9:00 AM - 11:00 AM (Primary) or 4:00 PM - 6:00 PM (Candidate group).
 - **Pricing:** 600 MXN per class (Pay-per-session model).
+- **Certification Requirements:** Complete 100% lab project (AI Chat CLI) + Live 1-on-1 code defense session + Full course cost coverage (16 lessons × $600 MXN = $9,600 MXN).
 
 ---
 
 ## Strategic Placements
 
 ### 1. Course 2 Welcome Funnel (`00-kotlin-for-begginers.mdx`)
-- **Placement:** Section before CTA / Next steps ("Clases en Vivo y Formato del Curso").
-- **Goal:** Conversion for Saturday live cohorts (600 MXN/session) and general early access.
+- **Placement:** Section before CTA / Next steps ("Certificado de Finalización y Criterios de Aprobación" & "Clases en Vivo").
+- **Goal:** Conversion for Saturday live cohorts (600 MXN/session), schedule preference polling (9-11 AM vs 4-6 PM), certification qualification, and general early access.
 
 ### 2. Global Index / Portal (`index.mdx`)
 - **Placement:** CardGrid at the bottom ("Comunidad y Soporte").
@@ -38,7 +39,7 @@
       "blocks": [
         {
           "type": "TEXT",
-          "html": "👋 <b>¡Bienvenido al ecosistema Kotlin Desde Cero!</b><br>Completa este breve formulario para recibir notificaciones cuando publiquemos nuevas lecciones, acceder al repositorio del <b>AI Chat CLI</b> y recibir soporte."
+          "html": "👋 <b>¡Bienvenido al ecosistema Kotlin Desde Cero!</b><br>Completa este breve formulario para apartar tu lugar en las <b>clases en vivo (Sábados 9-11 AM, $600 MXN/clase)</b>, recibir avisos de nuevas lecciones y acceder al repositorio del <b>AI Chat CLI</b>."
         }
       ]
     },
@@ -61,6 +62,23 @@
         { "type": "MULTIPLE_CHOICE_OPTION", "text": "Desarrollador Java / Android tradicional" },
         { "type": "MULTIPLE_CHOICE_OPTION", "text": "Desarrollador Web (JS, TS, Python, PHP)" },
         { "type": "MULTIPLE_CHOICE_OPTION", "text": "Ingeniero de Software con experiencia" }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "TITLE", "html": "¿Qué horario de clases en vivo se adapta mejor a tu disponibilidad?" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Sábados de 9:00 AM a 11:00 AM (Matutino)" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Sábados de 4:00 PM a 6:00 PM (Vespertino)" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Cualquiera de los dos horarios me funciona" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Prefiero avanzar 100% autodidacta con las lecciones escritas" }
+      ]
+    },
+    {
+      "blocks": [
+        { "type": "TITLE", "html": "🎓 ¿Te interesa obtener el Certificado Oficial de Finalización?" },
+        { "type": "TEXT", "html": "<i>Requisitos: Cubrir el total del curso (16 lecciones × $600 MXN), completar el proyecto AI Chat CLI y aprobar la sesión de defensa técnica en vivo.</i>" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Sí, deseo certificarme cumpliendo todos los requisitos" },
+        { "type": "MULTIPLE_CHOICE_OPTION", "text": "Solo deseo tomar las clases / aprender a mi ritmo sin certificarme" }
       ]
     },
     {

@@ -49,7 +49,11 @@ flowchart TD
   2. **Kotlin Architecture Cheat Sheets:**
      - *Scope Functions Decision Tree (`let`, `run`, `with`, `apply`, `also`)*.
      - *Null Safety & Platform Types Reference Card*.
-  3. **Course Certificate:** Verified repository review upon completing Lesson 16.
+  3. **Official Certificate of Completion:** Verified credential awarded upon meeting criteria:
+     - Full course coverage (16 lessons × $600 MXN = $9,600 MXN).
+     - 100% incremental lab completion in student's GitHub repository.
+     - Passing a live 1-on-1 technical code defense session explaining architecture and implementation.
+     - Fast-track certification available for self-paced students completing all requirements ahead of schedule.
 
 ---
 
