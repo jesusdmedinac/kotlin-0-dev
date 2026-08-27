@@ -42,8 +42,8 @@
     },
     {
       "blocks": [
-        { "type": "TITLE", "html": "¿Cuál es tu nombre o alias?" },
-        { "type": "INPUT_TEXT", "placeholder": "Ej. Alex Dev" }
+        { "type": "TITLE", "html": "¿Cuál es tu nombre completo?" },
+        { "type": "INPUT_TEXT", "placeholder": "Ej. David Cepeda" }
       ]
     },
     {
