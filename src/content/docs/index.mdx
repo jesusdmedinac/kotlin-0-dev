@@ -1,57 +1,162 @@
 ---
 title: Kotlin Desde0
-description: Kotlin para todos
+description: Domina Kotlin moderno desde cero hasta arquitectura avanzada en la JVM, Android, Backend y Multiplataforma.
+template: splash
 hero:
-  tagline: Curso de Kotlin desde 0!
+  title: Kotlin Desde0 ⚡
+  tagline: Domina el lenguaje líder de la JVM, Android, backend y multiplataforma. Aprende de forma agnóstica a la plataforma, comprende el bytecode y construye un asistente AI Chat CLI paso a paso.
   image:
     light: ../../assets/kotlin-light.png
     dark: ../../assets/kotlin-dark.png
+  actions:
+    - text: Apartar Lugar en Vivo ($600 MXN)
+      link: https://tally.so/r/GxAj5o
+      icon: right-arrow
+      variant: primary
+    - text: Explorar Kotlin para Principiantes
+      link: /course-2-beginners/00-kotlin-for-begginers
+      icon: external
+      variant: secondary
 ---
 
-import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, Card, LinkCard, Aside, Badge } from '@astrojs/starlight/components';
 
-## Desde0 - Curso de Kotlin
+## ¿Por qué dominar Kotlin en Desde0?
+
+Kotlin combina la potencia y madurez del ecosistema Java con la elegancia, concisión y seguridad de los lenguajes funcionales modernos. En **Desde0** no te enseñamos sintaxis aislada: te formamos con ingeniería real bajo el capó.
+
+<CardGrid stagger>
+  <Card title="🛡️ Seguridad Nativa (Null Safety)" icon="shield">
+    Elimina el error del billón de dólares (`NullPointerException`) en tiempo de compilación con el sistema de tipos de Kotlin.
+  </Card>
+  <Card title="🤖 Laboratorio Incremental (AI Chat CLI)" icon="seti:kotlin">
+    Cada concepto teórico se aplica inmediatamente construyendo paso a paso un asistente de inteligencia artificial para la terminal.
+  </Card>
+  <Card title="🚀 Concurrencia con Corrutinas" icon="rocket">
+    Aprende a programar operaciones asíncronas no bloqueantes de manera secuencial, limpia y con uso eficiente de memoria.
+  </Card>
+  <Card title="📜 Certificación por Competencia" icon="star">
+    Obtén un **Certificado Oficial de Finalización** respaldado por la defensa técnica en vivo 1-a-1 de tu proyecto en GitHub.
+  </Card>
+</CardGrid>
+
+---
+
+## 🗓️ Convocatoria Abierta: Clases en Vivo de Kotlin
+
+¿Prefieres aprender en directo con un instructor y resolver tus dudas de código al instante? Abrimos la convocatoria para la generación sabatina de **Kotlin para Principiantes**:
+
+<CardGrid stagger>
+  <Card title="🗓️ Fecha de Inicio" icon="seti:clock">
+    **Inicio: Sábado 12 de Septiembre**. Sesiones semanales intensivas con código en vivo.
+  </Card>
+  <Card title="⏰ Horarios Disponibles" icon="laptop">
+    * **Grupo Matutino:** Sábados de **9:00 AM a 11:00 AM**.
+    * **Grupo Vespertino (Candidato):** Sábados de **4:00 PM a 6:00 PM**.
+  </Card>
+  <Card title="💳 Inversión Accesible y Flexible" icon="seti:markdown">
+    **$600 MXN por clase**. Modelo de pago por sesión sin plazos forzosos para avanzar a tu propio ritmo.
+  </Card>
+  <Card title="🎓 Criterios de Certificación" icon="star">
+    100% del proyecto **AI Chat CLI** en GitHub + defensa técnica en vivo 1-a-1 + cobertura total del programa (**16 clases × $600 MXN = $9,600 MXN**).
+  </Card>
+</CardGrid>
+
+<Aside type="tip" title="Reserva tu lugar y vota por tu horario">
+En el formulario de registro puedes seleccionar el horario que mejor se adapte a tu agenda (9-11 AM o 4-6 PM) y apartar tu lugar para el inicio del **12 de septiembre**.
+</Aside>
 
 <CardGrid>
   <LinkCard
+    title="🎟️ Apartar Lugar en Vivo — Inicio: Sábado 12 de Septiembre"
+    description="Sábados 9-11 AM o 4-6 PM ($600 MXN / sesión). Elige tu horario y asegura tu lugar."
+    href="https://tally.so/r/GxAj5o"
+  />
+  <LinkCard
+    title="📖 Ver Temario Completo (16 Lecciones)"
+    description="Revisa los 4 módulos formativos y la arquitectura del AI Chat CLI."
+    href="/course-2-beginners/00-kotlin-for-begginers"
+  />
+</CardGrid>
+
+---
+
+## 🌱 ¿Nunca has programado? Empieza con Fundamentos Web
+
+Si estás comenzando desde cero absoluto en el mundo del software y buscas un ritmo más pausado con analogías cotidianas, te invitamos a nuestro curso hermano en la plataforma principal de Desde0:
+
+<CardGrid>
+  <LinkCard
+    title="🚀 Programación Desde0 - Para no programadores (Inicio: 6 de Septiembre)"
+    description="24 semanas (12 lecciones), domingos 9-11 AM o 4-6 PM ($200 MXN/clase), proyecto ShortURL y Diploma Oficial de Participación."
+    href="https://desde0.jesusdmedinac.com/roadmap/para-no-programadores/"
+  />
+  <LinkCard
+    title="🎟️ Apartar Lugar para No Programadores ($200 MXN)"
+    description="Inicio: Domingo 6 de Septiembre. Formulario oficial de registro en Desde0."
+    href="https://tally.so/r/7RrOeP"
+  />
+</CardGrid>
+
+---
+
+## 🧭 Catálogo de Rutas del Ecosistema Kotlin
+
+Explora los 5 cursos que componen la formación integral en Kotlin:
+
+<CardGrid stagger>
+  <LinkCard
     title="1. Kotlin para no programadoras"
-    description="Aprende las bases de la programación y la lógica desde cero absoluto."
+    description="Aprende las bases de la lógica y la programación desde cero absoluto con Kotlin (basado en el libro)."
     href="/course-1-non-programmers/"
   />
   <LinkCard
     title="2. Kotlin para principiantes"
-    description="Da tus primeros pasos en Kotlin de forma agnóstica a la plataforma y crea un Chat de IA."
+    description="Domina Kotlin agnóstico, la JVM, control de flujo, programación funcional, POO y Corrutinas con el AI Chat CLI."
     href="/course-2-beginners/00-kotlin-for-begginers"
   />
   <LinkCard
     title="3. Kotlin para desarrolladores Android"
-    description="Aprende paradigmas avanzados de Kotlin en Android más allá de la POO."
+    description="Aprende paradigmas modernos de Kotlin en Android más allá de la POO tradicional con Jetpack y Compose."
     href="/course-3-android/"
   />
   <LinkCard
     title="4. Kotlin para desarrolladores móviles"
-    description="Domina Kotlin Multiplatform (KMP/CMP) y el motor de sus librerías principales."
+    description="Domina Kotlin Multiplatform (KMP / CMP) para compartir lógica y UI universal entre Android, iOS y Desktop."
     href="/course-4-mobile/"
   />
   <LinkCard
     title="5. Kotlin para ingenieros"
-    description="Explora patrones de diseño, arquitecturas y la ingeniería detrás del lenguaje."
+    description="Explora patrones de arquitectura avanzada, diseño en la JVM, optimización de Bytecode y rendimiento extremo."
     href="/course-5-engineers/"
   />
 </CardGrid>
 
-## Comunidad y Novedades
+---
+
+## 💬 Comunidad, Código Abierto y Novedades
+
+Únete a nuestra comunidad de desarrolladores para resolver dudas, revisar código y participar en dinámicas en vivo:
 
 <CardGrid>
   <LinkCard
-    title="📬 Registro y Novedades del Ecosistema"
-    description="Recibe avisos de nuevas lecciones, ejercicios y código de los proyectos prácticos."
-    href="https://tally.so/r/GxAj5o"
+    title="💬 Comunidad Oficial en Discord"
+    description="Interactúa con instructores y estudiantes, resuelve dudas técnicas y asiste a eventos en vivo."
+    href="https://discord.gg/nChTf3PdGJ"
   />
   <LinkCard
     title="⭐ Repositorio Oficial en GitHub"
-    description="Revisa el código fuente abierto y colabora en el proyecto de documentación."
+    description="Revisa el código fuente abierto de los laboratorios, plantillas y colabora en el proyecto."
     href="https://github.com/jesusdmedinac/kotlin-0-dev"
   />
+  <LinkCard
+    title="📬 Registro y Boletín del Ecosistema"
+    description="Recibe alertas de nuevas lecciones, ejercicios y lanzamientos de nuevas convocatorias."
+    href="https://tally.so/r/GxAj5o"
+  />
+  <LinkCard
+    title="🌐 Academia Principal Desde0"
+    description="Descubre todas las rutas de ingeniería de software, IA y desarrollo web en Desde0."
+    href="https://desde0.jesusdmedinac.com/"
+  />
 </CardGrid>
-

@@ -4,7 +4,7 @@
 - **Form Name:** Kotlin para Principiantes - Comunidad y Acceso Anticipado
 - **Slug / Purpose:** `course-2-funnel`
 - **Target Audience:** Students following Course 2 (Kotlin for Beginners) and building the AI Chat CLI.
-- **Live Online Classes:** Saturdays 9:00 AM - 11:00 AM (Primary) or 4:00 PM - 6:00 PM (Candidate group).
+- **Live Online Classes:** Starts Saturday September 12. Saturdays 9:00 AM - 11:00 AM (Primary) or 4:00 PM - 6:00 PM (Candidate group).
 - **Pricing:** 600 MXN per class (Pay-per-session model).
 - **Certification Requirements:** Complete 100% lab project (AI Chat CLI) + Live 1-on-1 code defense session + Full course cost coverage (16 lessons × $600 MXN = $9,600 MXN).
 
@@ -14,7 +14,7 @@
 
 ### 1. Course 2 Welcome Funnel (`00-kotlin-for-begginers.mdx`)
 - **Placement:** Section before CTA / Next steps ("Certificado de Finalización y Criterios de Aprobación" & "Clases en Vivo").
-- **Goal:** Conversion for Saturday live cohorts (600 MXN/session), schedule preference polling (9-11 AM vs 4-6 PM), certification qualification, and general early access.
+- **Goal:** Conversion for Saturday live cohorts starting Sept 12 (600 MXN/session), schedule preference polling (9-11 AM vs 4-6 PM), certification qualification, and general early access.
 
 ### 2. Global Index / Portal (`index.mdx`)
 - **Placement:** CardGrid at the bottom ("Comunidad y Soporte").
@@ -39,7 +39,7 @@
       "blocks": [
         {
           "type": "TEXT",
-          "html": "👋 <b>¡Bienvenido al ecosistema Kotlin Desde Cero!</b><br>Completa este breve formulario para apartar tu lugar en las <b>clases en vivo (Sábados 9-11 AM, $600 MXN/clase)</b>, recibir avisos de nuevas lecciones y acceder al repositorio del <b>AI Chat CLI</b>."
+          "html": "👋 <b>¡Bienvenido al ecosistema Kotlin Desde Cero!</b><br>Completa este breve formulario para apartar tu lugar en las <b>clases en vivo (Inicio: Sábado 12 de Septiembre, $600 MXN/clase)</b>, votar por tu horario preferido y acceder al repositorio del <b>AI Chat CLI</b>."
         }
       ]
     },

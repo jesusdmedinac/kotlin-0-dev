@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://kotlin-0-dev.jesusdmedinac.com',
 	integrations: [
 		starlight({
 			title: 'Desde0: Cursos Kotlin',
@@ -14,7 +15,11 @@ export default defineConfig({
 					lang: 'es',
 				},
 			},
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/jesusdmedinac/kotlin-0-dev' }],
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/jesusdmedinac/kotlin-0-dev' },
+				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/nChTf3PdGJ' },
+				{ icon: 'youtube', label: 'YouTube', href: 'https://www.youtube.com/@jesusdmedinac' }
+			],
 			sidebar: [
 				{ label: "Bienvenida", link: "/" },
 				{
