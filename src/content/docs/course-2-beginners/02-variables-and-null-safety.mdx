@@ -164,10 +164,16 @@ print("Por favor, introduce tu nombre: ")
 ```
 
 <Aside type="note">
-**¿Consola o Terminal?**
-En IntelliJ IDEA verás que tienes una pestaña llamada **Run** (la Consola) y otra llamada **Terminal**. 
-- La **Terminal** es la línea de comandos de tu sistema operativo (como si abrieras Bash o PowerShell).
-- La **Consola (Run)** es la salida estándar donde se ejecuta y muestra tu programa de Kotlin dentro del IDE. Cuando decimos que el usuario "escribirá en la consola", nos referimos a esta pestaña de ejecución.
+**¿Consola interactiva, Terminal y Gradle?**
+Dependiendo de cómo ejecutes tu proyecto, la forma en que el programa recibe lo que escribes varía:
+- **En IDEs (IntelliJ IDEA / Android Studio):** La pestaña **Run** conecta directamente un emulador de terminal interactiva con la JVM.
+- **En Terminal o Google Antigravity (mediante Gradle):** Gradle aísla los subprocesos por seguridad. Para permitir que `./gradlew run` escuche lo que tecleas sin cerrar el flujo de entrada prematuramente (**EOF**), nuestro archivo `build.gradle.kts` incluye la instrucción:
+  ```kotlin
+  tasks.named<JavaExec>("run") {
+      standardInput = System.`in`
+  }
+  ```
+  De esta forma, puedes interactuar con tu programa desde cualquier terminal o entorno sin bloqueos inesperados.
 </Aside>
 
 #### Paso 2: Capturar el Input
@@ -203,12 +209,30 @@ Finalmente, agreguemos un saludo personalizado utilizando **String Templates** (
 println("\n¡Hola, $username! ¿En qué te puedo ayudar hoy?")
 ```
 
-#### Paso 5: ¡Ejecuta y prueba!
-1. Haz clic en el botón verde de **Play** junto a tu función `main`.
-2. Cuando la consola te pregunte tu nombre, escríbelo y presiona Enter.
-3. Vuelve a ejecutar el programa, pero esta vez simplemente presiona Enter sin escribir nada para comprobar que tu lógica de validación te asigna el nombre "Invitado" y evita un colapso.
+#### Paso 5: ¡Ejecuta y prueba en tu entorno favorito!
 
-¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de un `NullPointerException`.
+Puedes ejecutar tu proyecto según la herramienta que estés utilizando:
+
+- **Opción A (Android Studio / IntelliJ IDEA):**
+  1. Haz clic en el botón verde de **Play** (▶️) situado al lado izquierdo de la línea `fun main()`.
+  2. En la pestaña inferior **Run**, escribe tu nombre cuando aparezca la pregunta y presiona Enter.
+
+- **Opción B (Google Antigravity / Visual Studio Code):**
+  1. Presiona el atajo **`Cmd + Shift + B`** (en Mac) o **`Ctrl + Shift + B`** (en Windows/Linux). También puedes abrir la paleta de comandos (`Cmd + Shift + P` o `Ctrl + Shift + P`), escribir `Tasks: Run Task` y seleccionar **Run AI Chat CLI**.
+  2. La terminal integrada abrirá la sesión interactiva lista para que escribas tu nombre.
+
+- **Opción C (Terminal de comandos):**
+  1. Abre tu terminal en la raíz del proyecto y ejecuta:
+     ```bash
+     ./gradlew run --console=plain -q
+     ```
+     *(En Windows CMD/PowerShell: `gradlew.bat run --console=plain -q`)*
+  2. Las banderas `--console=plain -q` suprimen las barras de estado del daemon de Gradle para que los prompts de texto y la interacción por teclado sean limpios.
+
+**Comprobación de Null Safety:**
+Vuelve a ejecutar el programa, pero esta vez simplemente presiona **Enter** sin escribir nada (o introduce solo espacios). Comprobarás que tu lógica de validación te asigna el nombre `"Invitado"` de forma segura, evitando un temido `NullPointerException`.
+
+¡Felicidades! Has interactuado exitosamente con la I/O (Input/Output) y has protegido tu aplicación de un colapso en tiempo de ejecución.
 
 ---
 
