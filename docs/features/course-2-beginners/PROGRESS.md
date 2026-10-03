@@ -32,7 +32,7 @@
 - [ ] [#16](https://github.com/jesusdmedinac/kotlin-0-dev/issues/16) Scenario: Safe Git tag navigation and bridge recap to Lesson 2
 
 ### Lesson 2 Enhancements ([`l2_pedagogical_improvements.feature`](./l2_pedagogical_improvements.feature))
-- [ ] [#17](https://github.com/jesusdmedinac/kotlin-0-dev/issues/17) Scenario: Interactive CLI input stream configuration in Gradle
+- [x] [#17](https://github.com/jesusdmedinac/kotlin-0-dev/issues/17) Scenario: Interactive CLI input stream configuration in Gradle
 - [x] [#18](https://github.com/jesusdmedinac/kotlin-0-dev/issues/18) Scenario: Tony Hoare null safety history, reference immutability, and .NET parallels
 - [ ] [#19](https://github.com/jesusdmedinac/kotlin-0-dev/issues/19) Scenario: Historical deprecation of KotlinNullPointerException in Kotlin 1.4
 
@@ -41,3 +41,8 @@
 - [x] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with functional programming and collections analogies
 - [x] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with OOP, properties, and generics variance analogies
 - [x] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with coroutines vs async/await concurrency models
+
+### Companion Lab Synchronization ([`lab_starter_alignment.feature`](./lab_starter_alignment.feature))
+- [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Autonomous L1-start repository with Gradle Wrapper
+- [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Fully verified L1-done tag with build manifests and VS Code tasks
+- [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Clean working tree and linear tag integrity
