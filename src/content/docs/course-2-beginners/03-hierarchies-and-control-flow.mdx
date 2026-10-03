@@ -1,41 +1,253 @@
 ---
 title: "L3: Jerarquías y Control de Flujo Exhaustivo"
-description: "Lección en preparación. Expresiones if/when, enums, sealed classes y el bucle del menú."
+description: "Aprende cómo Kotlin revoluciona la toma de decisiones con 'when' y jerarquías cerradas (enums y sealed classes) para crear código a prueba de fallos."
 sidebar:
   order: 3
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lección en Construcción (WIP)">
-Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
-</Aside>
+## El Infierno del `switch` de Java
 
-## ¿Qué aprenderás en esta lección?
+Si vienes de Java, C o JavaScript, seguramente estás familiarizado con la sentencia `switch`. Históricamente, el `switch` ha sido una de las estructuras de control más propensas a errores. ¿Por qué? Por culpa del **Fall-through**.
 
-En esta lección exploraremos:
-- **Teoría a fondo:** Expresiones `if` y `when` exhaustivas, modelado con `enum class` y `sealed class` / `sealed interface`.
-- **Bajo el capó:** Cómo el compilador de Kotlin optimiza las sentencias `when` a nivel de Bytecode (`tableswitch` vs `lookupswitch`).
-- **Laboratorio Incremental (AI Chat CLI):** Implementación del menú de navegación interactivo y control de estados de la aplicación.
+En esos lenguajes, si olvidas escribir la palabra clave `break;` al final de un caso, el programa continuará ejecutando el siguiente caso hacia abajo, causando bugs lógicos gravísimos y muy difíciles de rastrear.
+
+Kotlin decidió acabar con este problema de raíz eliminando por completo la palabra `switch` e introduciendo una estructura inmensamente más poderosa y segura: `when`.
 
 ---
 
-## Navegación
+## La Evolución: `if` y `when` como Expresiones
 
-<CardGrid>
-  <LinkCard
-    title="← Temario del Curso"
-    description="Volver al índice general de lecciones."
-    href="/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Lección Anterior (L2)"
-    description="Variables, Tipos y la Verdad sobre Null Safety."
-    href="/course-2-beginners/02-variables-and-null-safety"
-  />
-  <LinkCard
-    title="Siguiente Lección (L4) →"
-    description="Anatomía de Funciones."
-    href="/course-2-beginners/04-anatomy-of-functions"
-  />
-</CardGrid>
+En Kotlin, estructuras como `if` y `when` no son simples "órdenes" (statements), sino **Expresiones** (expressions). Esto significa que **pueden devolver un valor**.
+
+En Java, si querías asignar un valor dependiendo de una condición, tenías que crear una variable mutable y modificarla dentro del `if` o del `switch`. En Kotlin, puedes asignar el resultado de un `when` directamente a una constante (`val`).
+
+```kotlin
+// Asignamos el resultado de toda la evaluación 'when' directamente a la variable.
+// No hay necesidad de crear variables 'var' mutables intermedias.
+val selectedOption: MenuOption = when (rawOption) {
+    "1" -> MenuOption.CHAT
+    "2" -> MenuOption.SETTINGS
+    "3" -> MenuOption.EXIT
+    else -> MenuOption.UNKNOWN
+}
+```
+
+<Aside type="tip">
+**Adiós al `break`:** Nota que en Kotlin no necesitas usar `break`. Una vez que el bloque de código que coincide con la condición (la rama `->`) termina de ejecutarse, el `when` finaliza automáticamente. ¡Es imposible tener un bug por olvidar un `break`!
+</Aside>
+
+### Bajo el Cofre: El Bytecode de `when`
+
+¿Cómo funciona `when` en las entrañas de la JVM (Java Virtual Machine)? El compilador de Kotlin es muy inteligente y optimiza la traducción a bytecode de Java dependiendo de cómo uses el `when`:
+
+1. **Pocas Ramas:** Si tu `when` solo tiene 2 o 3 opciones, el compilador lo traduce a una simple cadena de instrucciones `if-else if`.
+2. **Múltiples Ramas o Enums:** Si tu `when` tiene muchos casos, o si estás evaluando un `enum class`, el compilador activa el modo turbo y genera instrucciones de Java Bytecode optimizadas:
+   - **`TABLESWITCH`:** Se usa si las claves son contiguas. Ofrece un acceso en memoria de tiempo constante ($O(1)$).
+   - **`LOOKUPSWITCH`:** Se usa si las claves están dispersas. Realiza una búsqueda binaria garantizando un tiempo de acceso de $O(\log n)$.
+
+---
+
+## Bucles y Estados Interactivos
+
+Antes de saltar al laboratorio, necesitamos una herramienta más: el bucle `while`. 
+
+Dado que en Kotlin el clásico bucle `for` se reserva casi exclusivamente para recorrer colecciones o listas (que veremos en la Lección 7), cuando necesitamos mantener una aplicación viva de forma interactiva (como el *Game Loop* de un videojuego o el menú de nuestra CLI), usamos un bucle `while`.
+
+```kotlin
+// Mantiene la aplicación ejecutándose en un ciclo infinito 
+// hasta que explícitamente usemos la palabra reservada 'break'.
+while (true) {
+    // 1. Mostrar menú
+    // 2. Leer input
+    // 3. Evaluar input con 'when'
+}
+```
+
+---
+
+## El Superpoder: Exhaustividad (Certeza del Compilador)
+
+La verdadera magia de Kotlin no es solo que `when` sea bonito, sino su concepto de **Control de Flujo Exhaustivo**.
+
+Cuando utilizas `when` como una expresión (es decir, devolviendo un valor) o cuando evalúas una "jerarquía cerrada", el compilador te obliga matemáticamente a manejar **TODAS las posibilidades**. Si se te olvida un caso, el código simplemente no compilará. 
+
+Para sacarle jugo a este superpoder, Kotlin nos ofrece las **Jerarquías Cerradas**:
+
+### 1. Clases Enumeradas (`enum class`)
+Se utilizan para representar un conjunto **fijo y constante** de valores. Piensa en ellos como un interruptor de opciones absolutas (ej. Días de la semana, Estados de un pedido, Opciones de menú).
+
+```kotlin
+// Definimos un conjunto estricto de opciones válidas para nuestra aplicación.
+enum class MenuOption {
+    CHAT,
+    SETTINGS,
+    EXIT,
+    UNKNOWN
+}
+```
+
+Si le pasamos un `MenuOption` a un `when`, Kotlin nos exigirá escribir una rama para `CHAT`, `SETTINGS`, `EXIT` y `UNKNOWN`. Si el día de mañana agregas la opción `HELP` al enum, ¡el compilador romperá tu código en todos los `when` donde olvidaste manejar `HELP`! Esto hace que refactorizar sea increíblemente seguro.
+
+### 2. Clases Selladas (`sealed class` y `sealed interface`)
+Son como los Enums, pero con esteroides. Mientras que un `enum` solo tiene valores constantes (como botones estáticos), una clase sellada permite que cada opción tenga **su propio estado y datos**.
+Por ejemplo, un estado de red podría ser `Error(val exception: Exception)` o `Success(val data: String)`. Profundizaremos en ellas en la [Lección 10: Companion Objects and Object Declarations](./10-companion-objects-and-object-declarations).
+
+---
+
+## Laboratorio Incremental: Menú Principal y `while`
+
+Hoy llevaremos nuestro Chat CLI al siguiente nivel. Envolveremos el saludo de la Lección 2 dentro de un bucle infinito y presentaremos un menú interactivo. Parsearemos la entrada de texto cruda hacia nuestro propio `enum class` para garantizar un control de flujo exhaustivo.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla)" 
+  description="Partiremos exactamente desde donde dejamos la lección anterior." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L3-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto" 
+  description="El código completo con el enum class, el bucle while y el when exhaustivo." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L3-done" 
+/>
+
+### Instrucciones Paso a Paso
+
+*Nota: A partir de esta lección, debes escribir todo tu código fuente, variables y enums en **Inglés**.*
+
+#### Paso 1: Definir la jerarquía de opciones
+Hasta arriba de tu archivo `Main.kt` (fuera de la función `main`), declara un enum para restringir matemáticamente las opciones de nuestro menú.
+
+```kotlin
+// Definimos un Enum para representar las opciones de nuestro menú de forma estricta.
+enum class MenuOption {
+    CHAT,
+    SETTINGS,
+    EXIT,
+    UNKNOWN
+}
+```
+
+<Aside type="note" title="💡 ¿Por qué un enum class y no una sealed class aquí?">
+En esta etapa temprana de la aplicación, nuestras opciones de menú son constantes directas sin estado interno (`CHAT`, `SETTINGS`, `EXIT`, `UNKNOWN`). Un `enum class` es la forma más ligera y concisa de modelar este conjunto cerrado de comandos.
+
+Más adelante en el curso (**Lección 10: Companion Objects and Object Declarations**), cuando cada opción del menú requiera parámetros específicos de navegación o datos dinámicos (por ejemplo, transportar el ID de un canal o configuraciones de red), evolucionaremos esta arquitectura hacia una `sealed class` con `data objects` y `data classes`.
+</Aside>
+
+
+#### Paso 2: Crear el bucle infinito
+Justo debajo de donde imprimimos `Hello, $username!`, abre un bloque `while (true)` e imprime las opciones del menú.
+
+```kotlin
+    // Bucle principal (Main Loop) que mantiene viva la aplicación interactiva
+    while (true) {
+        println("\n--- Main Menu ---")
+        println("1. Chat")
+        println("2. Settings")
+        println("3. Exit")
+        print("Choose an option: ")
+
+        val rawOption: String? = readlnOrNull()
+        
+        // Continuaremos en el Paso 3 aquí adentro...
+    }
+```
+
+#### Paso 3: Parseo seguro usando `when` como expresión
+Adentro del `while`, debajo del `readlnOrNull()`, usaremos un `when` para convertir la cadena de texto cruda `"1"` en nuestra constante segura `MenuOption.CHAT`. Fíjate cómo asignamos el resultado directamente a `val selectedOption`.
+
+```kotlin
+        // Usamos 'when' como expresión para mapear el input crudo (String) 
+        // a nuestro Enum estructurado, devolviendo el valor directamente.
+        val selectedOption: MenuOption = when (rawOption) {
+            "1" -> MenuOption.CHAT
+            "2" -> MenuOption.SETTINGS
+            "3" -> MenuOption.EXIT
+            else -> MenuOption.UNKNOWN
+        }
+```
+
+#### Paso 4: Ejecución Exhaustiva
+Ahora usaremos nuestro Enum estructurado para ejecutar la lógica de la aplicación. Escribe este segundo `when` debajo del anterior:
+
+```kotlin
+        // Usamos 'when' nuevamente, pero esta vez con nuestro Enum. Al ser una jerarquía 
+        // cerrada (el compilador conoce todas las opciones), nos obliga a manejar 
+        // exhaustivamente todos los casos posibles sin necesidad de un 'else'.
+        when (selectedOption) {
+            MenuOption.CHAT -> {
+                println(">>> Entering chat mode... (Work in progress)")
+            }
+            MenuOption.SETTINGS -> {
+                println(">>> Entering settings... (Work in progress)")
+            }
+            MenuOption.EXIT -> {
+                println("Goodbye, $username! See you soon.")
+                break // Rompe el bucle while(true) y finaliza el programa
+            }
+            MenuOption.UNKNOWN -> {
+                println("Invalid option. Please try again.")
+            }
+        }
+```
+
+#### Paso 5: ¡Ejecuta y prueba tu menú en tu entorno preferido!
+
+Puedes probar tu menú interactivo según la herramienta que estés utilizando:
+
+- **En Android Studio / IntelliJ IDEA:** Presiona el botón verde de **Play** (▶️) junto a `fun main()` y escribe en la pestaña inferior **Run**.
+- **En Google Antigravity / Visual Studio Code:** Presiona el atajo **`Cmd + Shift + B`** (macOS) o **`Ctrl + Shift + B`** (Windows/Linux) para abrir la terminal interactiva integrada.
+- **En Terminal de comandos:** Ejecuta:
+  ```bash
+  ./gradlew run --console=plain -q
+  ```
+  *(En Windows: `gradlew.bat run --console=plain -q`)*
+
+**Casos de prueba a verificar:**
+1. Después de ingresar tu nombre, el menú debe desplegarse con las 3 opciones.
+2. Escribe `1` y presiona Enter: debe imprimir el mensaje de chat y volver a presentarte el menú (gracias a la persistencia del bucle `while`).
+3. Escribe una opción inexistente (por ejemplo `"9"` o `"hola"`): el caso exhaustivo `MenuOption.UNKNOWN` atrapará el error e imprimirá `"Invalid option. Please try again."`.
+4. Escribe `3`: el comando `break` romperá el bucle `while (true)` y finalizará el programa despidiéndose con tu nombre.
+
+<Aside type="caution" title="⚠️ ¿Qué pasa si readlnOrNull() recibe EOF en un bucle infinito?">
+Si ejecutas tu programa en una terminal donde `standardInput` no esté conectado o si el usuario envía una señal de fin de flujo (**EOF**, como `Ctrl+D`), `readlnOrNull()` retornará `null` de forma instantánea.
+
+Como nuestro `when (rawOption)` mapea `null` a `MenuOption.UNKNOWN`, el bucle `while (true)` comenzaría a iterar a la velocidad de tu CPU imprimiendo `"Invalid option"` indefinidamente.
+
+**Patrón defensivo:** En aplicaciones CLI profesionales, si `readlnOrNull()` es `null`, rompemos el ciclo inmediatamente:
+```kotlin
+val rawOption: String? = readlnOrNull() ?: break // Cierra limpiamente si se desconecta la entrada
+```
+</Aside>
+
+¡Felicidades! Has construido la columna vertebral interactiva de nuestra aplicación usando los principios de control de flujo exhaustivo.
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Control Flow (when)" 
+  description="Explora las capacidades avanzadas de la sentencia when en Kotlin." 
+  href="https://kotlinlang.org/docs/control-flow.html#when-expression" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Enum Classes" 
+  description="Aprende a agregar propiedades y funciones dentro de clases enumeradas." 
+  href="https://kotlinlang.org/docs/enum-classes.html" 
+/>
+
+---
+
+## Feedback y Dudas de la Lección
+
+¿Tienes alguna duda sobre `when` exhaustivo, el bytecode de la JVM o el bucle del menú?
+
+<LinkCard
+  title="💬 Déjanos tu Feedback o Pregunta"
+  description="Envía tus preguntas para resolverlas o sugerir mejoras en la explicación."
+  href="https://tally.so/r/A7geNk?lesson=L3"
+/>
+
