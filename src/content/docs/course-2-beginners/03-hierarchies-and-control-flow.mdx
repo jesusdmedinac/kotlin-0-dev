@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-import { Aside, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## El Infierno del `switch` de Java
 
@@ -46,6 +46,30 @@ val selectedOption: MenuOption = when (rawOption) {
 2. **Múltiples Ramas o Enums:** Si tu `when` tiene muchos casos, o si estás evaluando un `enum class`, el compilador activa el modo turbo y genera instrucciones de Java Bytecode optimizadas:
    - **`TABLESWITCH`:** Se usa si las claves son contiguas. Ofrece un acceso en memoria de tiempo constante ($O(1)$).
    - **`LOOKUPSWITCH`:** Se usa si las claves están dispersas. Realiza una búsqueda binaria garantizando un tiempo de acceso de $O(\log n)$.
+
+### 🧠 Puente Conceptual: Control de Flujo y Pattern Matching en tu Lenguaje
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * En JS/TS clásico, la sentencia `switch` sufre del peligroso *fall-through* si olvidas `break;`, y no es una expresión (no devuelve un valor que puedas asignar directamente a una variable).
+    * Para simular pattern matching en TypeScript, se utilizan uniones discriminadas (*Discriminated Unions* como `type Action = { type: 'chat' } | { type: 'exit' }`) evaluadas en un `switch(action.type)` o librerías externas como `ts-pattern`.
+    * En Kotlin, `when` soporta expresiones nativas, descarta el `break` por diseño y realiza **Smart Casts** automáticos dentro de cada rama sin necesidad de librerías externas.
+  </TabItem>
+  <TabItem label="Python">
+    * A partir de Python 3.10, se introdujo el *Structural Pattern Matching* con la sentencia **`match / case`**.
+    * La sintaxis de `when` en Kotlin inspiró fuertemente esta evolución: en Python `case "1":` equivale a `"1" ->`, y el comodín `case _:` equivale a `else ->`.
+    * Sin embargo, en Python `match` sigue siendo una declaración (*statement*) que no devuelve un valor asignable directamente, mientras que en Kotlin `val opcion = when (...)` es un patrón idiomático fundamental.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * A partir de C# 8.0, C# introdujo las **`switch expressions`** (`var result = raw switch { "1" => MenuOption.Chat, _ => MenuOption.Unknown };`).
+    * El `when` de Kotlin y las `switch expressions` de C# comparten la misma filosofía: ambos son expresiones de primera clase, descartan la necesidad de `break;`, y exigen exhaustividad cuando se evalúan sobre jerarquías cerradas o enums.
+  </TabItem>
+  <TabItem label="Java">
+    * Java tradicional solo contaba con la sentencia `switch` imperativa con fall-through obligatorio.
+    * A partir de Java 14/17+, Java incorporó las **Switch Expressions** con sintaxis de flecha (`case "1" -> MenuOption.CHAT;`), y en Java 21 el pattern matching formal para tipos y registros.
+    * Kotlin diseñó `when` como expresión desde su versión 1.0 (2016), convirtiéndolo en un pilar idiomático del lenguaje desde sus orígenes.
+  </TabItem>
+</Tabs>
 
 ---
 
