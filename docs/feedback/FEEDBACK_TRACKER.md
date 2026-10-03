@@ -108,13 +108,13 @@ This document maintains the end-to-end traceability between live classroom obser
 | Issue # | Title | Type | Target Scope | Status |
 |---|---|---|---|---|
 | [#13](https://github.com/jesusdmedinac/kotlin-0-dev/issues/13) | `feat(l1): add lightweight setup guide (VS Code & macOS CLI tools)` | Feature / Docs | `src/content/docs/course-2-beginners/01-environment-and-hello-world.mdx` | 🟡 Open |
-| [#14](https://github.com/jesusdmedinac/kotlin-0-dev/issues/14) | `feat(l1): add Gradle project anatomy and dependency analogies` | Feature / Pedagogy | `src/content/docs/course-2-beginners/01-environment-and-hello-world.mdx` | 🟡 Open |
+| [#14](https://github.com/jesusdmedinac/kotlin-0-dev/issues/14) | `feat(l1): add Gradle project anatomy and dependency analogies` | Feature / Pedagogy | `src/content/docs/course-2-beginners/01-environment-and-hello-world.mdx` | 🟢 Resolved in PR |
 | [#15](https://github.com/jesusdmedinac/kotlin-0-dev/issues/15) | `feat(l1): enrich under-the-hood section with bytecode decompilation, MainKt, and annotations vs decorators` | Feature / Pedagogy | `src/content/docs/course-2-beginners/01-environment-and-hello-world.mdx` | 🟡 Open |
 | [#16](https://github.com/jesusdmedinac/kotlin-0-dev/issues/16) | `docs(l1-l2): add git tag navigation guide and bridge recap to lesson 2` | Documentation | `01-environment-and-hello-world.mdx` & `02-variables-and-null-safety.mdx` | 🟡 Open |
 | [#17](https://github.com/jesusdmedinac/kotlin-0-dev/issues/17) | `feat(l2): configure interactive terminal input in Gradle (standardInput = System.in)` | Feature / Lab | `src/content/docs/course-2-beginners/02-variables-and-null-safety.mdx` | 🟡 Open |
-| [#18](https://github.com/jesusdmedinac/kotlin-0-dev/issues/18) | `feat(l2): expand null safety origins, reference vs object immutability, and .NET analogies` | Feature / Pedagogy | `src/content/docs/course-2-beginners/02-variables-and-null-safety.mdx` | 🟡 Open |
+| [#18](https://github.com/jesusdmedinac/kotlin-0-dev/issues/18) | `feat(l2): expand null safety origins, reference vs object immutability, and .NET analogies` | Feature / Pedagogy | `src/content/docs/course-2-beginners/02-variables-and-null-safety.mdx` | 🟢 Resolved in PR |
 | [#19](https://github.com/jesusdmedinac/kotlin-0-dev/issues/19) | `docs(l2): document KotlinNullPointerException historical deprecation in Kotlin 1.4` | Documentation | `src/content/docs/course-2-beginners/02-variables-and-null-safety.mdx` | 🟡 Open |
-| [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) | `feat(curriculum): integrate .NET and multi-ecosystem mental models across Course 2 syllabus` | Feature / Curriculum | `docs/features/course-2-beginners/dotnet_ecosystem_analogies.feature` | 🟡 Open |
+| [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) | `feat(curriculum): integrate .NET and multi-ecosystem mental models across Course 2 syllabus` | Feature / Curriculum | `docs/features/course-2-beginners/dotnet_ecosystem_analogies.feature` | 🟢 Resolved in PR |
 
 ---
 

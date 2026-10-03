@@ -4,6 +4,7 @@ Feature: Course 2 - Kotlin for Beginners
   In order to build an interactive AI Chat from the terminal incrementally
 
   # MODULE 1: Basics and Advanced Control Flow
+  # Cognitive Bridges (TS, Python, C#, Java): Tooling & Manifests (npm, pip, nuget, maven vs gradle), Null Safety (strictNullChecks, Optional, Nullable references vs T?), Control flow (switch, match/case vs when).
   Scenario: Lesson 1 - Agnostic Environment and Hello World
     Given that the student needs to understand the JVM and Kotlin compilation
     When they study the theoretical basis of platform-agnostic Kotlin
@@ -20,6 +21,7 @@ Feature: Course 2 - Kotlin for Beginners
     Then they apply this by building the interactive Main Menu loop (1. Chat, 2. Settings, 3. Exit)
 
   # MODULE 2: Functional Thinking (FP)
+  # Cognitive Bridges (TS, Python, C#, Java): Extension functions (C# this string, TS prototype, Python monkey-patch), Higher-order functions & lambdas (Func/Action, arrow functions), Lazy collections (Sequence vs LINQ Select/Where, Python yield, Java Streams).
   Scenario: Lesson 4 - Anatomy of Functions
     Given that Java lacks named arguments and default values due to bytecode erasure
     When the student learns how Kotlin handles these functional features under the hood
@@ -46,6 +48,7 @@ Feature: Course 2 - Kotlin for Beginners
     Then they use scope functions to cleanly instantiate and configure the User Profile state
 
   # MODULE 3: Advanced OOP and Typing (The Clash with Java)
+  # Cognitive Bridges (TS, Python, C#, Java): Data classes & sealed hierarchies (C# records, TS discriminated unions, Python @dataclass/Pydantic, Java records), Generics variance (Kotlin in/out vs C# in/out and Java wildcards).
   Scenario: Lesson 9 - Classes, Inheritance, and Visibility
     Given that Kotlin defaults to `public final` to favor composition over inheritance
     When the student contrasts Kotlin's object model with Java primitives
@@ -67,6 +70,7 @@ Feature: Course 2 - Kotlin for Beginners
     Then they build a custom delegate that automatically saves the Chat History to a `.txt` file upon modification
 
   # MODULE 4: Asynchrony and Final Project
+  # Cognitive Bridges (TS, Python, C#, Java): Structured concurrency & coroutines (Kotlin suspend vs JS Promises, Python asyncio, C# Task TAP, Java Virtual Threads Loom).
   Scenario: Lesson 13 - Coroutines vs Traditional Asynchrony
     Given that blocking the main thread degrades user experience
     When the student theoretically compares threads, callbacks (RxJava), and Kotlin suspension

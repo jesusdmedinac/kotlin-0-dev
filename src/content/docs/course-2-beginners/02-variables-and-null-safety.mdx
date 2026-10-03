@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-import { Aside, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
 ## El Error del Billón de Dólares
 
@@ -46,12 +46,52 @@ username = "guest"
 ```
 
 <Aside type="caution">
-**¿Es `val` verdaderamente Inmutable?** No. 
+**¿Es `val` verdaderamente Inmutable?** No necesariamente.
 
-En la teoría pura de Kotlin, `val` significa *Solo Lectura*. Esto significa dos cosas:
-1. La caja en sí no se puede reasignar, pero si dentro de la caja guardaste un objeto mutable (como una lista), puedes seguir modificando sus elementos internos.
-2. Una propiedad `val` puede tener un **Custom Getter**. Bajo el capó (en el bytecode de Java), una propiedad `val` se compila como una función (un método `get()`). Esto significa que puedes programarla para que devuelva un valor distinto cada vez que la llamas (por ejemplo, `val horaActual get() = ...`), por lo que no siempre es estrictamente constante.
+En la teoría de Kotlin, `val` garantiza **inmutabilidad de referencia**, no inmutabilidad del objeto contenido:
+1. **La referencia está sellada:** No puedes hacer que la variable apunte a otro espacio de memoria.
+2. **Pero el objeto puede mutar:** Si dentro de un `val` guardas una estructura mutable (como `MutableList`), puedes alterar sus elementos libremente.
+
+```kotlin
+// 'nombres' es un val: no podemos reasignar la variable a otra lista.
+val nombres = mutableListOf("Alice", "Bob")
+
+// ❌ ERROR DE COMPILACIÓN: Val cannot be reassigned
+// nombres = mutableListOf("Charlie")
+
+// ✅ VÁLIDO: El objeto interno sí muta
+nombres.add("Charlie") 
+println(nombres) // [Alice, Bob, Charlie]
+```
+
+Para tener inmutabilidad total tanto en la referencia como en los datos, usamos colecciones de solo lectura como `listOf("Alice", "Bob")`.
 </Aside>
+
+### 🧠 Puente Conceptual: Variables e Inmutabilidad en tu Lenguaje
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * `val` en Kotlin se asemeja a **`const`** en JavaScript/TypeScript: la referencia no puede ser reasignada.
+    * Sin embargo, en TypeScript `const arr = ["A", "B"]` permite `arr.push("C")` sin ninguna restricción. En Kotlin diferenciamos explícitamente entre la interfaz inmutable de solo lectura (`List`, creada con `listOf`) y la interfaz mutable (`MutableList`, creada con `mutableListOf`).
+    * `var` equivale directamente a **`let`** en TS.
+  </TabItem>
+  <TabItem label="Python">
+    * En Python no existen constantes a nivel de compilador; solo existe la convención de escribir nombres en mayúsculas (`MAX_USERS = 100`), pero técnicamente pueden ser reasignadas.
+    * Una `List` de solo lectura en Kotlin equivale conceptualmente a una **`tuple`** en Python (no permite agregar elementos).
+    * Una `MutableList` de Kotlin equivale a una **`list`** estándar de Python (`lista.append()`).
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * En C#, `val` equivale a una variable local no reasignable o a campos marcados con **`readonly`**.
+    * Una `List<T>` de Kotlin equivale a la interfaz **`IReadOnlyList<T>`** de C#.
+    * Una `MutableList<T>` de Kotlin equivale a la clase concreta **`List<T>`** de C#.
+    * `var` en C# es solo inferencia de tipo; en Kotlin `var` significa explícitamente que la variable es mutable.
+  </TabItem>
+  <TabItem label="Java">
+    * `val` equivale a declarar una variable local con el modificador **`final`** (`final String username = "...";`).
+    * `listOf()` de Kotlin equivale a **`List.of()`** (introducido en Java 9) o `Collections.unmodifiableList()`.
+    * `mutableListOf()` equivale al clásico `new ArrayList<>()`.
+  </TabItem>
+</Tabs>
 
 ---
 
@@ -115,6 +155,31 @@ El botón de autodestrucción. Le dice a Kotlin: *"Confía en mí, estoy 100% se
 // esta línea lanzará un NullPointerException y matará la aplicación.
 val dangerLength = nullableName!!.length
 ```
+
+### 🧠 Puente Conceptual: Null Safety en tu Lenguaje
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * En TypeScript existe la regla `strictNullChecks` en `tsconfig.json`. Si está activada, `string | null` se comporta prácticamente igual a `String?`.
+    * El Safe Call (`?.`) y el Elvis (`?:`) de Kotlin son equivalentes al **Optional Chaining (`?.`)** y al **Nullish Coalescing (`??`)** de JavaScript moderno.
+    * Los Smart Casts de Kotlin equivalen a los **Type Guards** de TypeScript (`if (typeof x === "string")`).
+    * El operador `!!` de Kotlin es el gemelo exacto del operador `!` (Non-null assertion) de TypeScript (`obj!.prop`).
+  </TabItem>
+  <TabItem label="Python">
+    * En Python tradicional, cualquier variable puede contener `None` en cualquier momento sin advertencias en tiempo de ejecución.
+    * Para modelar seguridad contra nulos, en Python moderno se usan anotaciones de tipo con `Optional[str]` o `str | None` de la librería `typing`.
+    * La diferencia clave es que en Python la verificación depende de linters externos opcionales (`mypy` o PyRight), mientras que en Kotlin **el propio compilador bloquea la compilación** si no manejas los casos nulos.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * A partir de C# 8.0, Microsoft introdujo los **Nullable Reference Types** (`string?`). La sintaxis y la filosofía de diseño son idénticas a las de Kotlin.
+    * El operador `!!` de Kotlin cumple exactamente el mismo rol que el operador de supresión de advertencias `!` de C# (*null-forgiving operator*).
+    * El operador Elvis `?:` de Kotlin equivale al operador null-coalescing **`??`** de C#.
+  </TabItem>
+  <TabItem label="Java">
+    * En Java tradicional, cualquier objeto puede ser `null` en cualquier momento (nulabilidad ambiental no controlada por el compilador).
+    * Aunque Java 8 introdujo `Optional<T>`, este requiere instanciar un objeto envoltorio en memoria (heap allocation). En Kotlin, `String?` es una verificación pura en tiempo de compilación: **cero sobrecarga de memoria** en la JVM.
+  </TabItem>
+</Tabs>
 
 ---
 
@@ -201,6 +266,15 @@ if (input != null && input.isNotBlank()) {
     username = "Invitado" // Nuestro valor por defecto
 }
 ```
+
+<Aside type="tip" title="Tip Idiomático: isNullOrBlank()">
+En Kotlin no necesitas hacer validaciones manuales como `.trim().isEmpty()` de otros lenguajes. Kotlin incluye la función de extensión **`input.isNullOrBlank()`**, que valida tanto la nulabilidad como los espacios en blanco en una sola expresión:
+
+```kotlin
+// Versión ultra concisa con expresión 'if' como valor:
+val username = if (!input.isNullOrBlank()) input else "Invitado"
+```
+</Aside>
 
 #### Paso 4: Saludar al usuario
 Finalmente, agreguemos un saludo personalizado utilizando **String Templates** (inyectando la variable con `$`).
