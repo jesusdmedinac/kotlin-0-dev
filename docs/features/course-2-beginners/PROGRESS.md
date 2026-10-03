@@ -1,9 +1,9 @@
 # Course 2: Kotlin for Beginners - Progress
 
-[← Back to System Progress](../../../PROGRESS.md)
+[← Back to System Progress](../../../PROGRESS.md) | [Pedagogical Feedback Tracker](../../feedback/FEEDBACK_TRACKER.md)
 
 ## Infrastructure
-- [ ] Setup Course 2 Starlight routing & base folders
+- [x] Setup Course 2 Starlight routing & base folders
 
 ## Course Content
 - [x] L1: Agnostic Environment and Hello World
@@ -22,3 +22,22 @@
 - [ ] L14: Suspension and Scopes
 - [ ] L15: Contexts and Dispatchers
 - [ ] L16: Final Project (AI Chat)
+
+## Pedagogical Enhancements & Live Classroom Feedback
+
+### Lesson 1 Enhancements ([`l1_pedagogical_improvements.feature`](./l1_pedagogical_improvements.feature))
+- [ ] [#13](https://github.com/jesusdmedinac/kotlin-0-dev/issues/13) Scenario: Lightweight development environment setup for constrained hardware
+- [ ] [#14](https://github.com/jesusdmedinac/kotlin-0-dev/issues/14) Scenario: Gradle project anatomy and mental model analogies
+- [ ] [#15](https://github.com/jesusdmedinac/kotlin-0-dev/issues/15) Scenario: Under-the-hood JVM mechanics, MainKt, and annotations vs decorators
+- [ ] [#16](https://github.com/jesusdmedinac/kotlin-0-dev/issues/16) Scenario: Safe Git tag navigation and bridge recap to Lesson 2
+
+### Lesson 2 Enhancements ([`l2_pedagogical_improvements.feature`](./l2_pedagogical_improvements.feature))
+- [ ] [#17](https://github.com/jesusdmedinac/kotlin-0-dev/issues/17) Scenario: Interactive CLI input stream configuration in Gradle
+- [ ] [#18](https://github.com/jesusdmedinac/kotlin-0-dev/issues/18) Scenario: Tony Hoare null safety history, reference immutability, and .NET parallels
+- [ ] [#19](https://github.com/jesusdmedinac/kotlin-0-dev/issues/19) Scenario: Historical deprecation of KotlinNullPointerException in Kotlin 1.4
+
+### Curriculum-Wide Enhancements ([`dotnet_ecosystem_analogies.feature`](./dotnet_ecosystem_analogies.feature))
+- [ ] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with foundational runtime and tooling analogies
+- [ ] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with functional programming and collections analogies
+- [ ] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with OOP, properties, and generics variance analogies
+- [ ] [#20](https://github.com/jesusdmedinac/kotlin-0-dev/issues/20) Scenario: Syllabus update with coroutines vs async/await concurrency models
