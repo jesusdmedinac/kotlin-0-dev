@@ -1,0 +1,196 @@
+---
+title: "Kotlin for Beginners"
+description: "Master modern Kotlin from scratch in a platform-agnostic way and build an AI Chat CLI assistant step-by-step."
+sidebar:
+  order: 0
+---
+
+import { Aside, Card, CardGrid, LinkCard, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
+
+# Concise. Safe. Expressive. Multiplatform.
+
+> *"A modern programming language that makes developers happier, more productive, and safer."* — Inspired by JetBrains philosophy.
+
+Welcome to the definitive **Kotlin for Beginners** course. Whether you come from Java, Python, or JavaScript, or you're seeking to master the leading language of modern development across the JVM, Android, backend, and multiplatform, this course is engineered to guide you from foundational mechanics to advanced architecture patterns.
+
+---
+
+## Why Choose Kotlin?
+
+Kotlin was designed by engineers at JetBrains to solve everyday developer friction: eradicating boilerplate code, eliminating runtime null pointer exceptions, and ensuring seamless interoperability with the Java ecosystem.
+
+<CardGrid stagger>
+  <Card title="⚡ Concise and Productive" icon="seti:kotlin">
+    Write up to **40% less code**. Say goodbye to ceremonial getters, setters, and verbose constructors with *data classes*, type inference, and extension functions.
+  </Card>
+  <Card title="🛡️ Safe by Default (Null Safety)" icon="shield">
+    Kotlin's type system cleanly separates nullable and non-nullable references, **eliminating `NullPointerException` at compile time**.
+  </Card>
+  <Card title="🔄 100% Interoperable with Java" icon="puzzle">
+    Call any Java library or framework from Kotlin and vice versa without wrappers or performance penalties.
+  </Card>
+  <Card title="🚀 Concurrency with Coroutines" icon="rocket">
+    Handle asynchronous operations and non-blocking programming sequentially, readably, and with ultra-efficient memory usage.
+  </Card>
+</CardGrid>
+
+---
+
+## Kotlin's Elegance in Code
+
+Notice how Kotlin blends declarative simplicity with safety in just a few lines:
+
+```kotlin
+// 1. Immutable modeling with default arguments in a single line
+data class Message(val author: String, val text: String, val isAi: Boolean = false)
+
+fun main() {
+    // 2. Read-only collections with smart type inference
+    val history = listOf(
+        Message(author = "Student", text = "Why is Kotlin so popular?"),
+        Message(author = "AI Assistant", text = "Because it is safe, expressive, and fun!", isAi = true)
+    )
+
+    // 3. Fluid functional processing and Template Strings
+    history
+        .filter { it.isAi }
+        .forEach { println("🤖 [${it.author}]: ${it.text}") }
+}
+```
+
+---
+
+## Our Methodology: Incremental Lab
+
+<Aside type="tip" title="Learning by Doing: Your End-to-End Project">
+Unlike traditional courses that teach syntax through disconnected snippets, in this course you incrementally build a real **AI Chat CLI** (a terminal-based artificial intelligence assistant). Each lesson explores a deep theoretical concept and immediately applies it to unlock a new feature in your application.
+</Aside>
+
+---
+
+## Learning Path & Syllabus
+
+The curriculum is structured into **4 learning modules** comprising **16 practical lessons**:
+
+### Module 1: Basics and Advanced Control Flow
+Understand how code executes on the JVM and master your application flow.
+
+1. [L1: Agnostic Environment and Hello World](/en/course-2-beginners/01-environment-and-hello-world) <Badge text="Available" variant="success" />  
+   *The JVM, Bytecode, `kotlinc` compiler, Gradle, and initial welcome banner.*
+2. [L2: Variables, Types, and Null Safety](/en/course-2-beginners/02-variables-and-null-safety) <Badge text="Available" variant="success" />  
+   *`val`/`var` mutability, the billion-dollar mistake, Platform Types, and safe input validation.*
+3. [L3: Hierarchies and Exhaustive Control Flow](/en/course-2-beginners/03-hierarchies-and-control-flow) <Badge text="WIP" variant="caution" />  
+   *`if`/`when` expressions, `enum`, `sealed classes/interfaces`, and the main menu loop.*
+4. [L4: Anatomy of Functions](/en/course-2-beginners/04-anatomy-of-functions) <Badge text="WIP" variant="caution" />  
+   *Named arguments, default parameters, single-expression functions, and modular refactoring.*
+
+### Module 2: Functional Thinking (FP)
+Learn declarative paradigms and build fluent interfaces.
+
+5. [L5: Extension and Infix Functions](/en/course-2-beginners/05-extension-and-infix-functions) <Badge text="WIP" variant="caution" />  
+   *Extension functions, extension properties, `infix` notation, and terminal ANSI styling.*
+6. [L6: Higher-Order Functions and Lambdas](/en/course-2-beginners/06-higher-order-functions) <Badge text="WIP" variant="caution" />  
+   *Function types, trailing lambdas, `inline functions`, and message sanitization pipelines.*
+7. [L7: Collections and Sequences (Lazy vs Eager)](/en/course-2-beginners/07-collections-and-sequences) <Badge text="WIP" variant="caution" />  
+   *List/Set/Map, functional transforms (`map`, `filter`), lazy evaluation with `Sequence`, and history.*
+8. [L8: Scope Functions](/en/course-2-beginners/08-scope-functions) <Badge text="WIP" variant="caution" />  
+   *`let`, `run`, `with`, `apply`, and `also`: the Swiss Army knife to instantiate and mutate user state.*
+
+### Module 3: Advanced OOP and Typing (The Clash with Java)
+Architect robust, decoupled, and strongly typed systems.
+
+9. [L9: Classes, Inheritance, and Visibility](/en/course-2-beginners/09-classes-and-visibility) <Badge text="WIP" variant="caution" />  
+   *Constructors, visibility modifiers, `open` vs default `final` classes, and `ChatEngine` encapsulation.*
+10. [L10: Companion Objects and Object Declarations](/en/course-2-beginners/10-companion-and-object-declarations) <Badge text="WIP" variant="caution" />  
+    *Thread-safe singletons, `companion object`, `data object`, and event modeling.*
+11. [L11: Advanced Generics and Variance](/en/course-2-beginners/11-advanced-generics) <Badge text="WIP" variant="caution" />  
+    *Declaration-site variance (`in`/`out`), reified type parameters, and `Result<T>` wrapper.*
+12. [L12: Delegation and Delegated Properties](/en/course-2-beginners/12-delegation) <Badge text="WIP" variant="caution" />  
+    *Native delegation with `by`, `lazy`, `observable`, and automated disk persistence.*
+
+### Module 4: Asynchrony and Final Project
+Master modern concurrency and distribute your application.
+
+13. [L13: Coroutines vs Traditional Asynchrony](/en/course-2-beginners/13-coroutines-vs-asynchrony) <Badge text="WIP" variant="caution" />  
+    *JVM threads vs lightweight Coroutines, non-blocking suspension, and I/O benchmarks.*
+14. [L14: Suspension and Concurrency Scopes](/en/course-2-beginners/14-suspension-and-scopes) <Badge text="WIP" variant="caution" />  
+    *`suspend` functions, `CoroutineScope`, `launch`/`async`, and concurrent "AI typing..." animation.*
+15. [L15: Contexts and Dispatchers](/en/course-2-beginners/15-contexts-and-dispatchers) <Badge text="WIP" variant="caution" />  
+    *`Dispatchers.IO` vs `Default`, `withContext`, and safe concurrent API integrations.*
+16. [L16: Final Project: Packaging and Distribution](/en/course-2-beginners/16-final-project-ai-chat) <Badge text="WIP" variant="caution" />  
+    *Full architectural review, JVM Shutdown Hooks, Gradle Fat JAR, and cross-platform binary distribution.*
+
+---
+
+## Live Classes and Format
+
+Prefer learning live with an instructor with instant real-time feedback? We offer live online cohort sessions designed to guide you step-by-step:
+
+<CardGrid stagger>
+  <Card title="🗓️ Kickoff and Primary Schedule" icon="seti:clock">
+    **Kickoff: Saturday, September 12th**. Morning session: **9:00 AM to 11:00 AM CST** (2 weekly hours of live intensive pair programming).
+  </Card>
+  <Card title="💻 100% Live Online" icon="laptop">
+    Interactive live classes with immediate feedback, real-time code debugging, and hands-on drills.
+  </Card>
+  <Card title="💳 Flexible Pay-Per-Session" icon="seti:markdown">
+    **$600 MXN (~$30 USD) per class**. Pay session-by-session without lock-in so you advance at your own pace.
+  </Card>
+  <Card title="🛠️ Guided Hands-On Lab" icon="puzzle">
+    Step-by-step development of the **AI Chat CLI** with code reviews and professional engineering standards.
+  </Card>
+</CardGrid>
+
+<Aside type="note" title="Looking for another time? An afternoon cohort is under consideration">
+Currently the primary cohort starts on **Saturday, September 12 from 9:00 AM to 11:00 AM CST**, and we are evaluating opening an **afternoon cohort on Saturdays from 4:00 PM to 6:00 PM CST**. You can select your preferred time in the registration form.
+</Aside>
+
+---
+
+## Certificate of Completion and Graduation Criteria
+
+Upon completing the curriculum, students can earn an **Official Certificate of Completion** backed by the **From0 (Desde0)** ecosystem. To maintain high engineering standards, certification requires:
+
+<CardGrid stagger>
+  <Card title="📜 Competency Certification" icon="star">
+    No certificates for mere attendance. The certificate validates that you master Kotlin syntax, concurrency, and architecture on the JVM.
+  </Card>
+  <Card title="💻 100% Lab Completed" icon="seti:kotlin">
+    You must build and verify all incremental stages of the **AI Chat CLI** project in your personal GitHub repository.
+  </Card>
+  <Card title="🎙️ Live Technical Defense" icon="laptop">
+    A 1-on-1 live code review session where you explain the architecture, design patterns, and engineering tradeoffs of your code.
+  </Card>
+  <Card title="💳 Full Program Coverage" icon="seti:markdown">
+    Completion of the full curriculum investment (**16 lessons × $600 MXN = $9,600 MXN**), covered per session or in a single payment.
+  </Card>
+</CardGrid>
+
+<Aside type="tip" title="Transparency in Certification">
+- **No extra certification fee:** If you have completed the 16 sessions, the live defense session and certificate issuance have **no additional cost**.
+- **Accelerated Certification:** If you complete the lab at an accelerated pace, you may request an early live defense once all repository requirements are met.
+</Aside>
+
+---
+
+## Join the Community and Reserve Your Seat
+
+Whether you learn self-paced or join the live cohort, register to reserve your place:
+
+<CardGrid>
+  <LinkCard
+    title="🚀 Start Lesson 1 (Self-Paced)"
+    description="Set up your Gradle environment, inspect JVM Bytecode, and launch your first CLI project."
+    href="/en/course-2-beginners/01-environment-and-hello-world"
+  />
+  <LinkCard
+    title="🎟️ Reserve Live Seat ($600 MXN / session)"
+    description="Saturdays 9-11 AM or 4-6 PM CST (Online). Select your preferred schedule."
+    href="https://tally.so/r/GxAj5o"
+  />
+  <LinkCard
+    title="💻 Project Repository on GitHub"
+    description="Access lab templates, source code, and step-by-step solutions."
+    href="https://github.com/jesusdmedinac/kotlin-0-dev"
+  />
+</CardGrid>

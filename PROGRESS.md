@@ -9,7 +9,7 @@
 - [x] Scenario: English locale subpath configuration
 - [x] Scenario: Automatic language and region detection for new visitors
 - [x] Scenario: Persistent user language preference
-- [ ] Scenario: English syllabus and overview pages availability
+- [x] Scenario: English syllabus and overview pages availability
 - [ ] Scenario: Course 2 English lessons availability
 
 ## Courses Overview
