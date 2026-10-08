@@ -56,14 +56,16 @@ docs/references/jetbrains/
 │       └── 02-resources-and-datetime.md
 │
 ├── android/                            # Official Android development with Kotlin
+│   └── 01-android-overview.md
 │
 ├── ai/                                 # Kotlin for AI & Data Science
-│   ├── overview/                       # LLMs, agent tooling, typed prompts
-│   └── benchmark/                      # Performance & reliability benchmarks
+│   ├── 01-ai-overview.md
+│   ├── 02-koog-and-mcp.md
+│   └── 03-kotlin-benchmark-and-skills.md
 │
-└── interactive/                        # Practical sandboxes & challenges
-    ├── playground/                     # In-browser runner
-    └── koans/                          # Idiomatic Kotlin Koans
+└── interactive/                        # Practical sandboxes & educational resources
+    ├── 01-playground-and-koans.md
+    └── 02-education-curriculum.md
 ```
 
 ---
