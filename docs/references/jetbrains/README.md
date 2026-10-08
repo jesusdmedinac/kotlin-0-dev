@@ -36,8 +36,15 @@ docs/references/jetbrains/
 │       └── 09-libraries-and-apis.md
 │
 ├── backend/                            # Server-side Kotlin documentation
+│   ├── 01-backend-overview.md
 │   ├── ktor/                           # Ktor framework official docs
+│   │   ├── 01-ktor-overview-and-setup.md
+│   │   ├── 02-routing.md
+│   │   └── 03-client-engines.md
 │   └── spring-boot/                    # Official Spring Boot + Kotlin guides
+│       ├── 01-spring-boot-overview-and-setup.md
+│       ├── 02-data-classes-and-controllers.md
+│       └── 03-database-and-crud-repository.md
 │
 ├── multiplatform/                      # Kotlin Multiplatform (KMP) resources
 │   ├── core/                           # Shared logic, expect/actual, project setup
