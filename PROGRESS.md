@@ -12,6 +12,14 @@
 - [x] Scenario: English syllabus and overview pages availability
 - [x] Scenario: Course 2 English lessons availability
 
+## Bilingual Course Parity & Alignment ([docs/features/course-2-beginners/bilingual_course_alignment.feature](./docs/features/course-2-beginners/bilingual_course_alignment.feature))
+- [x] Scenario: Lesson 1 English pedagogical parity with Gradle anatomy and conceptual bridges
+- [x] Scenario: Lesson 2 English pedagogical parity with immutability and null safety bridges
+- [x] Scenario: Lesson 3 English complete translation and interactive CLI menu lab
+- [x] Scenario: English curricular outline availability for Lessons 4 through 16
+- [x] Scenario: Brand name and single-currency pricing integrity
+
+
 ## Courses Overview
 - [ ] Course 1: Kotlin for Non-Programmers (Pending planning)
 - [ ] Course 2: Kotlin for Beginners (In Progress - See [docs/features/course-2-beginners/PROGRESS.md](./docs/features/course-2-beginners/PROGRESS.md))

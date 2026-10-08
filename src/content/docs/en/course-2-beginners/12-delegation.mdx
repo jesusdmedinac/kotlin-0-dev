@@ -1,0 +1,41 @@
+---
+title: "L12: Delegation and Delegated Properties"
+description: "Lesson under preparation. Native delegation pattern with by, lazy, observable, and custom delegates."
+sidebar:
+  order: 12
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** First-class interface delegation (`by`), standard library property delegates (`lazy`, `Delegates.observable`, `Delegates.vetoable`), and implementing Custom Property Delegates via `ReadOnlyProperty` / `ReadWriteProperty`.
+- **Under the Hood:** How the compiler generates hidden synthetic fields (`$$delegate`) and accessor methods redirecting property calls to `getValue` and `setValue`.
+- **Incremental Lab (AI Chat CLI):** Building a custom property delegate to automatically persist message history to disk (`history.txt`) whenever state changes.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L11)"
+    description="Advanced Generics and Variance."
+    href="/en/course-2-beginners/11-advanced-generics"
+  />
+  <LinkCard
+    title="Next Lesson (L13) →"
+    description="Coroutines vs Traditional Asynchrony."
+    href="/en/course-2-beginners/13-coroutines-vs-asynchrony"
+  />
+</CardGrid>

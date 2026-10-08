@@ -46,3 +46,11 @@
 - [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Autonomous L1-start repository with Gradle Wrapper
 - [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Fully verified L1-done tag with build manifests and VS Code tasks
 - [x] [#22](https://github.com/jesusdmedinac/kotlin-0-dev/issues/22) Scenario: Clean working tree and linear tag integrity
+
+### English Course Parity & Alignment ([`bilingual_course_alignment.feature`](./bilingual_course_alignment.feature))
+- [x] [#27](https://github.com/jesusdmedinac/kotlin-0-dev/issues/27) Scenario: Lesson 1 English pedagogical parity with Gradle anatomy and conceptual bridges
+- [x] [#27](https://github.com/jesusdmedinac/kotlin-0-dev/issues/27) Scenario: Lesson 2 English pedagogical parity with immutability and null safety bridges
+- [x] [#27](https://github.com/jesusdmedinac/kotlin-0-dev/issues/27) Scenario: Lesson 3 English complete translation and interactive CLI menu lab
+- [x] [#27](https://github.com/jesusdmedinac/kotlin-0-dev/issues/27) Scenario: English curricular outline availability for Lessons 4 through 16
+- [x] [#27](https://github.com/jesusdmedinac/kotlin-0-dev/issues/27) Scenario: Brand name and single-currency pricing integrity
+
