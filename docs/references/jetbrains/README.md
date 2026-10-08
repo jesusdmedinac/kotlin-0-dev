@@ -47,8 +47,13 @@ docs/references/jetbrains/
 │       └── 03-database-and-crud-repository.md
 │
 ├── multiplatform/                      # Kotlin Multiplatform (KMP) resources
+│   ├── 01-multiplatform-overview.md
 │   ├── core/                           # Shared logic, expect/actual, project setup
+│   │   ├── 01-expect-actual.md
+│   │   └── 02-project-structure-and-hierarchy.md
 │   └── compose-multiplatform/          # Shared declarative UI
+│       ├── 01-compose-multiplatform-setup-and-lifecycle.md
+│       └── 02-resources-and-datetime.md
 │
 ├── android/                            # Official Android development with Kotlin
 │
