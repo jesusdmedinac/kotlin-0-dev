@@ -1,0 +1,266 @@
+---
+title: "L2: Variables, Types, and the Truth about Null Safety"
+description: "Master Kotlin's type system, prevent runtime crashes with null safety, and uncover how Platform Types hide underlying traps."
+sidebar:
+  order: 2
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+## The Billion-Dollar Mistake
+
+In 1965, British computer scientist Sir Tony Hoare introduced the concept of the null reference (`null`) while designing the ALGOL W language. Decades later, he famously apologized in a public conference, calling it his "billion-dollar mistake" because it has sparked countless system outages, security vulnerabilities, and debugging marathons across languages like Java, C, and C++.
+
+The infamous **`NullPointerException` (NPE)** happens when your code attempts to interact with an object you assumed was present, but in reality is completely absent (`null`). Imagine trying to start a car, but the engine literally does not exist inside the engine bay.
+
+Kotlin was deliberately architected from day one to eliminate this problem at compile time.
+
+---
+
+## The Boxes: `val` vs `var`
+
+In Kotlin, you can think of variables as labeled boxes where you store data. There are two primary varieties of boxes:
+
+### The Open Box: `var` (Variable)
+A standard open container. You can deposit a piece of data, retrieve it, and place a different piece of data inside at any time. Its contents can freely mutate or vary.
+
+```kotlin
+// 'var' stands for Variable. By using var, we notify the Kotlin compiler
+// that this container is explicitly designed to be reopened and reassigned.
+var age = 25
+// Because age is declared with 'var', mutating its reference is fully valid.
+age = 26 
+```
+
+### The Taped-Shut Box: `val` (Value)
+A container where you place a piece of data and **seal it with tape**. Once you assign a value, you cannot reassign that identifier to point to another object. This is known as a **Read-Only** reference.
+
+```kotlin
+// 'val' stands for Value. Using val establishes a Read-Only binding.
+// We instruct Kotlin: "Once data is placed here, seal the box."
+// This makes application state predictable and safe.
+val username = "jesusdmedinac"
+// ❌ COMPILE ERROR: Val cannot be reassigned.
+// Kotlin prevents this mutation because it violates the 'val' contract.
+username = "guest" 
+```
+
+<Aside type="caution">
+**Is `val` strictly Immutable?** No. 
+
+In Kotlin language design, `val` means *Read-Only*. This introduces two critical nuances:
+1. The reference itself cannot be reassigned, but if the object inside the box is mutable (such as a `MutableList`), you can still modify its internal items.
+2. A `val` property can define a **Custom Getter**. Under the hood (in JVM bytecode), a `val` property compiles to a method (`get()`). You can program it to compute a new value on each invocation (e.g., `val currentTime get() = ...`), meaning it is not always a static constant.
+</Aside>
+
+---
+
+## Null Safety: Shaking Transparent Boxes
+
+Kotlin's type system enforces a strict architectural boundary between references that **can hold null** (boxes that might be empty) and references that **guarantee a non-null value** (boxes guaranteed to contain data).
+
+To instruct Kotlin that a container *might* hold `null`, we append a question mark `?` to the type:
+
+```kotlin
+// By explicitly declaring the type as 'String' (without ?),
+// we promise Kotlin that this box will NEVER be empty.
+var name: String = "Jesus"
+// ❌ COMPILE ERROR: Kotlin prevents null assignment,
+// protecting the non-nullable contract.
+name = null 
+
+// By appending '?', we create a Nullable Type (String?).
+// We declare: "I am aware that this container might be empty in the future."
+var nullableName: String? = "Daniel"
+// ✅ Permitted. Because the type is String?, Kotlin allows emptying the box.
+nullableName = null 
+```
+
+### Ways to Inspect the Box (Safe Null Handling)
+
+Kotlin provides a comprehensive set of language operators to inspect and handle nullable types safely.
+
+#### 1. Classic `if != null` (Smart Cast)
+The most familiar approach for Java developers is a standard conditional check:
+
+```kotlin
+if (nullableName != null) {
+    // Inside this branch, Kotlin automatically smart-casts nullableName
+    // into a safe, non-nullable String because non-nullness is mathematically proven.
+    println(nullableName.length)
+}
+```
+
+#### 2. Safe Call Operator (`?.`)
+Executes the property or method call **only if** the target reference is non-null. If the box is empty, it short-circuits and safely returns `null` instead of blowing up:
+
+```kotlin
+// If nullableName is null, 'length' safely resolves to null. No crash!
+val length = nullableName?.length
+```
+
+#### 3. Elvis Operator (`?:`)
+Named for looking like Elvis Presley's iconic hairstyle tilted sideways `?:`. It pairs with safe calls to provide a **fallback default value** whenever an expression resolves to null:
+
+```kotlin
+// "Use nullableName, but if it is null, fallback to 'Guest'"
+val finalName = nullableName ?: "Guest"
+```
+
+#### 4. Not-Null Assertion Operator (`!!`)
+The self-destruct button. It tells the compiler: *"Trust me, I am 100% positive this is not null, and if I am mistaken, I take full responsibility for crashing the runtime."*
+
+```kotlin
+// 💥 WARNING: If nullableName is null at runtime,
+// this line immediately throws a NullPointerException and terminates the process.
+val dangerLength = nullableName!!.length
+```
+
+---
+
+## Behind the Scenes: Platform Types (`String!`)
+
+There is an important boundary where Kotlin cannot offer compile-time null safety guarantees: **Java Interoperability**. Because Kotlin runs seamlessly on the JVM, you can invoke libraries written in Java directly from Kotlin without adapters.
+
+However, Java **lacks native language-level null safety**. When Kotlin receives a return value from Java that lacks `@Nullable` or `@NotNull` annotations, the compiler cannot determine whether the object is safe (`String`) or nullable (`String?`).
+
+To handle this smoothly without forcing verbose syntax everywhere, Kotlin introduces **Platform Types** (rendered visually in your IDE with an exclamation mark, like `String!`).
+
+<Aside type="caution">
+A Platform Type (`String!`) means: *"This object originates from Java and its compile-time nullability is unknown. Kotlin relaxes its rules and trusts you. If your assumption is incorrect, it will throw a `NullPointerException` at runtime."*
+
+**Crucial Note:** You can never manually type `val name: String!` in your own Kotlin source code. It is purely an internal compiler notation surfaced by IDE tooling to signal platform risk.
+</Aside>
+
+---
+
+## Incremental Lab: Capturing Terminal Input
+
+Today we evolve our AI Chat CLI. Instead of just printing a static welcome banner, we will ask the user for their name and greet them dynamically.
+
+What happens if the user presses `Ctrl+D` (End-of-File / EOF) and submits nothing? The standard input stream returns null. This is where our null safety foundations shine.
+
+### Lab Deliverables
+
+<LinkCard 
+  title="🧑‍💻 Initial Code (Template)" 
+  description="Resume exactly from the completion state of Lesson 1." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-start" 
+/>
+<LinkCard 
+  title="✅ Solved Code" 
+  description="Full, null-safe implementation for this lesson." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L2-done" 
+/>
+
+### Step-by-Step Instructions
+
+In Lesson 1 we established our `main` entry point and welcome banner. **Keep that banner in place**; we are building upon it!
+
+#### Step 1: Prompt for the User's Name
+Directly below the `println` lines of your welcome banner, prompt the user for their name. Use `print` (without the `ln` suffix) so the terminal cursor awaits input on the same line:
+
+```kotlin
+print("Please enter your name: ")
+```
+
+<Aside type="note">
+**Interactive Consoles, Terminal, and Gradle**
+Depending on how you run your application, input capture behaves differently:
+- **Inside IDEs (IntelliJ IDEA / Android Studio):** The **Run** tab wires an interactive console directly to the JVM process.
+- **In Terminal or Google Antigravity (via Gradle):** Gradle isolates child processes. To ensure `./gradlew run` captures terminal keystrokes without prematurely closing the input stream (**EOF**), our `build.gradle.kts` configures:
+  ```kotlin
+  tasks.named<JavaExec>("run") {
+      standardInput = System.`in`
+  }
+  ```
+  This allows seamless CLI interaction across all terminal environments.
+</Aside>
+
+#### Step 2: Capture Input
+Read what the user types using `readlnOrNull()`. Add this line below your prompt:
+
+```kotlin
+// readlnOrNull() returns a nullable String (String?) because terminal 
+// reading may be interrupted or terminated via EOF (Ctrl+D).
+val input: String? = readlnOrNull()
+```
+
+#### Step 3: Validate Nullability Safely
+Because `input` is typed as `String?`, Kotlin will not permit unsafe dereferencing. Let's use an idiomatic `if/else` block to validate that the input is non-null and not empty whitespace:
+
+```kotlin
+// Declare 'username' as a val (Read-Only) since it remains fixed in this flow.
+val username: String
+
+// Verify that input is not null AND not merely blank whitespace
+if (input != null && input.isNotBlank()) {
+    username = input // Smart Cast in action! 'input' is guaranteed to be a non-null String here.
+} else {
+    username = "Guest" // Safe default fallback
+}
+```
+
+#### Step 4: Greet the User
+Finally, add a personalized greeting using Kotlin **String Templates** (evaluating identifiers with `$`):
+
+```kotlin
+println("\nHello, $username! How can I assist you today?")
+```
+
+#### Step 5: Run and Verify in Your Environment
+
+Launch your application using your preferred workflow:
+
+- **Option A (IntelliJ IDEA / Android Studio):**
+  1. Click the green **Play** (▶️) button next to `fun main()`.
+  2. In the bottom **Run** window, type your name when prompted and press Enter.
+
+- **Option B (Google Antigravity / Visual Studio Code):**
+  1. Press **`Cmd + Shift + B`** (Mac) or **`Ctrl + Shift + B`** (Windows/Linux). Alternatively, open the command palette (`Cmd + Shift + P`), type `Tasks: Run Task`, and select **Run AI Chat CLI**.
+  2. The terminal session will open interactively awaiting your input.
+
+- **Option C (Command-Line Terminal):**
+  1. Open your terminal in the repository root and run:
+     ```bash
+     ./gradlew run --console=plain -q
+     ```
+     *(On Windows CMD/PowerShell: `gradlew.bat run --console=plain -q`)*
+  2. The `--console=plain -q` flags suppress Gradle daemon progress bars for clean terminal interaction.
+
+**Verifying Null Safety:**
+Run the program a second time, but press **Enter** immediately without typing anything (or input only spaces). Notice how the validation logic safely falls back to `"Guest"`, preventing any risk of a `NullPointerException`.
+
+Congratulations! You have implemented robust I/O handling and defended your application against runtime crashes.
+
+---
+
+## Recommended References & Sources
+
+<LinkCard 
+  title="Official Documentation: Null Safety" 
+  description="Explore Kotlin's null safety operators in the official reference guide." 
+  href="https://kotlinlang.org/docs/null-safety.html" 
+/>
+<LinkCard 
+  title="Official Documentation: Java Interoperability & Platform Types" 
+  description="Examine how Kotlin infers types when interfacing with Java libraries." 
+  href="https://kotlinlang.org/docs/java-interop.html#null-safety-and-platform-types" 
+/>
+<LinkCard 
+  title="Null References: The Billion Dollar Mistake" 
+  description="Sir Tony Hoare's landmark QCon presentation." 
+  href="https://www.infoq.com/presentations/Null-References-The-Billion-Dollar-Mistake-Tony-Hoare/" 
+/>
+
+---
+
+## Lesson Feedback & Questions
+
+Have questions about mutability (`val`/`var`), Platform Types, or the Elvis operator?
+
+<LinkCard
+  title="💬 Share Your Feedback or Question"
+  description="Submit questions or suggestions to help us improve this lesson."
+  href="https://tally.so/r/A7geNk?lesson=L2"
+/>
