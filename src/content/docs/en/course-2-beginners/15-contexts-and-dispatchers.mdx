@@ -1,0 +1,41 @@
+---
+title: "L15: Contexts and Dispatchers"
+description: "Lesson under preparation. CoroutineContext, Dispatchers (IO, Default, Main), and withContext."
+sidebar:
+  order: 15
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** Elements of `CoroutineContext`, safe thread switching with `withContext`, specific roles of `Dispatchers.IO`, `Dispatchers.Default`, and `Dispatchers.Unconfined`, and exception handling with `CoroutineExceptionHandler`.
+- **Under the Hood:** How Dispatchers back onto adaptive JVM thread pools (`ForkJoinPool` / worker threads).
+- **Incremental Lab (AI Chat CLI):** Isolating blocking network calls to remote AI APIs onto `Dispatchers.IO` while processing token streaming on `Dispatchers.Default`.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L14)"
+    description="Suspension and Concurrency Scopes."
+    href="/en/course-2-beginners/14-suspension-and-scopes"
+  />
+  <LinkCard
+    title="Next Lesson (L16) →"
+    description="Final Project: AI Chat CLI."
+    href="/en/course-2-beginners/16-final-project-ai-chat"
+  />
+</CardGrid>

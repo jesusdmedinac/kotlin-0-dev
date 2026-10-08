@@ -1,0 +1,273 @@
+---
+title: "L3: Hierarchies and Exhaustive Control Flow"
+description: "Learn how Kotlin revolutionizes decision-making with 'when' expressions and closed hierarchies (enums and sealed classes) to build crash-resilient code."
+sidebar:
+  order: 3
+---
+
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## The Hell of Java's `switch` (The Fall-Through Bug)
+
+If you come from Java, C, or JavaScript, you are undoubtedly familiar with the `switch` statement. Historically, `switch` has been one of the most error-prone control structures in software engineering. Why? Because of **Fall-Through**.
+
+In those languages, if you forget to write the `break;` keyword at the end of a case, execution silently cascades into the next case below, causing insidious, hard-to-trace logic bugs.
+
+Kotlin decided to eliminate this problem at its root by abandoning the `switch` keyword entirely and introducing a far more powerful, expressive, and safe construct: **`when`**.
+
+---
+
+## The Evolution: `if` and `when` as Expressions
+
+In Kotlin, structures like `if` and `when` are not mere statements (imperative instructions); they are **Expressions**. This means that **they return a value**.
+
+In Java, if you wanted to assign a value conditionally, you had to declare a mutable variable and modify it inside each branch of the `if` or `switch`. In Kotlin, you can assign the evaluation result of a `when` directly to a read-only identifier (`val`).
+
+```kotlin
+// We assign the evaluation result of the entire 'when' directly to the variable.
+// There is no need for intermediate mutable 'var' variables.
+val selectedOption: MenuOption = when (rawOption) {
+    "1" -> MenuOption.CHAT
+    "2" -> MenuOption.SETTINGS
+    "3" -> MenuOption.EXIT
+    else -> MenuOption.UNKNOWN
+}
+```
+
+<Aside type="tip">
+**Goodbye to `break`:** Notice that in Kotlin you do not need `break;`. Once the branch matching the condition (the `->` clause) completes, the `when` expression terminates immediately. It is impossible to introduce a bug by forgetting a `break`!
+</Aside>
+
+### Under the Hood: The Bytecode of `when`
+
+How does `when` work inside the Java Virtual Machine (JVM)? The Kotlin compiler intelligently optimizes its bytecode output depending on how you use `when`:
+
+1. **Few Branches:** If your `when` only checks 2 or 3 conditions, the compiler emits a straightforward chain of `if-else if` instructions.
+2. **Multiple Branches or Enums:** When evaluating many discrete cases or an `enum class`, the compiler activates optimized JVM Bytecode instructions:
+   - **`TABLESWITCH`:** Used when matching contiguous integers. Offers constant-time access ($O(1)$) via direct indexed jump tables.
+   - **`LOOKUPSWITCH`:** Used when keys are sparse or non-contiguous. Executes binary search across sorted keys, guaranteeing logarithmic access time ($O(\log n)$).
+
+### 🧠 Conceptual Bridge: Control Flow and Pattern Matching in Your Language
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * In classic JS/TS, the `switch` statement suffers from dangerous fall-through if you omit `break;`, and it is not an expression (cannot yield a value directly to a `const`).
+    * To simulate pattern matching in TypeScript, developers rely on Discriminated Unions (`type Action = { type: 'chat' } | { type: 'exit' }`) evaluated inside a `switch(action.type)` or external libraries like `ts-pattern`.
+    * In Kotlin, `when` supports first-class expressions, discards `break` by design, and performs automatic **Smart Casts** within each branch without third-party dependencies.
+  </TabItem>
+  <TabItem label="Python">
+    * Starting with Python 3.10, Structural Pattern Matching was introduced via the **`match / case`** statement.
+    * The syntax of Kotlin's `when` heavily inspired this evolution: in Python `case "1":` corresponds to `"1" ->`, and the wildcard `case _:` corresponds to `else ->`.
+    * However, in Python `match` remains a statement that does not return an assignable value, whereas Kotlin's `val option = when (...)` is a foundational idiom.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * Starting in C# 8.0, Microsoft introduced **`switch expressions`** (`var result = raw switch { "1" => MenuOption.Chat, _ => MenuOption.Unknown };`).
+    * Kotlin's `when` and C#'s `switch expressions` share the same philosophy: both are first-class expressions, eliminate the need for `break;`, and demand compiler-verified exhaustiveness when evaluated over closed hierarchies.
+  </TabItem>
+  <TabItem label="Java">
+    * Traditional Java only provided the imperative `switch` statement with mandatory fall-through.
+    * In Java 14/17+, Java introduced arrow-syntax **Switch Expressions** (`case "1" -> MenuOption.CHAT;`), and in Java 21 formal pattern matching for records and types.
+    * Kotlin designed `when` as a native expression from version 1.0 (2016), making it a cornerstone of idiomatic Kotlin from the beginning.
+  </TabItem>
+</Tabs>
+
+---
+
+## Interactive Loops and Application State
+
+Before jumping into the lab, we need one more tool: the `while` loop.
+
+In Kotlin, the traditional `for` loop is reserved almost exclusively for iterating over collections or ranges (which we explore in Lesson 7). When we need to keep an interactive application running continuously (such as the *Game Loop* of a game or our CLI menu), we use a `while` loop.
+
+```kotlin
+// Keeps the application running in an infinite loop
+// until we explicitly execute the 'break' keyword.
+while (true) {
+    // 1. Display menu
+    // 2. Read input
+    // 3. Evaluate input with 'when'
+}
+```
+
+---
+
+## The Superpower: Exhaustive Control Flow (Compiler Certainty)
+
+The true brilliance of Kotlin is not just that `when` is elegant, but its guarantee of **Exhaustive Control Flow**.
+
+When you use `when` as an expression (yielding a value) or when evaluating a "closed hierarchy", the compiler mathematically forces you to handle **EVERY possible case**. If you omit even one branch, your code will fail to compile.
+
+To unlock this superpower, Kotlin provides **Closed Hierarchies**:
+
+### 1. Enumerated Classes (`enum class`)
+Used to represent a **fixed, constant set** of discrete values. Think of them as an absolute switch of predefined states (e.g., Days of the week, Order status, Menu options).
+
+```kotlin
+// We define a strict set of valid options for our application.
+enum class MenuOption {
+    CHAT,
+    SETTINGS,
+    EXIT,
+    UNKNOWN
+}
+```
+
+If we pass a `MenuOption` to a `when`, Kotlin requires a branch for `CHAT`, `SETTINGS`, `EXIT`, and `UNKNOWN`. If you later add `HELP` to the enum, the compiler will immediately highlight every `when` statement across your codebase where `HELP` is unhandled! This makes refactoring exceptionally safe.
+
+### 2. Sealed Classes (`sealed class` and `sealed interface`)
+Enums on steroids. While an `enum` only holds constant values (like static buttons), a sealed class allows each option to maintain **its own distinct state and payload data**.
+For example, a network result can be modeled as `Error(val exception: Exception)` or `Success(val data: String)`. We explore these in depth in [Lesson 10: Companion Objects and Object Declarations](/en/course-2-beginners/10-companion-and-object-declarations).
+
+---
+
+## Incremental Lab: Main Menu and `while` Loop
+
+Today we take our AI Chat CLI to the next level. We will wrap the greeting from Lesson 2 inside an infinite loop and present an interactive menu. We will parse raw text input into our strongly-typed `enum class` to guarantee exhaustive control flow.
+
+### Lab Deliverables
+
+<LinkCard 
+  title="🧑‍💻 Initial Code (Template)" 
+  description="Resume exactly from the completion state of Lesson 2." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L3-start" 
+/>
+<LinkCard 
+  title="✅ Solved Code" 
+  description="Completed implementation with enum class, while loop, and exhaustive when." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L3-done" 
+/>
+
+### Step-by-Step Instructions
+
+#### Step 1: Define the Options Hierarchy
+At the top of your `Main.kt` file (outside the `main` function), declare an enum to mathematically restrict menu options:
+
+```kotlin
+// Define an Enum to represent our menu options strictly.
+enum class MenuOption {
+    CHAT,
+    SETTINGS,
+    EXIT,
+    UNKNOWN
+}
+```
+
+<Aside type="note" title="💡 Why an enum class rather than a sealed class here?">
+At this early stage of our application, menu options are simple stateless constants (`CHAT`, `SETTINGS`, `EXIT`, `UNKNOWN`). An `enum class` is the most lightweight, concise way to model this closed set.
+
+Later in the course (**Lesson 10: Companion Objects and Object Declarations**), when menu options carry dynamic parameters or channels, we will evolve this model into a `sealed class` with `data objects` and `data classes`.
+</Aside>
+
+#### Step 2: Create the Infinite Loop
+Directly below where we greet the user (`Hello, $username!`), open a `while (true)` loop and print the menu options:
+
+```kotlin
+    // Main loop that keeps the interactive CLI alive
+    while (true) {
+        println("\n--- Main Menu ---")
+        println("1. Chat")
+        println("2. Settings")
+        println("3. Exit")
+        print("Choose an option: ")
+
+        val rawOption: String? = readlnOrNull()
+        
+        // We will continue Step 3 inside here...
+    }
+```
+
+#### Step 3: Safe Parsing Using `when` as an Expression
+Inside the `while` loop, directly below `readlnOrNull()`, use `when` to convert the raw string `"1"` into our type-safe constant `MenuOption.CHAT`. Notice how we assign the result directly to `val selectedOption`:
+
+```kotlin
+        // Use 'when' as an expression to map raw string input
+        // to our structured Enum, returning the value directly.
+        val selectedOption: MenuOption = when (rawOption) {
+            "1" -> MenuOption.CHAT
+            "2" -> MenuOption.SETTINGS
+            "3" -> MenuOption.EXIT
+            else -> MenuOption.UNKNOWN
+        }
+```
+
+#### Step 4: Exhaustive Execution
+Now use our structured Enum to execute application logic. Write this second `when` directly below the previous one:
+
+```kotlin
+        // Use 'when' with our Enum. Because it is a closed hierarchy
+        // (the compiler knows all possible cases), it enforces exhaustive
+        // branch handling without requiring a default 'else'.
+        when (selectedOption) {
+            MenuOption.CHAT -> {
+                println(">>> Entering chat mode... (Work in progress)")
+            }
+            MenuOption.SETTINGS -> {
+                println(">>> Entering settings... (Work in progress)")
+            }
+            MenuOption.EXIT -> {
+                println("Goodbye, $username! See you soon.")
+                break // Breaks the while(true) loop and exits cleanly
+            }
+            MenuOption.UNKNOWN -> {
+                println("Invalid option. Please try again.")
+            }
+        }
+```
+
+#### Step 5: Run and Verify Your Menu
+
+Launch your interactive application using your preferred workflow:
+
+- **Inside Android Studio / IntelliJ IDEA:** Click the green **Play** (▶️) button next to `fun main()` and type into the bottom **Run** console.
+- **Inside Google Antigravity / Visual Studio Code:** Press **`Cmd + Shift + B`** (macOS) or **`Ctrl + Shift + B`** (Windows/Linux) to launch the integrated interactive terminal.
+- **In Command-Line Terminal:** Run:
+  ```bash
+  ./gradlew run --console=plain -q
+  ```
+  *(On Windows: `gradlew.bat run --console=plain -q`)*
+
+**Test Cases to Verify:**
+1. After entering your name, the main menu displays with all 3 options.
+2. Type `1` and press Enter: it prints the chat mode notice and redisplays the menu (thanks to the `while` loop).
+3. Type an invalid input (such as `"9"` or `"hello"`): the exhaustive `MenuOption.UNKNOWN` branch catches it and displays `"Invalid option. Please try again."`.
+4. Type `3`: the `break` command terminates the `while (true)` loop and prints a personalized farewell.
+
+<Aside type="caution" title="⚠️ What happens if readlnOrNull() receives EOF in an infinite loop?">
+If you run your program in an environment where standard input is disconnected or if the user sends an End-of-File signal (**EOF**, such as `Ctrl+D`), `readlnOrNull()` returns `null` immediately.
+
+Because our `when (rawOption)` maps `null` to `MenuOption.UNKNOWN`, an unchecked `while (true)` loop would spin at 100% CPU repeating `"Invalid option"` indefinitely.
+
+**Defensive Pattern:** In professional CLI engineering, if `readlnOrNull()` is null, break out of the loop immediately:
+```kotlin
+val rawOption: String? = readlnOrNull() ?: break // Cleanly exits if input stream disconnects
+```
+</Aside>
+
+Congratulations! You have built the interactive backbone of our CLI application using exhaustive control flow.
+
+---
+
+## Recommended References & Sources
+
+<LinkCard 
+  title="Official Documentation: Control Flow (when)" 
+  description="Explore advanced features of Kotlin's when expressions." 
+  href="https://kotlinlang.org/docs/control-flow.html#when-expression" 
+/>
+<LinkCard 
+  title="Official Documentation: Enum Classes" 
+  description="Learn how to add properties and functions to Kotlin enum classes." 
+  href="https://kotlinlang.org/docs/enum-classes.html" 
+/>
+
+---
+
+## Lesson Feedback & Questions
+
+Have questions about exhaustive `when`, JVM bytecode jump tables, or the menu loop?
+
+<LinkCard
+  title="💬 Share Your Feedback or Question"
+  description="Send us your questions or suggestions to help us improve this lesson."
+  href="https://tally.so/r/A7geNk?lesson=L3"
+/>

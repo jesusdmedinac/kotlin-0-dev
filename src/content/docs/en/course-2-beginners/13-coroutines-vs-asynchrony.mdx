@@ -1,0 +1,41 @@
+---
+title: "L13: Coroutines vs Traditional Asynchrony"
+description: "Lesson under preparation. OS threads vs coroutines, suspension vs blocking, and cooperative concurrency."
+sidebar:
+  order: 13
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** Operating system threads (Java Threads) vs Coroutines (lightweight threads), non-blocking suspension vs thread blocking, and structured concurrency.
+- **Under the Hood:** Memory footprint comparison on the JVM (~1 MB stack per OS thread vs tens of bytes per coroutine) and how the JVM schedules coroutines across underlying worker thread pools.
+- **Incremental Lab (AI Chat CLI):** Profiling I/O blocking in the terminal console and designing cooperative concurrent background tasks.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L12)"
+    description="Delegation and Delegated Properties."
+    href="/en/course-2-beginners/12-delegation"
+  />
+  <LinkCard
+    title="Next Lesson (L14) →"
+    description="Suspension and Concurrency Scopes."
+    href="/en/course-2-beginners/14-suspension-and-scopes"
+  />
+</CardGrid>

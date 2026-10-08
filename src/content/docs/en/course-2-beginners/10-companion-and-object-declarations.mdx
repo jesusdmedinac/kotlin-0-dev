@@ -1,0 +1,41 @@
+---
+title: "L10: Companion Objects and Object Declarations"
+description: "Lesson under preparation. Idiomatic singletons, companion objects, data objects, and factories."
+sidebar:
+  order: 10
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** `object` declarations (JVM-guaranteed thread-safe Singletons), `companion object` as the idiomatic replacement for `static` members, `data object`, and the Factory Pattern.
+- **Under the Hood:** How the JVM implements the Singleton pattern via a static `INSTANCE` field and lazy, thread-safe class initialization.
+- **Incremental Lab (AI Chat CLI):** Modeling chat connection events and global configuration state using Singletons and Companion Factories.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L9)"
+    description="Classes, Inheritance, and Visibility."
+    href="/en/course-2-beginners/09-classes-and-visibility"
+  />
+  <LinkCard
+    title="Next Lesson (L11) →"
+    description="Advanced Generics and Variance."
+    href="/en/course-2-beginners/11-advanced-generics"
+  />
+</CardGrid>

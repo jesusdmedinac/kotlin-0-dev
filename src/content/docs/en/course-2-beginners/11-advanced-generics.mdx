@@ -1,0 +1,41 @@
+---
+title: "L11: Advanced Generics and Variance"
+description: "Lesson under preparation. Variance (in/out), reified types, star projections, and safe typing."
+sidebar:
+  order: 11
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** Generic classes and functions `<T>`, upper bounds (`T : Any`), Declaration-site variance (`out` / Covariance and `in` / Contravariance), Star projections (`*`), and `reified` type parameters via `inline` functions.
+- **Under the Hood:** JVM Type Erasure and how Kotlin circumvents this restriction through bytecode inlining.
+- **Incremental Lab (AI Chat CLI):** Authoring a strongly-typed `Result<T>` sealed wrapper and generic response adapters to process AI completions.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L10)"
+    description="Companion Objects and Object Declarations."
+    href="/en/course-2-beginners/10-companion-and-object-declarations"
+  />
+  <LinkCard
+    title="Next Lesson (L12) →"
+    description="Delegation and Delegated Properties."
+    href="/en/course-2-beginners/12-delegation"
+  />
+</CardGrid>

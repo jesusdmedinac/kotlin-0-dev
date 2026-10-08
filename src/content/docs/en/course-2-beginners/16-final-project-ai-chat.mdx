@@ -1,0 +1,36 @@
+---
+title: "L16: Final Project: Packaging and Distributing the AI Chat CLI"
+description: "Lesson under preparation. Final architecture, lifecycle, fat JAR with Gradle, and cross-platform distribution."
+sidebar:
+  order: 16
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** Assembling the complete system architecture, console application lifecycle, JVM Shutdown Hooks for graceful exit, and packaging standalone executable binaries (`Shadow / Fat JAR`) with Gradle.
+- **Under the Hood:** How Fat JAR packaging bundles all transitive dependencies (Kotlin Standard Library, Coroutines, etc.) into a single executable `.jar` file with a configured `MANIFEST.MF`.
+- **Incremental Lab (AI Chat CLI):** Compiling, verifying end-to-end, and distributing your standalone, production-ready AI Assistant CLI tool.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L15)"
+    description="Contexts and Dispatchers."
+    href="/en/course-2-beginners/15-contexts-and-dispatchers"
+  />
+</CardGrid>

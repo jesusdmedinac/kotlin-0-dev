@@ -1,0 +1,41 @@
+---
+title: "L14: Suspension and Concurrency Scopes"
+description: "Lesson under preparation. suspend functions, continuation passing, CoroutineScope, launch, and async."
+sidebar:
+  order: 14
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Lesson in Preparation (WIP)">
+This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+</Aside>
+
+## What will you learn in this lesson?
+
+In this lesson we will explore:
+- **Deep Theory:** `suspend` functions, `Job` lifecycle, coroutine builders (`launch`, `async`/`await`), `coroutineScope`, and cooperative cancellation checking `isActive` / `yield`.
+- **Under the Hood:** Compiler transformation to State Machines (Continuation Passing Style - CPS) and the hidden `Continuation<T>` parameter.
+- **Incremental Lab (AI Chat CLI):** Building a concurrent "AI is typing..." console animation that renders smoothly alongside incoming response streams.
+
+---
+
+## Navigation
+
+<CardGrid>
+  <LinkCard
+    title="← Course Syllabus"
+    description="Return to the full lesson curriculum."
+    href="/en/course-2-beginners/00-kotlin-for-begginers"
+  />
+  <LinkCard
+    title="← Previous Lesson (L13)"
+    description="Coroutines vs Traditional Asynchrony."
+    href="/en/course-2-beginners/13-coroutines-vs-asynchrony"
+  />
+  <LinkCard
+    title="Next Lesson (L15) →"
+    description="Contexts and Dispatchers."
+    href="/en/course-2-beginners/15-contexts-and-dispatchers"
+  />
+</CardGrid>
