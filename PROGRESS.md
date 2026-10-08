@@ -10,7 +10,7 @@
 - [x] Scenario: Automatic language and region detection for new visitors
 - [x] Scenario: Persistent user language preference
 - [x] Scenario: English syllabus and overview pages availability
-- [ ] Scenario: Course 2 English lessons availability
+- [x] Scenario: Course 2 English lessons availability
 
 ## Courses Overview
 - [ ] Course 1: Kotlin for Non-Programmers (Pending planning)
