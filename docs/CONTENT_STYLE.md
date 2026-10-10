@@ -14,6 +14,7 @@ Every lesson MUST adhere to the following structure:
 6. **Heavily Commented Code**: Code blocks must contain pedagogical comments explaining *why* each line is written that way.
 7. **Custom Implementations (When Applicable)**: For functional concepts (e.g., `map`, `let`), guide the student to build their own version (`myMap`, `myLet`) before using the standard library.
 8. **Sources & References**: Always include a `<LinkCard>` section linking to official documentation or authoritative sources.
+9. **Syllabus Synchronization**: Whenever a lesson is created, updated, or marked as completed, the course overview file (`00-kotlin-for-begginers.mdx`) in both languages must be updated simultaneously: changing `<Badge text="WIP" variant="caution" />` to `<Badge text="Disponible" variant="success" />` (ES) / `<Badge text="Available" variant="success" />` (EN), and ensuring topic descriptions reflect the published material.
 
 ## 2. Tone and Voice
 - Encouraging, empathetic, and conversational.
