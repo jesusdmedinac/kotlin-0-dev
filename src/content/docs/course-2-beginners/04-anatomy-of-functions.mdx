@@ -1,41 +1,477 @@
 ---
 title: "L4: Anatomía de Funciones"
-description: "Lección en preparación. Argumentos con nombre, parámetros por defecto, sobrecargas y modularización."
+description: "Aprende a modularizar código en Kotlin: argumentos con nombre, parámetros por defecto, funciones de expresión única y el secreto del bytecode ($default bitmask)."
 sidebar:
   order: 4
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lección en Construcción (WIP)">
-Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+## El Infierno de las Sobrecargas Telescópicas
+
+Si alguna vez has escrito código en Java, C++ u otros lenguajes orientados a objetos tradicionales, seguro has sufrido el **"Telescoping Constructor / Method Pattern"** (el patrón de sobrecargas telescópicas).
+
+Imagina que quieres crear una función para imprimir un banner en consola. Quieres que el usuario pueda personalizar el texto, el ancho y el carácter decorativo. En Java tradicional, te veías obligado a escribir algo como esto:
+
+```java
+// El infierno de las sobrecargas en Java tradicional
+public void printBanner(String title) {
+    printBanner(title, 31);
+}
+
+public void printBanner(String title, int width) {
+    printBanner(title, width, '=');
+}
+
+public void printBanner(String title, int width, char borderChar) {
+    // Implementación real
+}
+```
+
+Cada nueva opción duplicaba los métodos sobrecargados. Y si a eso le sumabas parámetros booleanos, caías en la infame trampa: `createUser("admin", true, false, true);`. ¿Qué significa cada `boolean`? Es imposible saberlo a simple vista sin consultar la definición.
+
+Kotlin resuelve esto de forma brillante y radical a través de tres pilares idiomáticos: **Parámetros por Defecto**, **Argumentos con Nombre** y **Funciones de Expresión Única**.
+
+---
+
+## Analogías para Entender Funciones Modernas
+
+Antes de escribir una sola línea de código, visualicemos estos conceptos con analogías cotidianas:
+
+1. **Parámetros por Defecto (Default Arguments):** Piensa en pedir un café en una cafetería. Si dices *"Un cappuccino, por favor"*, el barista asume automáticamente los valores por defecto: tamaño mediano, leche entera y temperatura estándar. No necesitas recitar toda la lista de ingredientes a menos que quieras personalizar algo específico: *"Un cappuccino con leche de almendras"*.
+2. **Argumentos con Nombre (Named Arguments):** Imagina un formulario postal o una etiqueta de envío. En lugar de depender de que el paquete tenga el remitente a la izquierda y el destinatario a la derecha por mera posición geográfica, cada casilla tiene una etiqueta explícita: `remitente = "Alice"`, `destinatario = "Bob"`. Da igual el orden en que los coloques: es imposible equivocarse.
+3. **Funciones de Expresión Única (Single-Expression Functions):** Como una fórmula matemática directa ($f(x) = x^2$) en contraste con redactar un memorando legal de tres páginas solo para responder una pregunta de una sola frase.
+
+---
+
+## Declaración y Sintaxis de Funciones en Kotlin
+
+En Kotlin, las funciones se declaran con la palabra clave `fun`. Veamos su estructura base:
+
+```kotlin
+// Anatomía básica: palabra clave 'fun', nombre, parámetros tipados y tipo de retorno
+fun formatUsername(rawInput: String?): String {
+    // Los parámetros recibidos en una función son SIEMPRE inmutables ('val' implícito).
+    // Kotlin prohíbe reasignar 'rawInput = "otro"' dentro de la función para evitar efectos secundarios.
+    if (rawInput.isNullOrBlank()) {
+        return "Guest"
+    }
+    return rawInput.trim()
+}
+```
+
+<Aside type="note" title="💡 ¿Por qué no existe 'void' en Kotlin?">
+En Java, `void` representa una ausencia primitiva de valor que no puede ser tratada como un objeto ni como un tipo genérico.
+
+En Kotlin, toda función que "no devuelve nada" en realidad devuelve **`Unit`**. `Unit` es un tipo de dato real y un objeto singleton (`Unit.INSTANCE`). Si no especificas el tipo de retorno en una función que no retorna un valor, el compilador infiere `: Unit` automáticamente. Esto permite que Kotlin trate a todas las funciones de forma uniforme en la programación funcional y en genéricos.
 </Aside>
 
-## ¿Qué aprenderás en esta lección?
+### 1. Funciones de Expresión Única (`Single-Expression Functions`)
 
-En esta lección exploraremos:
-- **Teoría a fondo:** Parámetros por defecto (`default arguments`), argumentos con nombre (`named arguments`), funciones de expresión única (`single-expression functions`) y `vararg`.
-- **Bajo el capó:** Cómo el compilador de Kotlin genera sobrecargas y máscaras de bits (`$default` methods) en el Bytecode para interoperar con Java.
-- **Laboratorio Incremental (AI Chat CLI):** Refactorización de la lógica del chat en funciones limpias, modulares y reutilizables.
+Cuando el cuerpo de una función consiste en calcular y retornar una sola expresión, no necesitas usar llaves `{}` ni la palabra clave `return`. Puedes asignar la expresión directamente con el operador `=`:
+
+```kotlin
+// Forma tradicional con bloque:
+fun double(x: Int): Int {
+    return x * 2
+}
+
+// Forma idiomática de expresión única:
+fun double(x: Int): Int = x * 2
+```
+
+Incluso puedes aprovechar la inferencia de tipos del compilador y omitir el tipo de retorno explícito en funciones privadas o locales:
+
+```kotlin
+// El compilador infiere automáticamente que retorna Int
+fun square(x: Int) = x * x
+```
+
+<Aside type="tip">
+**Buenas prácticas en APIs públicas:** Aunque Kotlin puede inferir el tipo de retorno en funciones de expresión única, se considera una excelente práctica de ingeniería declarar explícitamente el tipo de retorno en funciones públicas para mantener contratos de código claros y auto-documentados.
+</Aside>
+
+### 2. Parámetros por Defecto (`Default Arguments`)
+
+En Kotlin puedes asignar un valor por defecto a cualquier parámetro usando la sintaxis `= valor` en la firma de la función:
+
+```kotlin
+fun printBanner(
+    title: String = "AI Chat CLI",
+    width: Int = 31,
+    borderChar: Char = '='
+) {
+    val border = borderChar.toString().repeat(width)
+    println(border)
+    println(title.center(width))
+    println(border)
+}
+```
+
+¡Con esta única declaración, reemplazamos todas las sobrecargas telescópicas de Java! Ahora podemos llamar a la función de muchas formas:
+
+```kotlin
+printBanner() // Usa todos los valores por defecto
+printBanner("Welcome to Kotlin") // Modifica solo el primer parámetro
+```
+
+### 3. Argumentos con Nombre (`Named Arguments`)
+
+¿Qué pasa si queremos conservar el `title` por defecto y el `width` por defecto, pero cambiar únicamente el `borderChar`? En lenguajes posicionales esto es imposible sin pasar todos los argumentos intermedios.
+
+En Kotlin, simplemente nombras el parámetro:
+
+```kotlin
+// Pasamos únicamente el parámetro que nos interesa, nombrando la etiqueta
+printBanner(borderChar = '*')
+
+// Incluso podemos cambiar el orden de los argumentos sin romper nada
+printBanner(width = 40, title = "Custom Engine", borderChar = '#')
+```
+
+Esto elimina por completo el peligro del *Boolean Trap* o de argumentos del mismo tipo adyacentes (`copyFile(source = pathA, destination = pathB)` en lugar de recordar a ciegas cuál iba primero).
+
+### 4. Parámetros Variables (`vararg`) y el Operador Spread (`*`)
+
+Si necesitas que una función acepte una cantidad arbitraria de argumentos del mismo tipo, usamos el modificador **`vararg`**:
+
+```kotlin
+fun logMessages(prefix: String, vararg messages: String) {
+    for (message in messages) {
+        println("[$prefix] $message")
+    }
+}
+
+// Invocación pasando valores sueltos:
+logMessages("INFO", "Iniciando sistema", "Conexión establecida", "Listo")
+```
+
+Si ya tienes un arreglo (`Array`) de datos y quieres pasarlo a una función que recibe `vararg`, usas el **operador spread** (el asterisco `*`):
+
+```kotlin
+val alerts = arrayOf("Batería baja", "Memoria al 80%")
+// El operador '*' desempaqueta el arreglo en argumentos individuales
+logMessages("WARN", *alerts)
+```
+
+---
+
+## Bajo el Capó: El Secreto del Bytecode y la Máscara de Bits (`$default`)
+
+¿Cómo hace Kotlin para que los parámetros por defecto funcionen en la JVM si Java y la especificación de clases de Java no admiten parámetros opcionales?
+
+Aquí está la magia del compilador de Kotlin: **Generación de métodos sintéticos con máscara de bits**.
+
+Cuando compilas una función como esta:
+
+```kotlin
+fun printBanner(title: String = "AI Chat CLI", width: Int = 31) {
+    println("$title ($width)")
+}
+```
+
+El compilador genera en el Bytecode **dos métodos**:
+
+1. El método normal:
+   ```java
+   public static void printBanner(String title, int width) { ... }
+   ```
+2. Un método sintético invisible con el sufijo **`$default`**:
+   ```java
+   public static void printBanner$default(String title, int width, int mask, Object marker) {
+       if ((mask & 1) != 0) {
+           title = "AI Chat CLI"; // El bit 0 estaba encendido: usar valor por defecto
+       }
+       if ((mask & 2) != 0) {
+           width = 31; // El bit 1 estaba encendido: usar valor por defecto
+       }
+       printBanner(title, width);
+   }
+   ```
+
+### ¿Cómo funciona la Máscara de Bits (`int mask`)?
+
+Cada parámetro con valor por defecto tiene asignado un bit en una máscara entera (`int` de 32 bits):
+* Parámetro 1 (`title`): Bit 0 ($2^0 = 1$)
+* Parámetro 2 (`width`): Bit 1 ($2^1 = 2$)
+* Parámetro 3: Bit 2 ($2^2 = 4$)
+
+Cuando en tu código Kotlin escribes:
+```kotlin
+printBanner(width = 50)
+```
+Tú omitiste el parámetro 1 (`title`). El compilador calcula la máscara encendiendo el bit 0 (`mask = 1`) y genera en bytecode una llamada a:
+```java
+printBanner$default(null, 50, 1, null);
+```
+Dentro de `$default`, la operación a nivel de bits `(1 & 1) != 0` es verdadera, por lo que se asigna `"AI Chat CLI"` a `title` antes de ejecutar la lógica. ¡Es una técnica extremadamente eficiente en memoria y tiempo de CPU ($O(1)$)!
+
+### Interoperabilidad con Java: La Anotación `@JvmOverloads`
+
+Si programas una librería en Kotlin pero alguien la consume desde Java, los desarrolladores de Java no pueden llamar al método sintético `$default`. Para ellos, Kotlin solo expondría el método con todos los parámetros obligatorios.
+
+Para resolver esto, Kotlin proporciona la anotación **`@JvmOverloads`**:
+
+```kotlin
+@JvmOverloads
+fun printBanner(title: String = "AI Chat CLI", width: Int = 31) {
+    // ...
+}
+```
+
+Al agregar `@JvmOverloads`, el compilador de Kotlin genera automáticamente en el bytecode todas las sobrecargas tradicionales en Java (`printBanner()`, `printBanner(title)`, `printBanner(title, width)`), logrando interoperabilidad transparente al 100%.
+
+---
+
+## 🧠 Puente Conceptual: Funciones en tu Lenguaje
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * **Valores por defecto:** JS/TS soporta valores por defecto de forma nativa (`function greet(name = "Guest")`).
+    * **Argumentos nombrados:** JavaScript no tiene argumentos nombrados nativos. La convención idiomática es desestructurar un objeto de opciones: `function greet({ name = "Guest", width = 31 }: Options = {})`. En Kotlin no necesitas envolver tus parámetros en objetos extras.
+    * **Funciones compactas:** Las *Arrow Functions* concisas (`const double = (x: number) => x * 2;`) equivalen directamente a las *single-expression functions* de Kotlin.
+    * **Retorno vacío:** En JS/TS tienes `void` / `undefined`, mientras que en Kotlin `Unit` es un objeto singleton real.
+  </TabItem>
+  <TabItem label="Python">
+    * **Valores por defecto y argumentos nombrados:** Python fue pionero en esto con su sintaxis `def greet(name="Guest"): ...` y llamadas con `keyword arguments` (`greet(name="Ada")`).
+    * **Peligro del Default Mutable:** En Python, usar una lista mutable por defecto (`def append(item, target=[])`) es una de las trampas más conocidas porque la lista se comparte entre llamadas. En Kotlin, la expresión por defecto se evalúa en cada invocación dentro de la clase generada.
+    * **Funciones de una línea:** Python utiliza `lambda`, pero las lambdas de Python están severamente limitadas a una sola expresión simple sin sentencias. En Kotlin, una *single-expression function* es una función completa de pleno derecho que puede incluir expresiones `when` complejas.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * **Parámetros opcionales y nombrados:** C# cuenta con parámetros opcionales (`void Greet(string name = "Guest")`) y argumentos con nombre (`Greet(name: "Ada")`).
+    * **Diferencia Crítica de Compatibilidad Binaria:** En C#, el valor por defecto se quema en el sitio de llamada (*call-site metadata*). Si cambias el valor por defecto en una DLL de C# sin recompilar los proyectos clientes, los clientes seguirán enviando el valor antiguo. En Kotlin, el valor por defecto reside en el método `$default` dentro del bytecode de la clase emisora, garantizando consistencia.
+    * **Expression-bodied members:** La sintaxis `int Double(int x) => x * 2;` en C# es idéntica en espíritu al `fun double(x: Int) = x * 2` de Kotlin.
+  </TabItem>
+  <TabItem label="Java">
+    * **Cero argumentos nombrados y cero valores por defecto:** Java no admite ninguna de las dos características. La única alternativa histórica ha sido el *Telescoping Overload Pattern* o el patrón de diseño *Builder*.
+    * **`void` vs `Unit`:** `void` en Java es una palabra reservada no instanciable que rompe el sistema de tipos genéricos (por eso existen `Consumer<T>` y `Supplier<T>`). Kotlin resuelve esto unificando todo bajo `Unit`.
+    * **Interoperabilidad:** Para permitir que código Java aproveche los valores por defecto de una función Kotlin, debes anotar la función con `@JvmOverloads`.
+  </TabItem>
+</Tabs>
+
+---
+
+## Laboratorio Incremental: Modularización del Chat CLI
+
+En la Lección 3 dejamos nuestro archivo `Main.kt` funcionando, pero con un gran problema de diseño: **toda la lógica de la aplicación está amontonada dentro de `fun main()`**.
+
+Hoy refactorizaremos nuestro código aplicando las mejores prácticas de modularización:
+1. Extraeremos el encabezado a una función con valores por defecto.
+2. Encapsularemos la lectura y validación del nombre de usuario.
+3. Convertiremos el parseo del menú en una elegante función de expresión única.
+4. Separaremos la visualización del menú y la ejecución de opciones en funciones dedicadas.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla L4-start)" 
+  description="Punto de partida exacto desde donde terminamos la Lección 3." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L4-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto (Solución L4-done)" 
+  description="El código completamente modularizado con funciones idiomáticas y parámetros por defecto." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L4-done" 
+/>
+
+---
+
+### Instrucciones Paso a Paso
+
+Abre tu archivo `src/main/kotlin/Main.kt`. Mantendremos el `enum class MenuOption` que creamos en la Lección 3 y comenzaremos a extraer funciones encima y debajo de `fun main()`.
+
+#### Paso 1: Función de Banner con Valores por Defecto
+
+Extrae la impresión de la bienvenida a una función reutilizable `printBanner`. Utilizaremos parámetros por defecto para permitir que cualquier componente de la aplicación imprima banners con diferente título o ancho:
+
+```kotlin
+/**
+ * Imprime un encabezado visualmente delimitado en la consola.
+ * 
+ * @param title Texto central que se mostrará en el banner.
+ * @param width Cantidad de caracteres de ancho para la línea de borde.
+ * @param borderChar Carácter utilizado para dibujar el delimitador superior e inferior.
+ */
+fun printBanner(
+    title: String = "AI Chat CLI",
+    width: Int = 31,
+    borderChar: Char = '='
+) {
+    val border = borderChar.toString().repeat(width)
+    println(border)
+    println("🤖 $title")
+    println(border)
+}
+```
+
+#### Paso 2: Encapsular la Solicitud del Nombre de Usuario
+
+Crea una función dedicada `askForUsername` que se encargue de solicitar y sanear la entrada del usuario, devolviendo un nombre seguro:
+
+```kotlin
+/**
+ * Solicita interactivamente el nombre del usuario por consola.
+ * Si el usuario presiona Enter sin escribir nada o envía espacios en blanco,
+ * se retorna el valor de contingencia especificado en [defaultName].
+ */
+fun askForUsername(defaultName: String = "Guest"): String {
+    print("Please, enter your name: ")
+    val input = readlnOrNull()
+    return if (!input.isNullOrBlank()) input.trim() else defaultName
+}
+```
+
+#### Paso 3: Parseo con Función de Expresión Única
+
+Transforma la lógica que traduce una cadena de texto a un `MenuOption` en una función de expresión única compacta y legible:
+
+```kotlin
+/**
+ * Mapea el texto crudo ingresado por el usuario al Enum estructurado [MenuOption].
+ * Al usar una función de expresión única con 'when', el código es conciso y declarativo.
+ */
+fun parseMenuOption(raw: String?): MenuOption = when (raw?.trim()) {
+    "1" -> MenuOption.CHAT
+    "2" -> MenuOption.SETTINGS
+    "3" -> MenuOption.EXIT
+    else -> MenuOption.UNKNOWN
+}
+```
+
+#### Paso 4: Visualización del Menú
+
+Extrae la impresión de las opciones disponibles a una función simple `printMenu`:
+
+```kotlin
+/**
+ * Muestra las opciones principales del menú en la consola interactiva.
+ */
+fun printMenu() {
+    println("\n--- Main Menu ---")
+    println("1. Chat")
+    println("2. Settings")
+    println("3. Exit")
+    print("Choose an option: ")
+}
+```
+
+#### Paso 5: Ejecución de Comandos y Control de Flujo
+
+Crea la función `executeMenuOption` encargada de procesar la opción seleccionada. Observa que devuelve un `Boolean`: `true` si la aplicación debe seguir corriendo, o `false` si el usuario decidió salir:
+
+```kotlin
+/**
+ * Ejecuta la acción correspondiente a la opción seleccionada.
+ * 
+ * @return true si el bucle principal debe continuar ejecutándose, 
+ *         false si se seleccionó la salida de la aplicación.
+ */
+fun executeMenuOption(option: MenuOption, username: String): Boolean = when (option) {
+    MenuOption.CHAT -> {
+        println(">>> Entering chat mode... (Work in progress)")
+        true
+    }
+    MenuOption.SETTINGS -> {
+        println(">>> Entering settings... (Work in progress)")
+        true
+    }
+    MenuOption.EXIT -> {
+        println("Goodbye, $username! See you soon.")
+        false
+    }
+    MenuOption.UNKNOWN -> {
+        println("Invalid option. Please try again.")
+        true
+    }
+}
+```
+
+#### Paso 6: El Nuevo `fun main()` Modular y Declarativo
+
+Ahora observa cómo queda nuestra función principal `main()`. Se ha transformado en un orquestador de alto nivel limpio, conciso y auto-documentado:
+
+```kotlin
+fun main() {
+    // 1. Imprimimos el banner aprovechando los valores por defecto
+    printBanner()
+
+    // 2. Capturamos el nombre de usuario de forma modular
+    val username = askForUsername()
+    println("\nHello, $username!")
+
+    // 3. Bucle interactivo controlado por el resultado booleano de nuestras funciones
+    while (true) {
+        printMenu()
+        val rawInput = readlnOrNull()
+        val option = parseMenuOption(rawInput)
+        
+        val shouldContinue = executeMenuOption(option, username)
+        if (!shouldContinue) {
+            break
+        }
+    }
+}
+```
+
+---
+
+### Paso 7: Verificación y Pruebas
+
+Ejecuta tu proyecto con tu comando o atajo preferido:
+
+- **En Android Studio / IntelliJ IDEA:** Clic en el botón verde de Play (▶️) junto a `fun main()`.
+- **En Antigravity / VS Code:** Presiona `Cmd + Shift + B` (macOS) o `Ctrl + Shift + B` (Windows/Linux).
+- **En Terminal:**
+  ```bash
+  ./gradlew run --console=plain -q
+  ```
+  *(En Windows: `gradlew.bat run --console=plain -q`)*
+
+**Pruebas a realizar:**
+1. **Verificación de defaults:** Observa cómo `printBanner()` dibuja las 31 barras y el título sin haberle pasado ningún parámetro.
+2. **Entrada vacía:** Presiona Enter directamente al pedir tu nombre; debe darte la bienvenida como `Guest`.
+3. **Navegación de opciones:** Prueba las opciones `1`, `2`, una opción inválida como `5`, y finalmente `3` para salir.
+
+¡Felicitaciones! Has transformado un bloque de código monolítico en una arquitectura modular limpia, altamente testeable y preparada para el siguiente paso del curso.
 
 ---
 
 ## Navegación
 
-<CardGrid>
-  <LinkCard
-    title="← Temario del Curso"
-    description="Volver al índice general de lecciones."
-    href="/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Lección Anterior (L3)"
-    description="Jerarquías y Control de Flujo Exhaustivo."
-    href="/course-2-beginners/03-hierarchies-and-control-flow"
-  />
-  <LinkCard
-    title="Siguiente Lección (L5) →"
-    description="Extensiones y Funciones Infix."
-    href="/course-2-beginners/05-extension-and-infix-functions"
-  />
-</CardGrid>
+<LinkCard
+  title="← Lección Anterior (L3)"
+  description="Jerarquías y Control de Flujo Exhaustivo."
+  href="/course-2-beginners/03-hierarchies-and-control-flow"
+/>
+<LinkCard
+  title="Siguiente Lección (L5) →"
+  description="Extensiones y Funciones Infix: enriqueciendo tipos y sintaxis fluida."
+  href="/course-2-beginners/05-extension-and-infix-functions"
+/>
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Functions en Kotlin" 
+  description="Aprende más sobre sintaxis de funciones, parámetros por defecto y notación infix." 
+  href="https://kotlinlang.org/docs/functions.html" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Interoperabilidad Java y @JvmOverloads" 
+  description="Cómo generar sobrecargas automáticas para consumidores Java desde Kotlin." 
+  href="https://kotlinlang.org/docs/java-to-kotlin-interop.html#overloads-generation" 
+/>
+
+---
+
+## Feedback y Dudas de la Lección
+
+¿Tienes alguna duda sobre la anatomía de funciones, el método `$default` o el refactor de esta lección?
+
+<LinkCard
+  title="💬 Déjanos tu Feedback o Pregunta"
+  description="Envía tus preguntas para resolverlas o sugerir mejoras pedagógicas."
+  href="https://tally.so/r/A7geNk?lesson=L4"
+/>
