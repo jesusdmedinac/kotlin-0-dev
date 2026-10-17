@@ -1,41 +1,507 @@
 ---
 title: "L5: Extension and Infix Functions"
-description: "Lesson under preparation. Extension functions, extension properties, infix notation, and fluent DSLs."
+description: "Master extending existing classes without inheritance: extension functions, extension properties, infix notation, and the bytecode secrets of static dispatch."
 sidebar:
   order: 5
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lesson in Preparation (WIP)">
-This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+## The Hell of Utility Classes (`StringUtils Hell`)
+
+In Java, C#, and virtually every classic object-oriented language, developers eventually collide with an unyielding barrier: **closed classes**.
+
+Imagine you are working with the standard `String` class. You want a simple, clean method to check if a string contains digits only, or you want to style text with ANSI colors for the terminal. However, `String` is a `final` class in the JDK: you cannot inherit from it, nor can you modify its original compiled source code.
+
+What has been the historical industry workaround for over two decades? Creating bloated **utility classes** packed with static methods:
+
+```java
+// Traditional, painful inside-out code in classic Java
+String formatted = StringUtils.capitalize(StringUtils.strip(text));
+boolean isValid = ValidationUtils.isNumeric(text);
+```
+
+This pattern suffers from two major flaws:
+1. **Inside-Out Readability:** To understand what happens to `text`, your eyes must parse the code from the inside out rather than following the natural left-to-right reading flow.
+2. **Zero IDE Discoverability:** When you type `text.` in your IDE, autocomplete has no awareness that external helper utilities exist for strings. You are forced to memorize arbitrary class names like `StringUtils`.
+
+Kotlin completely eliminates this friction with two elegant language features: **Extension Functions** and **Infix Notation**.
+
+---
+
+## Real-World Mental Models
+
+Before inspecting the syntax, let's establish intuitive analogies from everyday life:
+
+1. **Extension Functions:** Think of buying a phone case equipped with a magnetic kickstand or a wallet slot. You don't need to break into Apple's or Samsung's manufacturing plant or rewire the internal circuit board to give your smartphone an extra capability. The accessory attaches externally, yet it feels like an intrinsic, natural extension of the device.
+2. **Infix Functions:** Consider natural human grammar. In English, we say: *"Alice invites Bob"* (Subject - Verb - Object), not *"invite(Alice, Bob)"*. Infix notation allows a function name to sit cleanly between its receiver and single argument, transforming code into readable prose without the visual noise of dots and parentheses.
+
+---
+
+## Anatomy of Extension Functions
+
+An extension function allows you to "append" new functions to an existing class without touching its source code and without relying on inheritance.
+
+The syntax simply prefixes the function identifier with the **Receiver Type**:
+
+```kotlin
+// 'String' is the Receiver Type.
+// Inside the body, 'this' refers to the concrete Receiver Object instance.
+fun String.cyan(): String {
+    val cyanAnsi = "\u001B[36m"
+    val resetAnsi = "\u001B[0m"
+    return "$cyanAnsi$this$resetAnsi"
+}
+
+fun main() {
+    val message = "Welcome to AI Chat"
+    
+    // We invoke the extension exactly as if it were a native method on String
+    println(message.cyan())
+}
+```
+
+<Aside type="tip" title="Implicit 'this'">
+Just like inside standard class methods, the `this` reference inside an extension function is optional unless resolving a name collision:
+```kotlin
+fun String.lastChar(): Char = this.get(length - 1)
+// Is strictly identical to:
+fun String.lastChar(): Char = get(length - 1)
+```
 </Aside>
 
-## What will you learn in this lesson?
+### 1. Extensions Strictly Respect Encapsulation
 
-In this lesson we will explore:
-- **Deep Theory:** Extension functions, extension properties, `infix` notation for readable DSLs, and receiver scopes.
-- **Under the Hood:** Static resolution of extension functions in Bytecode (Java `public static final` methods) and why dynamic dispatch (polymorphism) does not apply.
-- **Incremental Lab (AI Chat CLI):** Authoring custom String extensions to format and colorize terminal output (`"Error".red()`, `"AI".cyan()`) fluently.
+A common beginner misconception is worrying that extension functions might break class encapsulation. **This is fundamentally impossible.**
+
+An extension function executes entirely from the outside:
+* It can only access **public** and visible internal properties or functions of the receiver class.
+* It **cannot** access `private` or `protected` members. The internal encapsulation of the class remains 100% safeguarded.
+
+### 2. Nullable Receivers
+
+You can define extensions directly on nullable types (`Type?`). This enables encapsulating null-safety checks cleanly inside the extension itself:
+
+```kotlin
+// Defining the extension on 'String?' rather than 'String'
+fun String?.orFallback(fallback: String = "Unknown"): String {
+    // Here 'this' can be null, allowing safe verification
+    return if (this.isNullOrBlank()) fallback else this.trim()
+}
+
+fun main() {
+    val rawInput: String? = null
+    // We can call the extension without needing a safe-call '?.' operator!
+    println(rawInput.orFallback("Guest")) // Prints: Guest
+}
+```
+
+This is precisely how standard library functions like `CharSequence?.isNullOrBlank()` are engineered in Kotlin.
+
+### 3. Extension Properties
+
+In addition to functions, Kotlin allows you to define virtual **Extension Properties**:
+
+```kotlin
+// Since it cannot allocate storage in memory, it must define an explicit getter
+val String.isStrongPassword: Boolean
+    get() = length >= 8 && any { it.isDigit() } && any { it.isUpperCase() }
+```
+
+<Aside type="caution" title="Extension properties have no backing fields">
+An extension property cannot hold state or use a backing field (`field`) because it does not physically alter the memory footprint of the underlying class. It must always compute its value dynamically via `get()`.
+</Aside>
+
+---
+
+## Infix Functions: Fluent and Readable Syntax
+
+Have you noticed how dictionaries and maps are instantiated in Kotlin?
+
+```kotlin
+val statusCodes = mapOf(
+    200 to "OK",
+    404 to "Not Found",
+    500 to "Internal Server Error"
+)
+```
+
+You might think that `to` is a special compiler keyword. **It is not**. `to` is simply an ordinary standard library function declared with the **`infix`** modifier.
+
+### What Problem Does Infix Notation Solve?
+
+In traditional object-oriented programming, whenever we want to connect two objects with an action or relationship, we are forced to use dots and parentheses:
+
+```kotlin
+user.sends(message)
+title.withBorder('=')
+```
+
+While functional, this adds visual clutter when expressing direct relationships between two domain entities.
+
+Kotlin allows us to omit dots `.` and parentheses `()` for functions that act as natural verbs or connectors between two operands, enabling highly readable **DSLs (Domain-Specific Languages)**:
+
+```kotlin
+user sends message
+title withBorder '='
+```
+
+### Mandatory Rules for `infix`:
+To qualify for `infix` notation, the Kotlin compiler strictly enforces four constraints:
+1. It must be a **member function** or an **extension function**.
+2. It must accept **exactly one single parameter**.
+3. The parameter **cannot** be a `vararg`.
+4. The parameter **cannot** define a default value.
+
+```kotlin
+// Defining an infix function to format tagged messages
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+
+fun main() {
+    // Traditional dot-and-parenthesis call:
+    val standard = "System online".taggedWith("INFO")
+
+    // Elegant infix call (no dots, no parentheses):
+    val fluent = "System online" taggedWith "INFO"
+    
+    println(fluent) // Prints: [INFO] System online
+}
+```
+
+Notice how Kotlin maps are constructed with `mapOf(1 to "one", 2 to "two")`. `to` is not a compiler keyword; it is simply a standard library `infix` function that returns a `Pair(a, b)`!
+
+### Operator Precedence for `infix` in Kotlin
+
+A crucial design aspect of infix functions is understanding their evaluation order relative to other expressions:
+* They have **lower precedence** than arithmetic operators (`+`, `-`, `*`, `/`), range operators (`..`), and type checks (`as`, `is`).
+* They have **higher precedence** than comparison operators (`<`, `>`, `<=`, `>=`), equality operators (`==`, `!=`), and boolean logical operators (`&&`, `||`).
+
+Consider this example:
+```kotlin
+// '1 + 2' evaluates FIRST because addition has higher precedence than 'step'
+for (i in 1 + 2 step 2) { /* ... */ } 
+// Evaluates as: (1 + 2) step 2
+
+// 'taggedWith' evaluates BEFORE '=='
+if (message taggedWith "AI" == "[AI] Hello") { /* ... */ }
+// Evaluates as: (message taggedWith "AI") == "[AI] Hello"
+```
+
+---
+
+## Under the Hood: JVM Bytecode & Static Dispatch
+
+How does the Java Virtual Machine support extension functions if the JVM bytecode specification prohibits injecting methods into compiled classes?
+
+The answer is simple and revelatory: **Extension functions are compile-time syntactic sugar over traditional static methods.**
+
+When you compile:
+```kotlin
+fun String.cyan(): String = "\u001B[36m$this\u001B[0m"
+```
+
+The Kotlin compiler emits the exact following Java Bytecode:
+```java
+// Equivalent compiled Java code emitted by the Kotlin compiler
+public static final String cyan(@NotNull String $this$cyan) {
+    Intrinsics.checkNotNullParameter($this$cyan, "$this$cyan");
+    return "\u001B[36m" + $this$cyan + "\u001B[0m";
+}
+```
+
+The receiver instance simply becomes the **first parameter** passed into the static method.
+
+### ⚠️ The Static Dispatch Trap
+
+Because extension functions compile to static methods, **extension functions DO NOT support polymorphism or dynamic dispatch**. They are resolved at compile time based strictly on the declared static type of the reference, not the runtime instance in memory.
+
+Consider this classic scenario that catches many developers off guard:
+
+```kotlin
+open class Notification
+class PushNotification : Notification()
+
+fun Notification.describe() = "Generic notification"
+fun PushNotification.describe() = "Urgent push notification"
+
+fun main() {
+    // The reference is statically typed as 'Notification',
+    // but holds an instance of 'PushNotification'.
+    val alert: Notification = PushNotification()
+
+    println(alert.describe()) 
+    // 💥 Prints "Generic notification", NOT "Urgent push notification"!
+}
+```
+
+Why did this occur? Because the compiler inspects the static type of `alert` (`Notification`) and emits a direct static call in bytecode:
+```java
+NotificationKt.describe(alert);
+```
+There is no virtual method table (`vtable`) lookup. The resolution is entirely static.
+
+### Golden Rule: Member Functions Always Win
+
+If a class already declares a member method with the exact same signature as an extension function, **the member method always takes absolute priority**:
+
+```kotlin
+class User {
+    fun printInfo() = println("Native class member")
+}
+
+fun User.printInfo() = println("Extension function")
+
+fun main() {
+    User().printInfo() // Always prints: "Native class member"
+}
+```
+
+### How Infix Functions Appear in Bytecode
+
+You might wonder: when Kotlin allows writing `"Connected" taggedWith "INFO"`, is there a special instruction in JVM Bytecode designed for infix dispatch?
+
+**The answer is no.** The `infix` modifier is 100% compile-time syntactic sugar evaluated exclusively during the Kotlin compiler's frontend parsing phase.
+
+In JVM Bytecode, an `infix` function compiles **identically to any regular function**:
+
+1. **When declared as an extension function:** It compiles into a standard static method (`public static final`) where the receiver is the first parameter and the operand is the second parameter:
+   ```kotlin
+   // Kotlin source code:
+   infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+   ```
+   Compiles into bytecode equivalent to:
+   ```java
+   // Decompiled Java Bytecode:
+   public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) {
+       Intrinsics.checkNotNullParameter($this$taggedWith, "$this$taggedWith");
+       Intrinsics.checkNotNullParameter(tag, "tag");
+       return "[" + tag + "] " + $this$taggedWith;
+   }
+   ```
+   And at the call site, the dotless, parenthesis-free infix expression:
+   ```kotlin
+   val status = "Connected" taggedWith "INFO"
+   ```
+   Emits a standard static method call via the `INVOKESTATIC` bytecode instruction:
+   ```java
+   String status = TerminalStylesKt.taggedWith("Connected", "INFO");
+   ```
+
+2. **When declared as a class member:** It compiles into a conventional virtual method call (`INVOKEVIRTUAL`):
+   ```kotlin
+   class Router {
+       infix fun routeTo(destination: String) { /* ... */ }
+   }
+   router routeTo "/chat"
+   ```
+   In Java, it is invoked simply as an ordinary instance method call: `router.routeTo("/chat");`.
+
+<Aside type="note" title="Java Interoperability">
+From Java's perspective, the `infix` modifier is completely transparent and introduces zero runtime overhead. Java callers consume Kotlin infix extensions as standard static methods (`TerminalStylesKt.taggedWith("Connected", "INFO")`) and infix members as standard instance methods.
+</Aside>
+
+---
+
+## 🧠 Conceptual Bridge: Extensions in Your Language
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * **Prototype Augmentation:** In JS/TS, extending global types requires altering `String.prototype` or declaration merging (`declare global { interface String { ... } }`).
+    * **Global Pollution Risk:** Prototype monkey-patching in JS is risky because any package can overwrite methods globally. In Kotlin, extensions are strictly scoped by `import`: if you don't import an extension, it does not exist and cannot collide with other modules.
+  </TabItem>
+  <TabItem label="Python">
+    * **Dynamic Monkey-Patching:** In Python you can assign methods dynamically at runtime (`str.custom = ...`), but primitive classes written in C (`str`, `int`) are frozen by the interpreter and raise a `TypeError`.
+    * **Lack of Static Guarantees:** Static type checkers like mypy often struggle with dynamic runtime patches, whereas Kotlin guarantees 100% compile-time type verification.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * **Direct Equivalence:** C# introduced extension methods in C# 3.0 with the syntax `public static string Cyan(this string str)`.
+    * **Identical CLR Architecture:** In C#, extension methods compile to static calls in CIL (Common Intermediate Language) and suffer from the identical static dispatch behavior without dynamic polymorphism.
+    * **No Infix Notation:** C# does not allow omitting dots and parentheses for binary calls; `infix` notation is a distinct Kotlin feature.
+  </TabItem>
+  <TabItem label="Java">
+    * **No Native Support:** Pure Java has no extension functions. Developers rely on static utility classes (`StringUtils`, `Collections`).
+    * **Consuming from Java:** If you write an extension function in a Kotlin file `TerminalStyles.kt`, a Java developer calls it as a standard static method: `TerminalStylesKt.cyan("Hello")`.
+  </TabItem>
+</Tabs>
+
+---
+
+## Incremental Lab: ANSI Styling and Fluent Messaging in the CLI
+
+Today we will elevate the user experience of our **AI Chat CLI**. We will use extension functions and infix notation to introduce vibrant ANSI colors and readable messaging.
+
+### Lab Deliverables
+
+<LinkCard 
+  title="🧑‍💻 Starter Template (L5-start Tag)" 
+  description="Exact starting point where we concluded Lesson 4." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L5-start" 
+/>
+<LinkCard 
+  title="✅ Completed Solution (L5-done Tag)" 
+  description="Fully styled CLI leveraging ANSI string extensions and infix functions." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L5-done" 
+/>
+
+---
+
+### Step-by-Step Instructions
+
+Open your project. We will create a dedicated file for our styling extensions and then integrate them cleanly into `Main.kt`.
+
+#### Step 1: Create Color Extensions in `TerminalStyles.kt`
+
+Create a new file at `src/main/kotlin/TerminalStyles.kt` and define standard ANSI escape codes alongside String extension functions:
+
+```kotlin
+/**
+ * Standard ANSI escape codes for styling compatible terminal output.
+ */
+private const val ANSI_RESET = "\u001B[0m"
+private const val ANSI_BOLD = "\u001B[1m"
+private const val ANSI_RED = "\u001B[31m"
+private const val ANSI_GREEN = "\u001B[32m"
+private const val ANSI_YELLOW = "\u001B[33m"
+private const val ANSI_CYAN = "\u001B[36m"
+
+/**
+ * Extension functions on the standard String class.
+ * Enables fluent color styling: "Alert".red().bold()
+ */
+fun String.cyan(): String = "$ANSI_CYAN$this$ANSI_RESET"
+fun String.green(): String = "$ANSI_GREEN$this$ANSI_RESET"
+fun String.yellow(): String = "$ANSI_YELLOW$this$ANSI_RESET"
+fun String.red(): String = "$ANSI_RED$this$ANSI_RESET"
+fun String.bold(): String = "$ANSI_BOLD$this$ANSI_RESET"
+
+/**
+ * Infix function to format message tags with human-readable syntax.
+ * Example: "Connected" taggedWith "INFO" -> "[INFO] Connected"
+ */
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+```
+
+#### Step 2: Integrate Extensions into `printBanner`
+
+Open `src/main/kotlin/Main.kt`. Update the banner logic to leverage our fluent string styling:
+
+```kotlin
+fun printBanner(
+    title: String = "AI Chat CLI",
+    width: Int = 31,
+    borderChar: Char = '='
+) {
+    val border = borderChar.toString().repeat(width).cyan()
+    println(border)
+    // Chaining .bold() and .cyan() fluently
+    println("🤖 ${title.bold().cyan()}")
+    println(border)
+}
+```
+
+#### Step 3: Enhance `askForUsername` with Styled Prompts
+
+Update the prompt to highlight the question in cyan:
+
+```kotlin
+fun askForUsername(defaultName: String = "Guest"): String {
+    print("Please, enter your name: ".cyan())
+    val input = readlnOrNull()
+    return if (!input.isNullOrBlank()) input.trim() else defaultName
+}
+```
+
+#### Step 4: Format Menu Commands and Execution Output
+
+Enrich menu options and combine `taggedWith` with color extensions to display system statuses:
+
+```kotlin
+fun printMenu() {
+    println("\n--- Main Menu ---".bold())
+    println("1. Chat")
+    println("2. Settings")
+    println("3. Exit")
+    print("Choose an option: ".cyan())
+}
+
+fun executeMenuOption(option: MenuOption, username: String): Boolean = when (option) {
+    MenuOption.CHAT -> {
+        // Combining infix 'taggedWith' with green styling
+        println("Entering chat mode... (Work in progress)" taggedWith "AI".green())
+        true
+    }
+    MenuOption.SETTINGS -> {
+        println("Entering settings... (Work in progress)" taggedWith "SYSTEM".yellow())
+        true
+    }
+    MenuOption.EXIT -> {
+        println("Goodbye, $username! See you soon.".yellow())
+        false
+    }
+    MenuOption.UNKNOWN -> {
+        // Highlighting error clearly in red
+        println("Invalid option. Please try again.".red())
+        true
+    }
+}
+```
+
+---
+
+### Step 5: Multi-Environment Verification
+
+Run your updated application:
+```bash
+./gradlew run --console=plain -q
+```
+*(On Windows: `gradlew.bat run --console=plain -q`)*
+
+**Test Scenarios to Validate:**
+1. The banner outputs clean cyan borders with the title in bold cyan.
+2. Typing an invalid menu option (e.g., `9`) displays a clear red warning message.
+3. Choosing option `1` prints the status preceded by the green `[AI]` tag formatted via `taggedWith`.
+4. Choosing option `3` exits with a yellow farewell message.
+
+Congratulations! You have mastered extending Kotlin types idiomatically, safely, and with clean, readable syntax.
 
 ---
 
 ## Navigation
 
-<CardGrid>
-  <LinkCard
-    title="← Course Syllabus"
-    description="Return to the full lesson curriculum."
-    href="/en/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Previous Lesson (L4)"
-    description="Anatomy of Functions."
-    href="/en/course-2-beginners/04-anatomy-of-functions"
-  />
-  <LinkCard
-    title="Next Lesson (L6) →"
-    description="Higher-Order Functions and Lambdas."
-    href="/en/course-2-beginners/06-higher-order-functions"
-  />
-</CardGrid>
+<LinkCard
+  title="← Previous Lesson (L4)"
+  description="Anatomy of Functions: default arguments, named arguments, and bytecode."
+  href="/en/course-2-beginners/04-anatomy-of-functions"
+/>
+<LinkCard
+  title="Next Lesson (L6) →"
+  description="Higher-Order Functions and Lambdas: passing behavior as data."
+  href="/en/course-2-beginners/06-higher-order-functions"
+/>
+
+---
+
+## Sources & Recommended Readings
+
+<LinkCard 
+  title="Official Kotlin Documentation: Extensions" 
+  description="Explore extension receivers, member extensions, and architecture guidelines." 
+  href="https://kotlinlang.org/docs/extensions.html" 
+/>
+<LinkCard 
+  title="Official Kotlin Documentation: Infix Notation" 
+  description="Compiler requirements for declaring and invoking infix functions." 
+  href="https://kotlinlang.org/docs/functions.html#infix-notation" 
+/>
+
+---
+
+## Lesson Feedback & Questions
+
+Do you have questions regarding static dispatch, nullable receivers, or infix notation?
+
+<LinkCard
+  title="💬 Submit Feedback or Ask a Question"
+  description="Send us your questions or suggestions to enhance our pedagogical materials."
+  href="https://tally.so/r/A7geNk?lesson=L5"
+/>
