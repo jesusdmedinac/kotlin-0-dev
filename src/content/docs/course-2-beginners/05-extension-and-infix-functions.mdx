@@ -301,6 +301,44 @@ fun main() {
 }
 ```
 
+### ¿Y qué ocurre con `infix` en Bytecode? (Cero Sobrecarga y `@Metadata`)
+
+Una duda habitual entre ingenieros de software es si la notación infija introduce alguna penalización de rendimiento en tiempo de ejecución o si la JVM cuenta con instrucciones especiales para invocar funciones infijas.
+
+La respuesta es rotunda: **a nivel de instrucciones de Bytecode ejecutables, no hay absolutamente ninguna diferencia.**
+
+#### 1. Misma Definición del Método en Bytecode
+Una función declarada con el modificador `infix`:
+```kotlin
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+```
+Se compila exactamente a la misma firma estática tradicional de Java:
+```java
+public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) { ... }
+```
+La especificación de la JVM no posee ningún modificador de acceso `ACC_INFIX` ni instrucción de máquina dedicada a llamadas infijas.
+
+#### 2. Mismo Bytecode en el Sitio de Llamada
+Tanto si escribes la llamada tradicional con punto y paréntesis como si utilizas la notación infija:
+```kotlin
+val a = "Servidor listo".taggedWith("INFO") // Con punto y paréntesis
+val b = "Servidor listo" taggedWith "INFO"   // Notación infija
+```
+En ambos casos el compilador genera **exactamente la misma secuencia de instrucciones de bytecode**:
+```text
+LDC "Servidor listo"
+LDC "INFO"
+INVOKESTATIC TerminalStylesKt.taggedWith (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+```
+*(Y si fuera un método miembro en lugar de una función de extensión, generaría de forma idéntica un `INVOKEVIRTUAL`).* Esto demuestra que la notación `infix` es una **abstracción de costo cero (zero-cost abstraction)**: cero penalización de CPU y cero asignaciones de memoria adicionales.
+
+#### 3. El Secreto: El Flag `IS_INFIX` en `@kotlin.Metadata`
+Si el bytecode ejecutable es idéntico, ¿cómo sabe el compilador de Kotlin —cuando consumes una librería empaquetada en un `.jar`— que esa función tiene permitido invocarse sin puntos ni paréntesis?
+
+A través de la anotación oculta **`@kotlin.Metadata`** que el compilador inyecta en cada clase compilada. Dentro de su descriptor binario (serializado con Protocol Buffers), Kotlin enciende una bandera booleana: **`IS_INFIX`**. 
+
+Este flag es leído exclusivamente por el compilador de Kotlin durante la fase de análisis sintáctico de los proyectos clientes; para la JVM y para los desarrolladores de Java, es completamente invisible y se comporta como un método estático o miembro convencional de dos parámetros.
+
 ---
 
 ## 🧠 Puente Conceptual: Extensiones en tu Lenguaje

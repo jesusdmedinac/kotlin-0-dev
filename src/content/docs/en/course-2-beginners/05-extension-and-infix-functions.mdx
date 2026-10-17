@@ -299,6 +299,44 @@ fun main() {
 }
 ```
 
+### What Happens to `infix` in Bytecode? (Zero-Cost Abstraction & `@Metadata`)
+
+A frequent question among software engineers is whether infix notation incurs any runtime performance overhead or whether the JVM possesses specialized opcodes for infix calls.
+
+The answer is definitive: **at the executable bytecode instruction level, there is zero difference.**
+
+#### 1. Identical Bytecode Method Definition
+A function declared with the `infix` modifier:
+```kotlin
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+```
+Compiles to the exact same traditional static Java method signature:
+```java
+public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) { ... }
+```
+The JVM specification contains no `ACC_INFIX` access flag or dedicated bytecode opcode for infix invocations.
+
+#### 2. Identical Bytecode at the Call Site
+Whether you write the standard dot-and-parenthesis call or fluent infix syntax:
+```kotlin
+val a = "System online".taggedWith("INFO") // Standard dot-and-parenthesis call
+val b = "System online" taggedWith "INFO"   // Fluent infix syntax
+```
+In both scenarios, the Kotlin compiler emits the **exact same JVM bytecode instructions**:
+```text
+LDC "System online"
+LDC "INFO"
+INVOKESTATIC TerminalStylesKt.taggedWith (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+```
+*(And if it were a class member function rather than an extension, it would identically emit an `INVOKEVIRTUAL`).* This proves that Kotlin's infix notation is a **zero-cost abstraction**: zero runtime CPU overhead and zero extra memory allocations.
+
+#### 3. The Secret: The `IS_INFIX` Flag in `@kotlin.Metadata`
+If the executable bytecode is identical, how does the Kotlin compiler know—when consuming pre-compiled libraries distributed as a `.jar`—that a given function is permitted to be invoked without dots and parentheses?
+
+Through the hidden **`@kotlin.Metadata`** annotation that the compiler injects into every compiled `.class` file. Inside its binary Protocol Buffers header, Kotlin toggles a specific boolean bitmask flag: **`IS_INFIX`**.
+
+This flag is inspected strictly by the Kotlin compiler during syntactic analysis; to the JVM and to Java callers, it is completely invisible and functions as a standard method accepting receiver and argument parameters.
+
 ---
 
 ## 🧠 Conceptual Bridge: Extensions in Your Language
