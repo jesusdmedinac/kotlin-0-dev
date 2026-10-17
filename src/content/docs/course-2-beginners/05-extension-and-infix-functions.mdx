@@ -1,41 +1,418 @@
 ---
 title: "L5: Extensiones y Funciones Infix"
-description: "Lección en preparación. Extension functions, extension properties, sintaxis infix y DSL fluido."
+description: "Aprende a extender clases existentes sin herencia: funciones de extensión, propiedades de extensión, sintaxis infix y el secreto de la resolución estática en Bytecode."
 sidebar:
   order: 5
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lección en Construcción (WIP)">
-Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+## El Infierno de las Clases de Utilidad (`StringUtils Hell`)
+
+En Java, C# y prácticamente cualquier lenguaje orientado a objetos clásico, tarde o temprano chocas contra un muro infranqueable: **las clases cerradas**.
+
+Imagina que estás trabajando con la clase estándar `String`. Quieres una función sencilla para verificar si una cadena contiene solo dígitos, o quieres colorear el texto en la terminal. Pero `String` es una clase `final` del JDK: no puedes heredar de ella ni modificar su código fuente original.
+
+¿Cuál ha sido la solución histórica de la industria durante más de dos décadas? Crear las infames **clases de utilidades** llenas de métodos estáticos:
+
+```java
+// El doloroso estilo invertido en Java tradicional
+String formatted = StringUtils.capitalize(StringUtils.strip(text));
+boolean isValid = ValidationUtils.isNumeric(text);
+```
+
+Este patrón tiene dos defectos graves:
+1. **Lectura invertida (Inside-Out):** Para entender qué le ocurre a `text`, tus ojos tienen que leer de adentro hacia afuera en lugar de la dirección natural de izquierda a derecha.
+2. **Cero autocompletado en el IDE:** Cuando escribes `text.` en tu editor, el autocompletado no sabe qué utilidades existen para cadenas. Tienes que recordar memorísticamente que existe una clase llamada `StringUtils`.
+
+Kotlin erradica este problema por completo mediante dos herramientas lingüísticas poderosas: **Funciones de Extensión** y **Notación Infix**.
+
+---
+
+## Analogías del Mundo Real
+
+Antes de entrar en sintaxis, afiancemos estos conceptos con analogías cotidianas:
+
+1. **Funciones de Extensión:** Imagina comprar una funda con soporte magnético o una correa para tu teléfono inteligente. No necesitas irrumpir en la fábrica de Apple o Samsung ni modificar los microchips soldados en la placa base para darle una habilidad extra a tu teléfono. El accesorio se acopla externamente desde afuera, pero se siente como parte natural del dispositivo.
+2. **Funciones Infix:** Piensa en la gramática natural del lenguaje humano. En español decimos: *"Juan invita a María"* (Sujeto - Verbo - Objeto), no decimos *"invitar(Juan, María)"*. La notación infija permite que el nombre de la función se coloque en medio de dos operandos, convirtiendo el código en prosa fluida sin ruido de puntos ni paréntesis.
+
+---
+
+## Anatomía de las Funciones de Extensión
+
+Una función de extensión te permite "añadir" nuevas funciones a una clase existente sin tener acceso a su código fuente y sin usar herencia.
+
+La sintaxis consiste en prefijar el nombre de la función con el **Tipo Receptor** (*Receiver Type*):
+
+```kotlin
+// 'String' es el Tipo Receptor (Receiver Type).
+// Dentro del cuerpo, 'this' hace referencia a la instancia concreta (Receiver Object).
+fun String.cyan(): String {
+    val cyanAnsi = "\u001B[36m"
+    val resetAnsi = "\u001B[0m"
+    return "$cyanAnsi$this$resetAnsi"
+}
+
+fun main() {
+    val message = "Bienvenido al AI Chat"
+    
+    // Invocamos la extensión como si fuera un método nativo de la clase String
+    println(message.cyan())
+}
+```
+
+<Aside type="tip" title="this Implícito">
+Al igual que dentro de cualquier método de clase, la referencia `this` dentro de una función de extensión es opcional si no hay colisión de nombres. Por ejemplo:
+```kotlin
+fun String.lastChar(): Char = this.get(length - 1)
+// Es exactamente equivalente a:
+fun String.lastChar(): Char = get(length - 1)
+```
 </Aside>
 
-## ¿Qué aprenderás en esta lección?
+### 1. Las Extensiones Respetan la Encapsulación
 
-En esta lección exploraremos:
-- **Teoría a fondo:** Funciones de extensión (`Extension Functions`), propiedades de extensión, sintaxis `infix` para DSLs legibles y ámbito de receptores.
-- **Bajo el capó:** Resolución estática de extensiones en Bytecode (métodos estáticos `public static final` de Java) y por qué no existe despacho dinámico (polimorfismo).
-- **Laboratorio Incremental (AI Chat CLI):** Creación de extensiones para dar formato y colorear la terminal (`"Error".red()`, `"AI".cyan()`) con fluidez.
+Un mito común entre principiantes es temer que las extensiones puedan violar la seguridad de una clase. **Esto es imposible**.
+
+Una función de extensión se ejecuta desde el exterior. Por lo tanto:
+* Solo puede acceder a las propiedades y funciones **públicas** o internas visibles de la clase receptora.
+* **No puede** acceder a miembros `private` o `protected`. El encapsulamiento de la clase permanece 100% inviolable.
+
+### 2. Extensiones con Receptores Anulables (`Nullable Receivers`)
+
+Puedes definir extensiones incluso sobre tipos que pueden ser nulos (`Type?`). Esto permite manejar la contingencia ante nulos limpiamente dentro de la propia extensión:
+
+```kotlin
+// Definimos la extensión sobre 'String?' en lugar de 'String'
+fun String?.orFallback(fallback: String = "Desconocido"): String {
+    // Aquí 'this' puede ser null, por lo que usamos el operador Elvis
+    return if (this.isNullOrBlank()) fallback else this.trim()
+}
+
+fun main() {
+    val rawInput: String? = null
+    // ¡Podemos llamar a la función sin necesidad de un safe call '?.'!
+    println(rawInput.orFallback("Invitado")) // Imprime: Invitado
+}
+```
+
+Esta es exactamente la técnica que utiliza la librería estándar de Kotlin para funciones tan ubicuas como `CharSequence?.isNullOrBlank()`.
+
+### 3. Propiedades de Extensión (`Extension Properties`)
+
+Además de funciones, Kotlin permite extender clases con **propiedades virtuales**:
+
+```kotlin
+// Como no almacena estado en memoria, debe proveer un getter explícito
+val String.isStrongPassword: Boolean
+    get() = length >= 8 && any { it.isDigit() } && any { it.isUpperCase() }
+```
+
+<Aside type="caution" title="Las propiedades de extensión no tienen 'backing field'">
+Una propiedad de extensión no puede tener un campo de respaldo (*backing field* `field`) ni almacenar un nuevo estado en la instancia, porque físicamente no modifica la estructura de la clase en memoria. Siempre debe ser computada a través de un `get()`.
+</Aside>
+
+---
+
+## Funciones Infix: Sintaxis de Lenguaje Natural
+
+Kotlin permite prescindir de los puntos `.` y los paréntesis `()` al invocar ciertas funciones mediante el modificador **`infix`**.
+
+### Reglas Obligatorias para `infix`:
+Para que una función pueda ser declarada con `infix`, el compilador de Kotlin exige estrictamente:
+1. Debe ser una **función miembro** o una **función de extensión**.
+2. Debe recibir **exactamente un único parámetro**.
+3. El parámetro **no puede** ser `vararg`.
+4. El parámetro **no puede** tener valores por defecto.
+
+```kotlin
+// Declaramos una función infix para etiquetar mensajes
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+
+fun main() {
+    // Invocación estándar tradicional:
+    val regular = "Servidor iniciado".taggedWith("INFO")
+
+    // Invocación fluida con sintaxis Infix (sin punto ni paréntesis):
+    val elegant = "Servidor iniciado" taggedWith "INFO"
+    
+    println(elegant) // Imprime: [INFO] Servidor iniciado
+}
+```
+
+¿Recuerdas cómo se construyen mapas en Kotlin con `mapOf(1 to "uno", 2 to "dos")`? `to` no es una palabra reservada del compilador; ¡es simplemente una función `infix` de la librería estándar que retorna un par (`Pair(a, b)`)!
+
+---
+
+## Bajo el Capó: El Secreto del Bytecode y el Despacho Estático
+
+¿Cómo implementa la máquina virtual de Java las funciones de extensión si la JVM no permite inyectar métodos en clases compiladas?
+
+La respuesta es simple y reveladora: **Las funciones de extensión son azúcar sintáctico sobre métodos estáticos tradicionales.**
+
+Cuando compilas:
+```kotlin
+fun String.cyan(): String = "\u001B[36m$this\u001B[0m"
+```
+
+El compilador de Kotlin genera en Java Bytecode exactamente lo siguiente:
+```java
+// Código Java equivalente generado por el compilador
+public static final String cyan(@NotNull String $this$cyan) {
+    Intrinsics.checkNotNullParameter($this$cyan, "$this$cyan");
+    return "\u001B[36m" + $this$cyan + "\u001B[0m";
+}
+```
+
+El objeto receptor simplemente se convierte en el **primer parámetro** del método estático.
+
+### ⚠️ La Gran Trampa: El Despacho Estático (*Static Dispatch*)
+
+Debido a que las extensiones se compilan como métodos estáticos, **las funciones de extensión NO admiten polimorfismo ni despacho dinámico**. Se resuelven en tiempo de compilación basándose en el tipo declarado de la variable, no en el tipo real del objeto en tiempo de ejecución.
+
+Veamos un ejemplo clásico que confunde a muchos desarrolladores:
+
+```kotlin
+open class Notification
+class PushNotification : Notification()
+
+fun Notification.describe() = "Notificación genérica"
+fun PushNotification.describe() = "Notificación push urgente"
+
+fun main() {
+    // La variable está tipada estáticamente como 'Notification', 
+    // pero la instancia real en memoria es 'PushNotification'.
+    val alert: Notification = PushNotification()
+
+    println(alert.describe()) 
+    // 💥 ¡Imprime "Notificación genérica", NO "Notificación push urgente"!
+}
+```
+
+¿Por qué ocurrió esto? Porque el compilador analiza el tipo estático de la variable `alert` (`Notification`) y en el bytecode emite directamente:
+```java
+NotificationKt.describe(alert);
+```
+No hay búsqueda en la tabla de métodos virtuales (*vtable*). La resolución fue $100\%$ estática.
+
+### Regla de Oro: Los Miembros de Clase Siempre Ganan
+
+Si una clase ya tiene un método con la misma firma que tu función de extensión, **el método miembro original siempre tiene prioridad absoluta**:
+
+```kotlin
+class User {
+    fun printInfo() = println("Miembro nativo de la clase")
+}
+
+fun User.printInfo() = println("Función de extensión")
+
+fun main() {
+    User().printInfo() // Siempre imprimirá: "Miembro nativo de la clase"
+}
+```
+
+---
+
+## 🧠 Puente Conceptual: Extensiones en tu Lenguaje
+
+<Tabs>
+  <TabItem label="TypeScript / JavaScript">
+    * **Prototype Augmentation:** En JS/TS, extender tipos globales como `String` requiere modificar `String.prototype` o usar *Declaration Merging* (`declare global { interface String { ... } }`).
+    * **Peligro de Colisión Global:** En JavaScript, el *monkey patching* de prototipos es riesgoso porque cualquier librería puede sobrescribir el mismo método globalmente. En Kotlin, las extensiones están encapsuladas por `import`: si no importas la extensión en tu archivo, no existe ni contamina el espacio global.
+  </TabItem>
+  <TabItem label="Python">
+    * **Monkey Patching Dinámico:** En Python puedes asignar métodos dinámicamente a clases en tiempo de ejecución (`str.custom_method = ...`), pero las clases primitivas escritas en C (`str`, `int`) están congeladas por el intérprete y arrojan un `TypeError`.
+    * **Sin Seguridad Estática:** El tipado estático de mypy y Pyright a menudo tiene dificultades para rastrear parches dinámicos, mientras que en Kotlin el compilador y el IDE garantizan verificación de tipos en tiempo de compilación.
+  </TabItem>
+  <TabItem label="C# / .NET">
+    * **Paralelismo Idéntico:** C# implementó los métodos de extensión en C# 3.0 usando la sintaxis `public static string Cyan(this string str)`.
+    * **Mismo Mecanismo en el CLR:** Al igual que en la JVM, en C# los métodos de extensión se compilan como llamadas estáticas a nivel de IL (Intermediate Language) y sufren exactamente de la misma resolución estática sin polimorfismo.
+    * **Sin Notación Infix:** C# no admite la omisión de puntos y paréntesis para llamadas binarias; la notación `infix` es exclusiva de Kotlin.
+  </TabItem>
+  <TabItem label="Java">
+    * **Inexistente:** Java puro no cuenta con funciones de extensión. Obliga a utilizar clases de utilidad estáticas (`StringUtils`, `Collections`).
+    * **Consumo desde Java:** Si escribes una extensión en Kotlin dentro de un archivo `TerminalStyles.kt`, un desarrollador Java la consume como un método estático tradicional: `TerminalStylesKt.cyan("Hola")`.
+  </TabItem>
+</Tabs>
+
+---
+
+## Laboratorio Incremental: Estilos ANSI y Mensajería Fluida en la CLI
+
+Hoy transformaremos la experiencia visual de nuestro **AI Chat CLI**. Utilizaremos funciones de extensión para dotar a los textos de la consola de colores ANSI y sintaxis fluida.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla L5-start)" 
+  description="Punto de partida exacto desde donde concluimos la Lección 4." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L5-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto (Solución L5-done)" 
+  description="El código completo enriquecido con extensiones de color ANSI y funciones infix." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L5-done" 
+/>
+
+---
+
+### Instrucciones Paso a Paso
+
+Abre tu proyecto en tu editor. Vamos a crear un archivo dedicado para nuestras extensiones estilísticas y luego las aplicaremos en `Main.kt`.
+
+#### Paso 1: Crear las Extensiones de Color en `TerminalStyles.kt`
+
+Crea un nuevo archivo en `src/main/kotlin/TerminalStyles.kt` y define las secuencias de escape ANSI junto con las funciones de extensión para `String`:
+
+```kotlin
+/**
+ * Secuencias de escape estándar ANSI para dar estilo y color en terminales compatibles.
+ */
+private const val ANSI_RESET = "\u001B[0m"
+private const val ANSI_BOLD = "\u001B[1m"
+private const val ANSI_RED = "\u001B[31m"
+private const val ANSI_GREEN = "\u001B[32m"
+private const val ANSI_YELLOW = "\u001B[33m"
+private const val ANSI_CYAN = "\u001B[36m"
+
+/**
+ * Funciones de extensión sobre la clase estándar String.
+ * Nos permiten encadenar colores de forma fluida: "Alerta".red().bold()
+ */
+fun String.cyan(): String = "$ANSI_CYAN$this$ANSI_RESET"
+fun String.green(): String = "$ANSI_GREEN$this$ANSI_RESET"
+fun String.yellow(): String = "$ANSI_YELLOW$this$ANSI_RESET"
+fun String.red(): String = "$ANSI_RED$this$ANSI_RESET"
+fun String.bold(): String = "$ANSI_BOLD$this$ANSI_RESET"
+
+/**
+ * Función infix para formatear etiquetas de mensajes con sintaxis legible.
+ * Ejemplo: "Conectado" taggedWith "INFO" -> "[INFO] Conectado"
+ */
+infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+```
+
+#### Paso 2: Integrar las Extensiones en el Banner y Menú de `Main.kt`
+
+Abre `src/main/kotlin/Main.kt`. Ahora actualizaremos nuestras funciones modulares para aprovechar la elegancia visual de las nuevas extensiones:
+
+```kotlin
+fun printBanner(
+    title: String = "AI Chat CLI",
+    width: Int = 31,
+    borderChar: Char = '='
+) {
+    val border = borderChar.toString().repeat(width).cyan()
+    println(border)
+    // Usamos .bold() y .cyan() como métodos fluidos directos
+    println("🤖 ${title.bold().cyan()}")
+    println(border)
+}
+```
+
+#### Paso 3: Mejorar la Función `askForUsername` con Estilos y Default
+
+Actualiza la solicitud del nombre de usuario para que el prompt resalte en color cian:
+
+```kotlin
+fun askForUsername(defaultName: String = "Guest"): String {
+    print("Please, enter your name: ".cyan())
+    val input = readlnOrNull()
+    return if (!input.isNullOrBlank()) input.trim() else defaultName
+}
+```
+
+#### Paso 4: Dar Formato al Menú y a las Opciones Ejecutables
+
+Enriquece la impresión del menú con colores y utiliza la función `taggedWith` para etiquetar el estado del sistema:
+
+```kotlin
+fun printMenu() {
+    println("\n--- Main Menu ---".bold())
+    println("1. Chat")
+    println("2. Settings")
+    println("3. Exit")
+    print("Choose an option: ".cyan())
+}
+
+fun executeMenuOption(option: MenuOption, username: String): Boolean = when (option) {
+    MenuOption.CHAT -> {
+        // Combinamos la función infix 'taggedWith' con la extensión de color .green()
+        println("Entering chat mode... (Work in progress)" taggedWith "AI".green())
+        true
+    }
+    MenuOption.SETTINGS -> {
+        println("Entering settings... (Work in progress)" taggedWith "SYSTEM".yellow())
+        true
+    }
+    MenuOption.EXIT -> {
+        println("Goodbye, $username! See you soon.".yellow())
+        false
+    }
+    MenuOption.UNKNOWN -> {
+        // Resaltamos el error claramente con .red()
+        println("Invalid option. Please try again.".red())
+        true
+    }
+}
+```
+
+---
+
+### Paso 5: Verificación en Terminal
+
+Ejecuta tu aplicación interactiva:
+```bash
+./gradlew run --console=plain -q
+```
+*(En Windows: `gradlew.bat run --console=plain -q`)*
+
+**Casos a verificar:**
+1. El banner debe mostrar los bordes en color cian brillante y el título en negritas.
+2. Al ingresar una opción desconocida (como `9`), el texto debe aparecer nítidamente en rojo de advertencia.
+3. Al seleccionar la opción `1`, el mensaje debe aparecer precedido por la etiqueta `[AI]` en color verde formateada gracias a la función `infix`.
+4. Al salir con la opción `3`, la despedida se mostrará en color amarillo.
+
+¡Felicidades! Has aprendido a expandir cualquier tipo de datos de Kotlin de manera idiomática, segura y con un estilo de código ultra legible.
 
 ---
 
 ## Navegación
 
-<CardGrid>
-  <LinkCard
-    title="← Temario del Curso"
-    description="Volver al índice general de lecciones."
-    href="/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Lección Anterior (L4)"
-    description="Anatomía de Funciones."
-    href="/course-2-beginners/04-anatomy-of-functions"
-  />
-  <LinkCard
-    title="Siguiente Lección (L6) →"
-    description="Funciones de Orden Superior y Lambdas."
-    href="/course-2-beginners/06-higher-order-functions"
-  />
-</CardGrid>
+<LinkCard
+  title="← Lección Anterior (L4)"
+  description="Anatomía de Funciones: default arguments, named arguments y bytecode."
+  href="/course-2-beginners/04-anatomy-of-functions"
+/>
+<LinkCard
+  title="Siguiente Lección (L6) →"
+  description="Funciones de Orden Superior y Lambdas: pasando código como datos."
+  href="/course-2-beginners/06-higher-order-functions"
+/>
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Extension Functions" 
+  description="Aprende más sobre receptores, alcance de extensiones y propiedades." 
+  href="https://kotlinlang.org/docs/extensions.html" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Infix Notation" 
+  description="Directrices del compilador para definir y estructurar llamadas infijas." 
+  href="https://kotlinlang.org/docs/functions.html#infix-notation" 
+/>
+
+---
+
+## Feedback y Dudas de la Lección
+
+¿Tienes alguna pregunta sobre despacho estático, receptores anulables o sintaxis infix?
+
+<LinkCard
+  title="💬 Déjanos tu Feedback o Pregunta"
+  description="Envía tus preguntas para resolverlas o sugerir mejoras pedagógicas."
+  href="https://tally.so/r/A7geNk?lesson=L5"
+/>

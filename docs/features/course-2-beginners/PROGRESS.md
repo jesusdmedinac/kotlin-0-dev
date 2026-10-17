@@ -10,7 +10,7 @@
 - [x] L2: Variables, Types, and the Truth about Null Safety
 - [x] L3: Hierarchies and Exhaustive Control Flow
 - [x] L4: Anatomy of Functions
-- [ ] L5: Extension and Infix Functions
+- [x] L5: Extension and Infix Functions
 - [ ] L6: Custom Higher-Order Functions
 - [ ] L7: Collections and Sequences (Lazy vs Eager)
 - [ ] L8: Scope Functions (The Swiss Army Knife)
