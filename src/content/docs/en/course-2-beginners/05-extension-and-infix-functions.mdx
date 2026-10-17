@@ -114,80 +114,37 @@ An extension property cannot hold state or use a backing field (`field`) because
 
 ---
 
-## Infix Functions: From Linguistics and Mathematics to Computer Science
+## Infix Functions: Fluent and Readable Syntax
 
-To truly appreciate why the `infix` keyword exists in Kotlin and why it is so transformative, it is illuminating to take an interdisciplinary journey through **Linguistics**, **Mathematics**, and **Computer Science**.
+Have you noticed how dictionaries and maps are instantiated in Kotlin?
 
-### 1. The Linguistic Root: Morphology and Word Order
-
-In human linguistics, modifiers attached to a word root are called **affixes**, categorized strictly by where they are inserted:
-* **Prefix:** Attached to the **beginning** of a word (e.g., *re-write*, *un-happy*, *dis-connect*).
-* **Suffix:** Attached to the **end** of a word (e.g., *quick-ly*, *read-able*, *runn-er*).
-* **Infix:** Inserted **inside** the root itself. While rare in Germanic and Romance languages (often limited to colloquial intensifiers or poetic diminutives, e.g., *abso-bloody-lutely*), infixes are fundamental in Austronesian languages like Tagalog (root *sulat* "write" $\rightarrow$ *s-um-ulat* "wrote") and Latin (root *frag-* $\rightarrow$ *f-ri-ngo* "I break").
-
-Beyond word morphology, there is **syntactic sentence order**: the vast majority of dominant modern languages (including English and Spanish) follow the **Subject - Verb - Object (SVO)** topology:
-
-```text
-[Alice] (Subject)  --->  [sends] (Infix Verb)  --->  [a message] (Object)
+```kotlin
+val statusCodes = mapOf(
+    200 to "OK",
+    404 to "Not Found",
+    500 to "Internal Server Error"
+)
 ```
 
-The verb serves as a natural **infix connector** bridging the acting subject to its target object. Writing code like `"Alice".send("message")` or `send("Alice", "message")` feels artificial to human cognition because it inverts or distorts this innate grammatical topology.
+You might think that `to` is a special compiler keyword. **It is not**. `to` is simply an ordinary standard library function declared with the **`infix`** modifier.
 
----
+### What Problem Does Infix Notation Solve?
 
-### 2. Mathematical Notations: From Łukasiewicz to Arithmetic
+In traditional object-oriented programming, whenever we want to connect two objects with an action or relationship, we are forced to use dots and parentheses:
 
-In mathematics, the placement of an operator dictates the rules governing expression evaluation:
+```kotlin
+user.sends(message)
+title.withBorder('=')
+```
 
-1. **Infix Notation:**
-   * The familiar convention taught in grade school: `A + B`, `X * Y`.
-   * The operator sits **between** its operands.
-   * **The Central Dilemma of Infix:** It demands complex **operator precedence** hierarchies (multiplication before addition) and constant reliance on **parentheses** to resolve ambiguity:
-     * Without parentheses: `2 + 3 * 4 = 14`
-     * With parentheses: `(2 + 3) * 4 = 20`
+While functional, this adds visual clutter when expressing direct relationships between two domain entities.
 
-2. **Prefix Notation (Polish Notation):**
-   * Invented in 1924 by Polish logician and mathematician **Jan Łukasiewicz**.
-   * The operator precedes its operands: `+ 2 3`.
-   * The expression `(2 + 3) * 4` is written deterministically: `* + 2 3 4`.
-   * **The Mathematical Superpower:** It completely eliminates the need for parentheses! The evaluation sequence is $100\%$ deterministic.
+Kotlin allows us to omit dots `.` and parentheses `()` for functions that act as natural verbs or connectors between two operands, enabling highly readable **DSLs (Domain-Specific Languages)**:
 
-3. **Postfix Notation (Reverse Polish Notation - RPN):**
-   * The operator follows its operands: `2 3 +`.
-   * The expression `(2 + 3) * 4` is written: `2 3 + 4 *`.
-   * Made famous by **Hewlett-Packard (HP)** scientific calculators throughout the 1970s and 1980s.
-
----
-
-### 3. The Shift to Computing: Compilers, Stacks, and the JVM
-
-How do computing architectures process these three notations?
-
-1. **Dijkstra's Shunting-Yard Algorithm (1961):**
-   Computers parse text as a flat stream of tokens. When a compiler encounters an infix expression like `a + b * c`, it uses Edsger Dijkstra's *Shunting-Yard* algorithm (inspired by railroad switching yards) to convert the infix stream into an **Abstract Syntax Tree (AST)** or directly into postfix bytecode.
-
-2. **The Stack Machine Architecture of the JVM:**
-   The Java Virtual Machine (JVM) does not evaluate infix expressions directly. The JVM is an operand-stack machine. Every arithmetic calculation executes as pure postfix (RPN) bytecode:
-   ```
-   BIPUSH 2     // Push 2 onto operand stack
-   BIPUSH 3     // Push 3 onto operand stack
-   IADD         // Pop 3 and 2, add them, push 5
-   BIPUSH 4     // Push 4 onto operand stack
-   IMUL         // Pop 4 and 5, multiply them, push 20
-   ```
-
-3. **How Programming Language Paradigms Adopted Notations:**
-   * **Prefix:** The **Lisp / Clojure** family embraced pure prefix syntax: `(+ 2 (* 3 4))` and standard C/Java function calls: `calculate(x, y)`.
-   * **Postfix / Suffix:** Languages like **Forth** and **PostScript** (the engine powering PDF documents and printers). Also seen in unary operators like `x++` and fluent method pipelines: `"text".trim().uppercase()`.
-   * **Infix:** Binary operators (`a + b`, `x && y`) in virtually every modern general-purpose language.
-
----
-
-### 4. Kotlin's Innovation: Infix Functions for Human-Centric DSLs
-
-Historically in Java or C++, infix notation was an exclusive privilege reserved **only** for primitive compiler operators (`+`, `-`, `*`, `/`). If an engineer wanted to define a logical relationship between two domain objects, they were forced into prefix/method notation: `user.sends(message)` or `matrixA.multiply(matrixB)`.
-
-Kotlin democratizes this syntax via the **`infix`** modifier, enabling custom domain functions to read like natural language prose.
+```kotlin
+user sends message
+title withBorder '='
+```
 
 ### Mandatory Rules for `infix`:
 To qualify for `infix` notation, the Kotlin compiler strictly enforces four constraints:
