@@ -299,43 +299,49 @@ fun main() {
 }
 ```
 
-### What Happens to `infix` in Bytecode? (Zero-Cost Abstraction & `@Metadata`)
+### How Infix Functions Appear in Bytecode
 
-A frequent question among software engineers is whether infix notation incurs any runtime performance overhead or whether the JVM possesses specialized opcodes for infix calls.
+You might wonder: when Kotlin allows writing `"Connected" taggedWith "INFO"`, is there a special instruction in JVM Bytecode designed for infix dispatch?
 
-The answer is definitive: **at the executable bytecode instruction level, there is zero difference.**
+**The answer is no.** The `infix` modifier is 100% compile-time syntactic sugar evaluated exclusively during the Kotlin compiler's frontend parsing phase.
 
-#### 1. Identical Bytecode Method Definition
-A function declared with the `infix` modifier:
-```kotlin
-infix fun String.taggedWith(tag: String): String = "[$tag] $this"
-```
-Compiles to the exact same traditional static Java method signature:
-```java
-public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) { ... }
-```
-The JVM specification contains no `ACC_INFIX` access flag or dedicated bytecode opcode for infix invocations.
+In JVM Bytecode, an `infix` function compiles **identically to any regular function**:
 
-#### 2. Identical Bytecode at the Call Site
-Whether you write the standard dot-and-parenthesis call or fluent infix syntax:
-```kotlin
-val a = "System online".taggedWith("INFO") // Standard dot-and-parenthesis call
-val b = "System online" taggedWith "INFO"   // Fluent infix syntax
-```
-In both scenarios, the Kotlin compiler emits the **exact same JVM bytecode instructions**:
-```text
-LDC "System online"
-LDC "INFO"
-INVOKESTATIC TerminalStylesKt.taggedWith (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-```
-*(And if it were a class member function rather than an extension, it would identically emit an `INVOKEVIRTUAL`).* This proves that Kotlin's infix notation is a **zero-cost abstraction**: zero runtime CPU overhead and zero extra memory allocations.
+1. **When declared as an extension function:** It compiles into a standard static method (`public static final`) where the receiver is the first parameter and the operand is the second parameter:
+   ```kotlin
+   // Kotlin source code:
+   infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+   ```
+   Compiles into bytecode equivalent to:
+   ```java
+   // Decompiled Java Bytecode:
+   public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) {
+       Intrinsics.checkNotNullParameter($this$taggedWith, "$this$taggedWith");
+       Intrinsics.checkNotNullParameter(tag, "tag");
+       return "[" + tag + "] " + $this$taggedWith;
+   }
+   ```
+   And at the call site, the dotless, parenthesis-free infix expression:
+   ```kotlin
+   val status = "Connected" taggedWith "INFO"
+   ```
+   Emits a standard static method call via the `INVOKESTATIC` bytecode instruction:
+   ```java
+   String status = TerminalStylesKt.taggedWith("Connected", "INFO");
+   ```
 
-#### 3. The Secret: The `IS_INFIX` Flag in `@kotlin.Metadata`
-If the executable bytecode is identical, how does the Kotlin compiler know—when consuming pre-compiled libraries distributed as a `.jar`—that a given function is permitted to be invoked without dots and parentheses?
+2. **When declared as a class member:** It compiles into a conventional virtual method call (`INVOKEVIRTUAL`):
+   ```kotlin
+   class Router {
+       infix fun routeTo(destination: String) { /* ... */ }
+   }
+   router routeTo "/chat"
+   ```
+   In Java, it is invoked simply as an ordinary instance method call: `router.routeTo("/chat");`.
 
-Through the hidden **`@kotlin.Metadata`** annotation that the compiler injects into every compiled `.class` file. Inside its binary Protocol Buffers header, Kotlin toggles a specific boolean bitmask flag: **`IS_INFIX`**.
-
-This flag is inspected strictly by the Kotlin compiler during syntactic analysis; to the JVM and to Java callers, it is completely invisible and functions as a standard method accepting receiver and argument parameters.
+<Aside type="note" title="Java Interoperability">
+From Java's perspective, the `infix` modifier is completely transparent and introduces zero runtime overhead. Java callers consume Kotlin infix extensions as standard static methods (`TerminalStylesKt.taggedWith("Connected", "INFO")`) and infix members as standard instance methods.
+</Aside>
 
 ---
 

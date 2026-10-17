@@ -301,43 +301,49 @@ fun main() {
 }
 ```
 
-### ¿Y qué ocurre con `infix` en Bytecode? (Cero Sobrecarga y `@Metadata`)
+### ¿Cómo se Muestran las Funciones `infix` en Bytecode?
 
-Una duda habitual entre ingenieros de software es si la notación infija introduce alguna penalización de rendimiento en tiempo de ejecución o si la JVM cuenta con instrucciones especiales para invocar funciones infijas.
+Podrías preguntarte: si Kotlin nos permite escribir `"Conectado" taggedWith "INFO"`, ¿existe alguna instrucción especial en la JVM para despachar llamadas infijas?
 
-La respuesta es rotunda: **a nivel de instrucciones de Bytecode ejecutables, no hay absolutamente ninguna diferencia.**
+**La respuesta es no.** La palabra clave `infix` es $100\%$ azúcar sintáctico procesado exclusivamente en la fase de análisis del compilador de Kotlin (*frontend compiler check*).
 
-#### 1. Misma Definición del Método en Bytecode
-Una función declarada con el modificador `infix`:
-```kotlin
-infix fun String.taggedWith(tag: String): String = "[$tag] $this"
-```
-Se compila exactamente a la misma firma estática tradicional de Java:
-```java
-public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) { ... }
-```
-La especificación de la JVM no posee ningún modificador de acceso `ACC_INFIX` ni instrucción de máquina dedicada a llamadas infijas.
+En el Bytecode de la JVM, una función `infix` se compila **exactamente igual que cualquier otra función**:
 
-#### 2. Mismo Bytecode en el Sitio de Llamada
-Tanto si escribes la llamada tradicional con punto y paréntesis como si utilizas la notación infija:
-```kotlin
-val a = "Servidor listo".taggedWith("INFO") // Con punto y paréntesis
-val b = "Servidor listo" taggedWith "INFO"   // Notación infija
-```
-En ambos casos el compilador genera **exactamente la misma secuencia de instrucciones de bytecode**:
-```text
-LDC "Servidor listo"
-LDC "INFO"
-INVOKESTATIC TerminalStylesKt.taggedWith (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
-```
-*(Y si fuera un método miembro en lugar de una función de extensión, generaría de forma idéntica un `INVOKEVIRTUAL`).* Esto demuestra que la notación `infix` es una **abstracción de costo cero (zero-cost abstraction)**: cero penalización de CPU y cero asignaciones de memoria adicionales.
+1. **Si es una función de extensión:** Se compila como un método estático regular (`public static final`) donde el receptor es el primer parámetro y el argumento es el segundo parámetro:
+   ```kotlin
+   // Código fuente Kotlin:
+   infix fun String.taggedWith(tag: String): String = "[$tag] $this"
+   ```
+   Se traduce en Bytecode equivalente a:
+   ```java
+   // Bytecode descompilado a Java:
+   public static final String taggedWith(@NotNull String $this$taggedWith, @NotNull String tag) {
+       Intrinsics.checkNotNullParameter($this$taggedWith, "$this$taggedWith");
+       Intrinsics.checkNotNullParameter(tag, "tag");
+       return "[" + tag + "] " + $this$taggedWith;
+   }
+   ```
+   Y en el sitio de llamada, la expresión infija sin puntos ni paréntesis:
+   ```kotlin
+   val status = "Conectado" taggedWith "INFO"
+   ```
+   Se traduce internamente en una llamada estática estándar mediante la instrucción `INVOKESTATIC`:
+   ```java
+   String status = TerminalStylesKt.taggedWith("Conectado", "INFO");
+   ```
 
-#### 3. El Secreto: El Flag `IS_INFIX` en `@kotlin.Metadata`
-Si el bytecode ejecutable es idéntico, ¿cómo sabe el compilador de Kotlin —cuando consumes una librería empaquetada en un `.jar`— que esa función tiene permitido invocarse sin puntos ni paréntesis?
+2. **Si es una función miembro de una clase:** Se compila como un método virtual normal (`INVOKEVIRTUAL`):
+   ```kotlin
+   class Router {
+       infix fun routeTo(destination: String) { /* ... */ }
+   }
+   router routeTo "/chat"
+   ```
+   En Java se invoca simplemente como una llamada ordinaria: `router.routeTo("/chat");`.
 
-A través de la anotación oculta **`@kotlin.Metadata`** que el compilador inyecta en cada clase compilada. Dentro de su descriptor binario (serializado con Protocol Buffers), Kotlin enciende una bandera booleana: **`IS_INFIX`**. 
-
-Este flag es leído exclusivamente por el compilador de Kotlin durante la fase de análisis sintáctico de los proyectos clientes; para la JVM y para los desarrolladores de Java, es completamente invisible y se comporta como un método estático o miembro convencional de dos parámetros.
+<Aside type="note" title="Interoperabilidad con Java">
+Desde la perspectiva de Java, el modificador `infix` es totalmente transparente y no introduce ninguna sobrecarga de rendimiento. Un desarrollador de Java puede llamar a cualquier función `infix` de Kotlin exactamente como llamaría a cualquier método estático o de instancia habitual.
+</Aside>
 
 ---
 
