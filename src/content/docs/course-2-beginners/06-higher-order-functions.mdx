@@ -515,12 +515,12 @@ fun executeMenuOption(option: MenuOption, username: String): Boolean = when (opt
             // Usamos myFilter para identificar y reportar qué palabras fueron moderadas
             val detectedWords = userMessage.split(" ").myFilter { it.lowercase() in FORBIDDEN_WORDS }
             if (detectedWords.isNotEmpty()) {
-                println("Palabras moderadas: ${detectedWords.joinToString(", ")}".yellow() taggedWith "FILTER".yellow())
+                println("Moderated words: ${detectedWords.joinToString(", ")}".yellow() taggedWith "FILTER".yellow())
             }
 
             println("\"$sanitized\"" taggedWith "AI".green())
         } else {
-            println("No se ingresó ningún mensaje.".yellow())
+            println("No message provided.".yellow())
         }
         true
     }
