@@ -11,7 +11,7 @@ import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
 En la programación tradicional orientada a objetos (como Java antes de su versión 8 o C++ clásico), los datos y el comportamiento vivían en mundos separados. Los datos podían almacenarse en variables, pasarse como argumentos y devolverse desde métodos. El código ejecutable, en cambio, estaba atrapado dentro de métodos que pertenecían rígidamente a clases.
 
-Si querías pasar una pequeña porción de lógica a un método —por ejemplo, cómo ordenar una lista o qué hacer al hacer clic en un botón— estabas condenado a crear engorrosas **clases anónimas**:
+Si querías pasar una pequeña porción de lógica a un método —por ejemplo, cómo ordenar una lista o qué hacer al hacer clic en un botón— estabas obligado a crear **clases anónimas**:
 
 ```java
 // El doloroso boilerplate de Java antes de las lambdas modernas
@@ -23,41 +23,81 @@ button.setOnClickListener(new View.OnClickListener() {
 });
 ```
 
+<Aside type="note" title="Objetos anónimos en Kotlin">
+En Kotlin, la sintaxis equivalente usa `object : Interfaz { ... }` (Object expressions). De hecho, la propia documentación oficial de Kotlin lo resume así:
+```
+Las expresiones de objeto crean objetos de clases anónimas.
+```
+</Aside>
+
 En Kotlin, **las funciones son ciudadanos de primera clase** (*first-class citizens*). Esto significa que una función puede:
-1. Almacenarse en una variable (`val miFuncion = { ... }`).
+1. Almacenarse en una variable.
+
+```kotlin
+val miFuncion = { 
+    println("Hola")
+}
+```
+
 2. Pasarse como argumento a otra función.
+
+```kotlin
+fun procesarOperacion(operacion: (Int, Int) -> Int) {
+    val resultado = operacion(5, 10)
+    println("El resultado es: $resultado")
+}
+
+procesarOperacion { a, b -> a + b }
+```
+
 3. Devolverse como resultado de otra función.
+
+```kotlin
+fun crearMultiplicador(factor: Int): (Int) -> Int {
+    return { numero -> numero * factor }
+}
+
+val duplicar = crearMultiplicador(2)
+println(duplicar(5)) // 10
+```
+
 4. Construirse dinámicamente en tiempo de ejecución.
+
+```kotlin
+fun crearOperacion(op: String): (Int, Int) -> Int {
+    return when (op) {
+        "sumar" -> { a, b -> a + b }
+        "restar" -> { a, b -> a - b }
+        "multiplicar" -> { a, b -> a * b }
+        "dividir" -> { a, b -> a / b }
+        else -> throw IllegalArgumentException("Operación desconocida: $op")
+    }
+}
+
+val suma = crearOperacion("sumar")
+println(suma(5, 10)) // 15
+```
 
 Cuando una función recibe otra función como parámetro o devuelve una función, recibe el nombre de **Función de Orden Superior** (*Higher-Order Function*).
 
 ---
 
-## Analogías del Mundo Real
+## Analogía del Mundo Real
 
 Para comprender intuitivamente el poder de las funciones de orden superior, usemos dos analogías cotidianas:
 
-### 1. El Robot Cocinero y la Ficha de Receta
-Imagina que compras un robot de cocina inteligente. El robot tiene un motor, calor, cuchillas y un depósito de ingredientes. Sin embargo, el robot no tiene un menú fijo grabado a fuego en sus circuitos. En su lugar, cuenta con una ranura donde introduces una **ficha de instrucciones** (una función lambda). 
+### El Cocinero y la Receta
+Imagina a un cocinero profesional en una cocina. El cocinero cuenta con utensilios, sartenes, fuego y acceso a ingredientes, pero no prepara un único plato fijo por defecto. En su lugar, está esperando a que le entregues una **receta** (una función lambda) para saber qué preparar.
 
-Tú le entregas los ingredientes (datos) y la ficha (comportamiento ejecutable). El robot ejecuta el proceso y te entrega el plato terminado. El robot es la **función de orden superior**; la ficha de receta es la **lambda**.
-
-### 2. La Línea de Ensamblaje con Cabezal Intercambiable
-En una fábrica automatizada, una cinta transportadora traslada piezas de metal una tras otra. La máquina central posee un brazo con un zócalo universal:
-* Si le acoplas un cabezal de pintura, la línea pinta las piezas.
-* Si le acoplas un escáner láser de control de calidad, la línea filtra piezas defectuosas.
-* Si le acoplas una estampadora, graba un logotipo.
-
-La cinta transportadora no necesita reinventarse para cada tarea: solo itera sobre las piezas y delega la acción al cabezal que tú le conectes.
+Tú le proporcionas los ingredientes (datos) y la receta con las instrucciones paso a paso (comportamiento ejecutable). El cocinero sigue los pasos y te entrega el platillo terminado. El cocinero es la **función de orden superior**; la receta es la **lambda**.
 
 ---
 
 ## Tipos de Función (`Function Types`)
 
-Para que el compilador de Kotlin acepte funciones como parámetros, necesita una forma de tiparlas rigurosamente. Al igual que decimos que una variable es de tipo `Int` o `String`, una función tiene su propio **Tipo de Función**.
+Para que el compilador de Kotlin acepte funciones como parámetros, necesita una forma de tiparlas rigurosamente. Al igual que decimos que una variable es de tipo `Int` o `String`, una función tiene su propia forma de definirse como **Tipo de Función**.
 
-La sintaxis universal es:
-```text
+```kotlin
 (TiposDeEntrada) -> TipoDeRetorno
 ```
 
@@ -118,9 +158,7 @@ val isEvenIdiomatic: (Int) -> Boolean = { it % 2 == 0 }
 ### La Regla de Oro: Sintaxis Trailing Lambda
 Esta es una de las decisiones sintácticas más elogiadas de Kotlin:
 
-> **Regla Trailing Lambda:** Si el **último parámetro** de una función es un tipo de función (lambda), la expresión lambda puede colocarse **fuera de los paréntesis** de invocación `()`.
-
-Si la lambda es el **único** parámetro que recibe la función, ¡los paréntesis vacíos `()` pueden omitirse por completo!
+**Regla Trailing Lambda:** Si el **último parámetro** de una función es un tipo de función (lambda), la expresión lambda puede colocarse **fuera de los paréntesis** de invocación `()`.
 
 ```kotlin
 fun repeatAction(times: Int, action: (Int) -> Unit) {
@@ -140,7 +178,42 @@ fun main() {
 }
 ```
 
-Esta sencilla convención es la que permite que frameworks como **Jetpack Compose**, constructores HTML y DSLs de pruebas parezcan palabras clave nativas del lenguaje en lugar de llamadas a métodos.
+Si la lambda es el **único** parámetro que recibe la función, ¡los paréntesis vacíos `()` pueden omitirse por completo!
+
+```kotlin
+fun customAction(action: () -> Unit) {
+    action()
+}
+
+fun main() {
+    // 1. Sintaxis tradicional con la lambda adentro (estilo Java/JS):
+    customAction({ println("Acción realizada") })
+
+    // 2. Sintaxis idiomática Kotlin (Trailing Lambda):
+    customAction { println("Acción realizada") }
+}
+```
+
+Esta sencilla convención es la que permite que frameworks como **Jetpack Compose** parezcan palabras clave nativas del lenguaje en lugar de llamadas a métodos.
+
+```kotlin
+// Jetpack Compose
+public fun ComponentActivity.setContent(
+    parent: CompositionContext? = null,
+    content: @Composable () -> Unit
+) {
+    // ...
+}
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // ...
+        setContent {
+            ZoraApp(platformVariant = ZoraPlatformVariant.MATERIAL3)
+        }
+    }
+}
+```
 
 ---
 
@@ -168,19 +241,50 @@ Function1 checkBlank = new Function1() {
 ```
 
 ### El Peligro de las Clausuras (Closures) y la Memoria
-* **Lambdas sin captura:** Si la lambda no utiliza ninguna variable local de su entorno exterior, el compilador genera un patrón Singleton (`INSTANCE`) y reutiliza la misma instancia en memoria en cada llamada.
-* **Lambdas con captura (Closures):** Si la lambda accede a variables locales declaradas fuera de su cuerpo (por ejemplo, una variable `censorWord` del método contenedor), **la JVM debe instanciar un nuevo objeto en el Heap cada vez que se ejecuta el código**.
+
+Cuando pasas una expresión lambda a una **función de orden superior regular (que NO está marcada como `inline`)**, el compilador de Kotlin se ve obligado a crear un objeto en memoria que implemente la interfaz `FunctionN`:
+
+* **Lambdas sin captura:** Si la lambda no utiliza ninguna variable local de su entorno exterior, el compilador genera un patrón Singleton (`INSTANCE`) y reutiliza la misma instancia en memoria en cada llamada:
 
 ```kotlin
-fun processMessages(messages: List<String>, forbiddenWord: String) {
-    // ¡Peligro de rendimiento! 'forbiddenWord' se captura.
-    // Si la lista tiene 100,000 elementos o esto se ejecuta en un bucle continuo,
-    // se crearán miles de instancias de Function1 sobrecargando al Garbage Collector (GC).
-    messages.forEach { message ->
-        if (message.contains(forbiddenWord)) { ... }
+// Función regular de orden superior (NO inline)
+fun processMessages(messages: List<String>, action: (String) -> Unit) {
+    for (message in messages) {
+        action(message)
+    }
+}
+
+fun handleChat(messages: List<String>) {
+    // Lambda sin captura: solo interactúa con su parámetro directo ('message').
+    // El compilador pasa la instancia estática Singleton: Function1.INSTANCE.
+    // 0 asignaciones adicionales en el Heap sin importar cuántas veces se llame a handleChat().
+    processMessages(messages) { message ->
+        println("Procesando: $message")
     }
 }
 ```
+
+* **Lambdas con captura (Closures):** Si la lambda accede a variables locales declaradas fuera de su cuerpo (por ejemplo, una variable `censorWord` del método contenedor), el compilador necesita encapsular esa variable dentro de los campos de la clase generada. **Por ello, la JVM debe instanciar un nuevo objeto en el Heap cada vez que se ejecuta el método contenedor**:
+
+```kotlin
+fun filterAndProcess(messages: List<String>, censorWord: String) {
+    // ¡Peligro de rendimiento! 'censorWord' es capturada en la clausura (closure).
+    // Como 'censorWord' depende de cada llamada, la JVM NO puede reutilizar un Singleton.
+    // Cada invocación de filterAndProcess(...) crea una nueva instancia (new Function1(censorWord)) en el Heap.
+    // Si esto se ejecuta miles de veces en un bucle interactivo de la CLI, generará presión sobre el Garbage Collector (GC).
+    processMessages(messages) { message ->
+        if (message.contains(censorWord)) {
+            println("Mensaje filtrado: contiene '$censorWord'")
+        }
+    }
+}
+```
+
+<Aside type="tip" title="¿Por qué forEach no tiene este problema?">
+Si te preguntas por qué no sufrimos este sobrecosto al usar `messages.forEach { ... }` de la biblioteca estándar de Kotlin, ¡es porque **`forEach`, `filter` y `map` ya están declaradas como `inline`**!
+
+En la siguiente sección veremos precisamente cómo funciona esa optimización y por qué es tan revolucionaria.
+</Aside>
 
 ---
 
@@ -205,10 +309,8 @@ inline fun executeSafely(action: () -> Unit) {
 <Tabs>
   <TabItem label="Código Fuente Kotlin">
 ```kotlin
-fun main() {
-    executeSafely {
-        println("Conectando con el AI engine...")
-    }
+executeSafely {
+    println("Conectando con el AI engine...")
 }
 ```
   </TabItem>
@@ -224,14 +326,54 @@ try {
   </TabItem>
 </Tabs>
 
-### ¿Cuándo usar y cuándo evitar `inline`?
-* **Úsalo cuando:** La función recibe lambdas como parámetros y se llama con frecuencia (como bucles, filtros o transformadores).
-* **Evítalo cuando:** La función tiene un cuerpo gigantesco (generaría *code bloat* al duplicar cientos de líneas de bytecode en cada call site).
-* **`noinline`:** Si una función inline recibe varias lambdas y quieres que una de ellas NO sea inlined (por ejemplo, para guardarla en una variable o pasarla a otra función regular), márcala con `noinline`:
-  ```kotlin
-  inline fun execute(fastAction: () -> Unit, noinline deferredAction: () -> Unit) { ... }
-  ```
-* **`crossinline`:** Úsalo cuando una lambda pasada a una función `inline` se ejecuta dentro de otro contexto (como un Runnable o un objeto anónimo), prohibiendo retornos no locales (`return`) que saldrían de la función exterior.
+### Cuándo usar inline
+
+* En funciones concisas que reciben parámetros funcionales (lambdas) y se llaman frecuentemente (como bucles, filtros, transformadores o wrappers de control de flujo). Aquí `inline` brilla porque elimina la creación de objetos `FunctionN` en cada llamada:
+
+```kotlin
+// BUENA PRÁCTICA: Función pequeña, recibe una lambda y se invoca frecuentemente
+inline fun measureExecutionTime(task: () -> Unit): Long {
+    val start = System.currentTimeMillis()
+    task() // Inlined directamente: 0 objetos Function0 creados en el Heap
+    return System.currentTimeMillis() - start
+}
+
+val duration = measureExecutionTime {
+    println("Generando respuesta del modelo de IA...")
+}
+```
+
+### Cuándo evitar inline
+
+* **Funciones sin parámetros funcionales (sin lambdas):** Si la función no recibe ninguna lambda, marcarla como `inline` no ahorra objetos en memoria. El compilador emitirá una advertencia (*warning*):
+
+```kotlin
+// MAL USO 1: Función regular sin lambdas
+// Warning del compilador: "Expected performance impact from inlining is insignificant"
+inline fun calculateTax(amount: Double): Double {
+    // Inlinear aquí no ahorra objetos ni llamadas virtuales;
+    // solo copia la operación inflando el bytecode innecesariamente.
+    return amount * 0.16
+}
+```
+
+* **Funciones con cuerpos gigantescos (*Bytecode Bloat*):** Si una función `inline` tiene muchas líneas de código complejo, hacerla inline copiará y pegará todo ese bloque masivo en cada lugar donde se llame, multiplicando el tamaño del archivo compilado:
+
+```kotlin
+// MAL USO 2: Función con cuerpo masivo (riesgo de code bloat)
+inline fun configureComplexSystem(action: () -> Unit) {
+    // Si esta función tiene 200 líneas de inicialización pesada
+    // y se invoca desde 20 lugares diferentes del proyecto,
+    // el compilador duplicará esas 200 líneas 20 veces (4,000 líneas generadas).
+    // Es preferible dejarla como función normal o extraer la lógica pesada fuera de la función inline.
+}
+```
+
+<Aside type="note" title="Spoiler: noinline y crossinline">
+Si alguna vez necesitas evitar que una lambda específica se haga inline (`noinline`) o ejecutarla de forma segura en otro contexto o hilo (`crossinline`), existen estos dos modificadores avanzados.
+
+Los exploraremos a fondo al diseñar librerías y extensiones en el **[Curso 3: Kotlin para desarrolladores Android](/course-3-android/)** y el **[Curso 5: Kotlin para ingenieros](/course-5-engineers/)**.
+</Aside>
 
 ---
 
@@ -272,14 +414,24 @@ Observa la pureza y sencillez: `myFilter` no sabe ni le importa qué condición 
 
 En este paso de nuestro laboratorio conectaremos el modo de interacción en tiempo real del **AI Chat CLI**. Crearemos un módulo de filtrado y sanitización funcional para detectar y censurar palabras no permitidas ingresadas por el usuario.
 
-```
-Repositorio de partida: tag L6-start
-Repositorio completado: tag L6-done
-```
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla L6-start)" 
+  description="Punto de partida exacto desde donde concluimos la Lección 5." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L6-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto (Solución L6-done)" 
+  description="El código completo enriquecido con funciones de orden superior y pipeline de moderación." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L6-done" 
+/>
 
 ---
 
-### Paso 1: Crear el Módulo `ChatSanitizer.kt`
+### Instrucciones Paso a Paso
+
+#### Paso 1: Crear el Módulo `ChatSanitizer.kt`
 
 Crea el archivo `src/main/kotlin/ChatSanitizer.kt` en tu proyecto con el siguiente código:
 
@@ -345,7 +497,7 @@ inline fun censorWords(
 
 ---
 
-### Paso 2: Conectar el Chat Interactivo en `Main.kt`
+#### Paso 2: Conectar el Chat Interactivo en `Main.kt`
 
 Abre `src/main/kotlin/Main.kt`. Actualiza la rama `MenuOption.CHAT` dentro de `executeMenuOption` para solicitar la entrada del usuario, procesarla con nuestro pipeline de sanitización y mostrar el resultado:
 
@@ -389,7 +541,7 @@ fun executeMenuOption(option: MenuOption, username: String): Boolean = when (opt
 
 ---
 
-### Paso 3: Verificación Interactiva en Consola
+#### Paso 3: Verificación Interactiva en Consola
 
 Ejecuta el proyecto desde tu terminal:
 

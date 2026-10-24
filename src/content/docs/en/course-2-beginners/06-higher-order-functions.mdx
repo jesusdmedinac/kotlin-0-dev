@@ -23,41 +23,81 @@ button.setOnClickListener(new View.OnClickListener() {
 });
 ```
 
+<Aside type="note" title="Anonymous Objects in Kotlin">
+In Kotlin, the equivalent syntax uses `object : Interface { ... }` (Object expressions). In fact, official Kotlin documentation summarizes it this way:
+```
+Object expressions create objects of anonymous classes.
+```
+</Aside>
+
 In Kotlin, **functions are first-class citizens**. This means that a function can:
-1. Be stored in a variable (`val myFunction = { ... }`).
+1. Be stored in a variable.
+
+```kotlin
+val myFunction = { 
+    println("Hello")
+}
+```
+
 2. Be passed as an argument to another function.
+
+```kotlin
+fun processOperation(operation: (Int, Int) -> Int) {
+    val result = operation(5, 10)
+    println("The result is: $result")
+}
+
+processOperation { a, b -> a + b }
+```
+
 3. Be returned as the result of another function.
+
+```kotlin
+fun makeMultiplier(factor: Int): (Int) -> Int {
+    return { number -> number * factor }
+}
+
+val double = makeMultiplier(2)
+println(double(5)) // 10
+```
+
 4. Be constructed dynamically at runtime.
+
+```kotlin
+fun createOperation(op: String): (Int, Int) -> Int {
+    return when (op) {
+        "add" -> { a, b -> a + b }
+        "subtract" -> { a, b -> a - b }
+        "multiply" -> { a, b -> a * b }
+        "divide" -> { a, b -> a / b }
+        else -> throw IllegalArgumentException("Unknown operation: $op")
+    }
+}
+
+val add = createOperation("add")
+println(add(5, 10)) // 15
+```
 
 When a function accepts another function as a parameter or returns a function, it is formally known as a **Higher-Order Function**.
 
 ---
 
-## Real-World Analogies
+## Real-World Analogy
 
-To build an intuitive mental model of higher-order functions, consider two everyday analogies:
+To intuitively understand the power of higher-order functions, let's use an everyday analogy:
 
-### 1. The Robotic Chef and the Recipe Card
-Imagine purchasing a smart multi-cooker robot. The appliance has a heating element, electric motor, blades, and an ingredient hopper. However, it does not possess a hardcoded recipe baked into its silicon chips. Instead, it features a slot where you insert an **instruction card** (a lambda expression).
+### The Chef and the Recipe
+Imagine a professional chef in a kitchen. The chef has cookware, pans, heat, and access to ingredients, but doesn't prepare a single fixed dish by default. Instead, the chef waits for you to provide a **recipe** (a lambda function) to know what to cook.
 
-You provide the raw ingredients (data) and the instruction card (executable behavior). The appliance runs the process and yields the prepared dish. The robotic appliance is the **higher-order function**; the recipe card is the **lambda**.
-
-### 2. The Assembly Line with an Interchangeable Tool Head
-In an automated manufacturing plant, a conveyor belt moves metal parts sequentially. The central robotic arm features a universal quick-disconnect socket:
-* Connect a paint nozzle, and the assembly line paints the items.
-* Connect a laser inspection scanner, and the line filters out defective pieces.
-* Connect an engraving stamp, and it brands the company logo.
-
-The conveyor belt does not need to be redesigned for every distinct workflow: it simply loops over parts and delegates the transformation to whichever tool head you attach.
+You provide the ingredients (data) and the step-by-step recipe instructions (executable behavior). The chef follows the instructions and serves the finished dish. The chef is the **higher-order function**; the recipe is the **lambda**.
 
 ---
 
 ## Function Types
 
-For the Kotlin compiler to accept functions as parameters, it requires a way to specify their types rigorously. Just as we declare variables of type `Int` or `String`, a function possesses its own formal **Function Type**.
+For the Kotlin compiler to accept functions as parameters, it requires a way to specify their types rigorously. Just as we declare variables of type `Int` or `String`, a function has its own formal way to be defined as a **Function Type**.
 
-The universal notation is:
-```text
+```kotlin
 (InputParameterTypes) -> ReturnType
 ```
 
@@ -118,9 +158,7 @@ val isEvenIdiomatic: (Int) -> Boolean = { it % 2 == 0 }
 ### The Golden Rule: Trailing Lambda Syntax
 This is one of Kotlin's most celebrated syntactic decisions:
 
-> **Trailing Lambda Rule:** If the **last parameter** of a function is a function type (lambda), the lambda expression can be placed **outside** the closing parenthesis `()`.
-
-If the lambda is the **only** parameter passed to the function, the empty parentheses `()` can be omitted altogether!
+**Trailing Lambda Rule:** If the **last parameter** of a function is a function type (lambda), the lambda expression can be placed **outside** the closing parenthesis `()`.
 
 ```kotlin
 fun repeatAction(times: Int, action: (Int) -> Unit) {
@@ -140,7 +178,42 @@ fun main() {
 }
 ```
 
-This single syntactic convention is what enables **Jetpack Compose**, declarative HTML builders, and unit testing frameworks to look like built-in language keywords rather than nested method invocations.
+If the lambda is the **only** parameter passed to the function, the empty parentheses `()` can be omitted altogether!
+
+```kotlin
+fun customAction(action: () -> Unit) {
+    action()
+}
+
+fun main() {
+    // 1. Traditional syntax with the lambda nested inside (Java/JS style):
+    customAction({ println("Action executed") })
+
+    // 2. Idiomatic Kotlin syntax (Trailing Lambda):
+    customAction { println("Action executed") }
+}
+```
+
+This single syntactic convention is what enables frameworks like **Jetpack Compose** to look like built-in language keywords rather than nested method invocations.
+
+```kotlin
+// Jetpack Compose
+public fun ComponentActivity.setContent(
+    parent: CompositionContext? = null,
+    content: @Composable () -> Unit
+) {
+    // ...
+}
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // ...
+        setContent {
+            ZoraApp(platformVariant = ZoraPlatformVariant.MATERIAL3)
+        }
+    }
+}
+```
 
 ---
 
@@ -168,19 +241,50 @@ Function1 checkBlank = new Function1() {
 ```
 
 ### The Memory Penalty of Closures
-* **Non-capturing lambdas:** If the lambda does not reference any local variables from its outer scope, the compiler instantiates a singleton (`INSTANCE`) and reuses it on every invocation.
-* **Capturing lambdas (Closures):** If the lambda references local variables declared outside its body (e.g., a local `forbiddenWord` variable in the enclosing method), **the JVM must allocate a brand-new object on the Heap every single time the function executes**.
+
+When you pass a lambda expression to a **regular higher-order function (one that is NOT marked as `inline`)**, the Kotlin compiler must allocate an object in memory implementing the `FunctionN` interface:
+
+* **Non-capturing lambdas:** If the lambda does not reference any local variables from its outer scope, the compiler instantiates a singleton (`INSTANCE`) and reuses it across every invocation:
 
 ```kotlin
-fun processMessages(messages: List<String>, forbiddenWord: String) {
-    // Performance risk! 'forbiddenWord' is captured in the closure.
-    // If the list contains 100,000 elements or runs in an interactive loop,
-    // thousands of Function1 instances are instantiated on the Heap, triggering GC pressure.
-    messages.forEach { message ->
-        if (message.contains(forbiddenWord)) { ... }
+// Regular higher-order function (NOT inline)
+fun processMessages(messages: List<String>, action: (String) -> Unit) {
+    for (message in messages) {
+        action(message)
+    }
+}
+
+fun handleChat(messages: List<String>) {
+    // Non-capturing lambda: only interacts with its own direct parameter ('message').
+    // The compiler passes the static Singleton instance: Function1.INSTANCE.
+    // Zero additional Heap allocations, no matter how many times handleChat() is called.
+    processMessages(messages) { message ->
+        println("Processing: $message")
     }
 }
 ```
+
+* **Capturing lambdas (Closures):** If the lambda references local variables declared outside its body (e.g., a local `forbiddenWord` variable in the enclosing method), the compiler must store that variable inside a field of the generated class. **Therefore, the JVM must allocate a brand-new object on the Heap every single time the enclosing method runs**:
+
+```kotlin
+fun filterAndProcess(messages: List<String>, forbiddenWord: String) {
+    // Performance risk! 'forbiddenWord' is captured inside the closure.
+    // Because 'forbiddenWord' varies per call, the JVM CANNOT reuse a singleton.
+    // Every call to filterAndProcess(...) allocates a new object (new Function1(forbiddenWord)) on the Heap.
+    // If called repeatedly inside an interactive CLI loop, this introduces significant GC pressure.
+    processMessages(messages) { message ->
+        if (message.contains(forbiddenWord)) {
+            println("Filtered message: contains '$forbiddenWord'")
+        }
+    }
+}
+```
+
+<Aside type="tip" title="Why doesn't forEach suffer from this?">
+If you are wondering why we do not encounter this memory penalty when using `messages.forEach { ... }` from the Kotlin standard library, it is because **`forEach`, `filter`, and `map` are already declared as `inline`**!
+
+In the very next section, we explore exactly how this compiler optimization works under the hood.
+</Aside>
 
 ---
 
@@ -205,10 +309,8 @@ inline fun executeSafely(action: () -> Unit) {
 <Tabs>
   <TabItem label="Kotlin Source Code">
 ```kotlin
-fun main() {
-    executeSafely {
-        println("Connecting to AI engine...")
-    }
+executeSafely {
+    println("Connecting to AI engine...")
 }
 ```
   </TabItem>
@@ -224,14 +326,54 @@ try {
   </TabItem>
 </Tabs>
 
-### When to Use and Avoid `inline`
-* **Use when:** The function accepts lambdas as parameters and is invoked frequently (loops, transformers, filters, or utility wrappers).
-* **Avoid when:** The function has a massive body (inlining huge methods causes *bytecode bloat* by duplicating hundreds of instructions at every call site).
-* **`noinline`:** When an inline function accepts multiple lambdas and you want one of them NOT to be inlined (for instance, to store it in a field or pass it to a regular function), mark it with `noinline`:
-  ```kotlin
-  inline fun execute(fastAction: () -> Unit, noinline deferredAction: () -> Unit) { ... }
-  ```
-* **`crossinline`:** Used when a lambda passed to an `inline` function must be executed inside a different execution context (such as an anonymous object or a new thread), preventing non-local `return` statements that would illegally escape the outer caller.
+### When to use inline
+
+* On concise functions that accept functional parameters (lambdas) and are called frequently (such as loops, filters, transformers, or control-flow wrappers). Here, `inline` shines by eliminating `FunctionN` object allocations on each call:
+
+```kotlin
+// GOOD PRACTICE: Short function, accepts a lambda, and is invoked frequently
+inline fun measureExecutionTime(task: () -> Unit): Long {
+    val start = System.currentTimeMillis()
+    task() // Inlined directly: zero Function0 objects created on the Heap
+    return System.currentTimeMillis() - start
+}
+
+val duration = measureExecutionTime {
+    println("Generating AI model response...")
+}
+```
+
+### When to avoid inline
+
+* **Functions without functional parameters (no lambdas):** If a function does not accept any lambdas, marking it `inline` offers no memory advantage. In fact, the compiler emits a warning:
+
+```kotlin
+// BAD PRACTICE 1: Regular function without lambda parameters
+// Compiler warning: "Expected performance impact from inlining is insignificant"
+inline fun calculateTax(amount: Double): Double {
+    // Inlining here saves zero Heap allocations or virtual calls;
+    // it simply copies the formula, bloating bytecode unnecessarily.
+    return amount * 0.16
+}
+```
+
+* **Functions with massive bodies (*Bytecode Bloat*):** If an `inline` function contains many lines of complex logic, inlining copies and pastes that entire code block at every single call site, multiplying the compiled file size:
+
+```kotlin
+// BAD PRACTICE 2: Function with a massive body (risk of bytecode bloat)
+inline fun configureComplexSystem(action: () -> Unit) {
+    // If this function contains 200 lines of heavy initialization logic
+    // and is invoked from 20 different places in the project,
+    // the compiler duplicates those 200 lines 20 times (4,000 generated instructions).
+    // Keep it as a normal function or extract the heavy logic outside the inlined wrapper.
+}
+```
+
+<Aside type="note" title="Spoiler: noinline and crossinline">
+If you ever need to prevent a specific lambda from being inlined (`noinline`) or run it safely across another execution context or thread (`crossinline`), Kotlin provides these two advanced modifiers.
+
+We'll explore them in depth when designing libraries and extensions in **[Course 3: Kotlin for Android Developers](/course-3-android/)** and **[Course 5: Kotlin for Engineers](/course-5-engineers/)**.
+</Aside>
 
 ---
 
@@ -272,14 +414,24 @@ Notice the elegance: `myFilter` has no pre-programmed concept of even numbers, p
 
 In this milestone of our ongoing project, we will connect real-time message handling in the **AI Chat CLI**. We will implement a functional sanitization and censorship pipeline to detect and mask prohibited words submitted by the user.
 
-```
-Starter template tag: L6-start
-Completed solution tag: L6-done
-```
+### Lab Deliverables
+
+<LinkCard 
+  title="🧑‍💻 Starter Template (L6-start Tag)" 
+  description="Exact starting point where we concluded Lesson 5." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L6-start" 
+/>
+<LinkCard 
+  title="✅ Completed Solution (L6-done Tag)" 
+  description="Fully integrated CLI featuring custom higher-order functions and message moderation pipeline." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L6-done" 
+/>
 
 ---
 
-### Step 1: Create `ChatSanitizer.kt`
+### Step-by-Step Instructions
+
+#### Step 1: Create `ChatSanitizer.kt`
 
 Create `src/main/kotlin/ChatSanitizer.kt` in your lab workspace with the following implementation:
 
@@ -345,7 +497,7 @@ inline fun censorWords(
 
 ---
 
-### Step 2: Connect Interactive Chat Prompt in `Main.kt`
+#### Step 2: Connect Interactive Chat Prompt in `Main.kt`
 
 Open `src/main/kotlin/Main.kt`. Update the `MenuOption.CHAT` branch inside `executeMenuOption` to prompt for user input, run it through our censorship pipeline, and echo the response:
 
@@ -389,7 +541,7 @@ fun executeMenuOption(option: MenuOption, username: String): Boolean = when (opt
 
 ---
 
-### Step 3: Interactive Terminal Verification
+#### Step 3: Interactive Terminal Verification
 
 Launch the application inside your terminal:
 

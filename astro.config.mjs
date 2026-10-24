@@ -5,6 +5,9 @@ import starlight from '@astrojs/starlight';
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://kotlin-0-dev.jesusdmedinac.com',
+	markdown: {
+		gfm: true,
+	},
 	integrations: [
 		starlight({
 			title: 'Desde0: Cursos Kotlin',
