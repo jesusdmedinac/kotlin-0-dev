@@ -1,41 +1,450 @@
 ---
 title: "L6: Higher-Order Functions and Lambdas"
-description: "Lesson under preparation. Lambdas, functions as parameters, inline functions, and trailing lambdas."
+description: "Master functional programming in Kotlin: function types, lambda expressions, trailing lambdas, under the hood with FunctionN interfaces, and zero-overhead inline functions."
 sidebar:
   order: 6
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lesson in Preparation (WIP)">
-This lesson is currently undergoing pedagogical drafting and development. It will soon be available with detailed visual diagrams, in-depth explanations, and its corresponding milestone in the **AI Chat CLI** incremental lab.
+## Functions as First-Class Citizens
+
+In traditional object-oriented programming (such as pre-Java 8 or classic C++), data and behavior lived in strictly separated worlds. Data could be assigned to variables, passed into arguments, and returned from methods. Executable behavior, by contrast, was rigidly confined inside methods tied to classes.
+
+Whenever you wanted to pass a small piece of custom logic into a method—for example, how to sort a list or what to do when clicking a button—you were forced into verbose **anonymous inner classes**:
+
+```java
+// Painful Java boilerplate prior to modern lambdas
+button.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        System.out.println("Button clicked");
+    }
+});
+```
+
+In Kotlin, **functions are first-class citizens**. This means that a function can:
+1. Be stored in a variable (`val myFunction = { ... }`).
+2. Be passed as an argument to another function.
+3. Be returned as the result of another function.
+4. Be constructed dynamically at runtime.
+
+When a function accepts another function as a parameter or returns a function, it is formally known as a **Higher-Order Function**.
+
+---
+
+## Real-World Analogies
+
+To build an intuitive mental model of higher-order functions, consider two everyday analogies:
+
+### 1. The Robotic Chef and the Recipe Card
+Imagine purchasing a smart multi-cooker robot. The appliance has a heating element, electric motor, blades, and an ingredient hopper. However, it does not possess a hardcoded recipe baked into its silicon chips. Instead, it features a slot where you insert an **instruction card** (a lambda expression).
+
+You provide the raw ingredients (data) and the instruction card (executable behavior). The appliance runs the process and yields the prepared dish. The robotic appliance is the **higher-order function**; the recipe card is the **lambda**.
+
+### 2. The Assembly Line with an Interchangeable Tool Head
+In an automated manufacturing plant, a conveyor belt moves metal parts sequentially. The central robotic arm features a universal quick-disconnect socket:
+* Connect a paint nozzle, and the assembly line paints the items.
+* Connect a laser inspection scanner, and the line filters out defective pieces.
+* Connect an engraving stamp, and it brands the company logo.
+
+The conveyor belt does not need to be redesigned for every distinct workflow: it simply loops over parts and delegates the transformation to whichever tool head you attach.
+
+---
+
+## Function Types
+
+For the Kotlin compiler to accept functions as parameters, it requires a way to specify their types rigorously. Just as we declare variables of type `Int` or `String`, a function possesses its own formal **Function Type**.
+
+The universal notation is:
+```text
+(InputParameterTypes) -> ReturnType
+```
+
+Let's inspect several representative signatures:
+
+| Function Type | Meaning | Lambda Literal Example |
+| :--- | :--- | :--- |
+| `() -> Unit` | Takes no arguments and returns nothing useful. | `{ println("Hello") }` |
+| `(String) -> Boolean` | Takes a `String` and returns a `Boolean` (a predicate). | `{ it.isNotBlank() }` |
+| `(Int, Int) -> Int` | Takes two integers and returns an integer. | `{ a, b -> a + b }` |
+| `(String) -> String` | Takes text and transforms it into another text. | `{ it.uppercase() }` |
+
+<Aside type="note" title="Unit vs void">
+Unlike `void` in Java or C#, Kotlin's `Unit` is a real object (a singleton type). Because of this, if a function returns no value, its return type in a function signature must be explicitly stated as `Unit`, never omitted: `() -> Unit`.
 </Aside>
 
-## What will you learn in this lesson?
+### Nullable Function Types
+A function reference can also be optional. Pay close attention to parentheses placement:
 
-In this lesson we will explore:
-- **Deep Theory:** Functions as first-class citizens, function types `(A) -> B`, trailing lambda syntax, and performance optimization with `inline`, `noinline`, and `crossinline`.
-- **Under the Hood:** JVM heap instantiation of anonymous `FunctionN` objects and how `inline` eliminates runtime memory allocation overhead.
-- **Incremental Lab (AI Chat CLI):** Building a customizable message sanitization and censorship pipeline (`myFilter`, `transformMessage`) for user inputs.
+```kotlin
+// 1. The entire function reference can be null:
+val callback: ((String) -> Unit)? = null
+
+// 2. The function ALWAYS exists, but returns a nullable value:
+val transform: (String) -> String? = { it.ifBlank { null } }
+```
+
+To invoke a nullable function type safely, use the safe call `.invoke()` operator:
+```kotlin
+callback?.invoke("Process completed")
+```
+
+---
+
+## Lambda Expressions and the Trailing Lambda Convention
+
+A **lambda expression** is a block of code enclosed in curly braces `{}` representing an anonymous function (a function without a name).
+
+```kotlin
+// Canonical full syntax
+val sum: (Int, Int) -> Int = { x: Int, y: Int -> x + y }
+
+// With type inference (the compiler infers x and y types from the declaration)
+val multiply = { x: Int, y: Int -> x * y }
+```
+
+### The Implicit `it` Parameter
+When a lambda expression has **exactly one parameter**, Kotlin permits you to omit both the parameter name and the arrow `->`. The compiler automatically injects an implicit variable named **`it`**:
+
+```kotlin
+// Explicit version
+val isEven: (Int) -> Boolean = { number -> number % 2 == 0 }
+
+// Idiomatic version using 'it'
+val isEvenIdiomatic: (Int) -> Boolean = { it % 2 == 0 }
+```
+
+### The Golden Rule: Trailing Lambda Syntax
+This is one of Kotlin's most celebrated syntactic decisions:
+
+> **Trailing Lambda Rule:** If the **last parameter** of a function is a function type (lambda), the lambda expression can be placed **outside** the closing parenthesis `()`.
+
+If the lambda is the **only** parameter passed to the function, the empty parentheses `()` can be omitted altogether!
+
+```kotlin
+fun repeatAction(times: Int, action: (Int) -> Unit) {
+    for (i in 1..times) {
+        action(i)
+    }
+}
+
+fun main() {
+    // 1. Traditional syntax with the lambda nested inside (Java/JS style):
+    repeatAction(3, { index -> println("Iteration $index") })
+
+    // 2. Idiomatic Kotlin syntax (Trailing Lambda):
+    repeatAction(3) { index ->
+        println("Iteration $index")
+    }
+}
+```
+
+This single syntactic convention is what enables **Jetpack Compose**, declarative HTML builders, and unit testing frameworks to look like built-in language keywords rather than nested method invocations.
+
+---
+
+## Under the Hood: JVM Architecture and the Hidden Cost
+
+How does Kotlin implement lambdas on the Java Virtual Machine (JVM), given that legacy JVM bytecode had no primitive concept of first-class function pointers?
+
+### The `FunctionN` Interfaces
+At compile time, every lambda you write is transformed into an instance of a synthetic interface provided by the Kotlin runtime: `Function0`, `Function1`, `Function2`, up to `Function22` (depending on the number of parameters it accepts).
+
+For example, this lambda:
+```kotlin
+val checkBlank: (String) -> Boolean = { it.isBlank() }
+```
+
+Compiles to bytecode equivalent to this Java structure:
+```java
+// Equivalent decompiled bytecode representation
+Function1 checkBlank = new Function1() {
+    @Override
+    public Object invoke(Object p1) {
+        return Boolean.valueOf(((String) p1).isBlank());
+    }
+};
+```
+
+### The Memory Penalty of Closures
+* **Non-capturing lambdas:** If the lambda does not reference any local variables from its outer scope, the compiler instantiates a singleton (`INSTANCE`) and reuses it on every invocation.
+* **Capturing lambdas (Closures):** If the lambda references local variables declared outside its body (e.g., a local `forbiddenWord` variable in the enclosing method), **the JVM must allocate a brand-new object on the Heap every single time the function executes**.
+
+```kotlin
+fun processMessages(messages: List<String>, forbiddenWord: String) {
+    // Performance risk! 'forbiddenWord' is captured in the closure.
+    // If the list contains 100,000 elements or runs in an interactive loop,
+    // thousands of Function1 instances are instantiated on the Heap, triggering GC pressure.
+    messages.forEach { message ->
+        if (message.contains(forbiddenWord)) { ... }
+    }
+}
+```
+
+---
+
+## The Zero-Cost Solution: `inline` Functions
+
+To eliminate heap allocation and virtual dispatch overhead entirely, Kotlin introduces the **`inline`** modifier.
+
+When you mark a higher-order function with `inline`, you instruct the compiler:
+> *"Do not generate anonymous classes or `FunctionN` objects. Wherever this function is called, physically copy and paste both the function body and the lambda body directly into the call site."*
+
+```kotlin
+// By marking this function as 'inline', heap object allocations are completely eliminated
+inline fun executeSafely(action: () -> Unit) {
+    try {
+        action()
+    } catch (e: Exception) {
+        println("Error: ${e.message}")
+    }
+}
+```
+
+<Tabs>
+  <TabItem label="Kotlin Source Code">
+```kotlin
+fun main() {
+    executeSafely {
+        println("Connecting to AI engine...")
+    }
+}
+```
+  </TabItem>
+  <TabItem label="Generated Bytecode (Inlined)">
+```java
+// The compiler eliminates the wrapper call and lambda, injecting flat code:
+try {
+    System.out.println("Connecting to AI engine...");
+} catch (Exception e) {
+    System.out.println("Error: " + e.getMessage());
+}
+```
+  </TabItem>
+</Tabs>
+
+### When to Use and Avoid `inline`
+* **Use when:** The function accepts lambdas as parameters and is invoked frequently (loops, transformers, filters, or utility wrappers).
+* **Avoid when:** The function has a massive body (inlining huge methods causes *bytecode bloat* by duplicating hundreds of instructions at every call site).
+* **`noinline`:** When an inline function accepts multiple lambdas and you want one of them NOT to be inlined (for instance, to store it in a field or pass it to a regular function), mark it with `noinline`:
+  ```kotlin
+  inline fun execute(fastAction: () -> Unit, noinline deferredAction: () -> Unit) { ... }
+  ```
+* **`crossinline`:** Used when a lambda passed to an `inline` function must be executed inside a different execution context (such as an anonymous object or a new thread), preventing non-local `return` statements that would illegally escape the outer caller.
+
+---
+
+## Building Our Own `myFilter`
+
+Before relying on standard library functions like `.filter()`, the best pedagogical exercise to master higher-order functions is building our own version from scratch:
+
+```kotlin
+/**
+ * Custom higher-order filter extension on any List<T>.
+ * Accepts a 'predicate' lambda that evaluates each element.
+ */
+inline fun <T> List<T>.myFilter(predicate: (T) -> Boolean): List<T> {
+    val result = mutableListOf<T>()
+    for (item in this) {
+        // Execute the lambda against the current element
+        if (predicate(item)) {
+            result.add(item)
+        }
+    }
+    return result
+}
+
+fun main() {
+    val numbers = listOf(1, 2, 3, 4, 5, 6, 7, 8)
+    
+    // Leverage trailing lambda syntax and implicit 'it'
+    val evens = numbers.myFilter { it % 2 == 0 }
+    println(evens) // [2, 4, 6]
+}
+```
+
+Notice the elegance: `myFilter` has no pre-programmed concept of even numbers, positive values, or string lengths. It simply manages iteration and delegates evaluation to the lambda supplied by the caller.
+
+---
+
+## Incremental Lab: The Chat Moderation Pipeline
+
+In this milestone of our ongoing project, we will connect real-time message handling in the **AI Chat CLI**. We will implement a functional sanitization and censorship pipeline to detect and mask prohibited words submitted by the user.
+
+```
+Starter template tag: L6-start
+Completed solution tag: L6-done
+```
+
+---
+
+### Step 1: Create `ChatSanitizer.kt`
+
+Create `src/main/kotlin/ChatSanitizer.kt` in your lab workspace with the following implementation:
+
+```kotlin
+/**
+ * Message sanitization and filtering module using functional programming concepts.
+ *
+ * In Lesson 6 we learn that functions are first-class citizens in Kotlin.
+ * We can pass functions as parameters, return them, and compose them fluently.
+ */
+
+/**
+ * Standard list of prohibited keywords to simulate chat moderation and security filtering.
+ */
+val FORBIDDEN_WORDS = setOf("spam", "hack", "bot", "exploit")
+
+/**
+ * Custom higher-order extension function that mimics the standard library [filter].
+ *
+ * Takes a [predicate] function type `(T) -> Boolean` and evaluates each element.
+ * Marked as [inline] to eliminate runtime heap allocation of Function1 instances at the call site.
+ */
+inline fun <T> List<T>.myFilter(predicate: (T) -> Boolean): List<T> {
+    val result = mutableListOf<T>()
+    for (item in this) {
+        if (predicate(item)) {
+            result.add(item)
+        }
+    }
+    return result
+}
+
+/**
+ * Sanitizes input text by applying a custom [transform] function to every word.
+ *
+ * Demonstrates a higher-order function where a lambda is used for word-by-word transformation.
+ */
+inline fun sanitizeMessage(
+    text: String,
+    transform: (String) -> String
+): String {
+    val words = text.split(" ")
+    val transformedWords = mutableListOf<String>()
+    for (word in words) {
+        transformedWords.add(transform(word))
+    }
+    return transformedWords.joinToString(" ")
+}
+
+/**
+ * Censors forbidden words in a text using a custom censorship [predicate] lambda.
+ *
+ * Demonstrates trailing lambda syntax and function composition.
+ */
+inline fun censorWords(
+    text: String,
+    replacement: String = "***",
+    isForbidden: (String) -> Boolean
+): String = sanitizeMessage(text) { word ->
+    if (isForbidden(word.lowercase())) replacement else word
+}
+```
+
+---
+
+### Step 2: Connect Interactive Chat Prompt in `Main.kt`
+
+Open `src/main/kotlin/Main.kt`. Update the `MenuOption.CHAT` branch inside `executeMenuOption` to prompt for user input, run it through our censorship pipeline, and echo the response:
+
+```kotlin
+fun executeMenuOption(option: MenuOption, username: String): Boolean = when (option) {
+    MenuOption.CHAT -> {
+        print("\n$username: ".cyan())
+        val userMessage = readlnOrNull().orEmpty()
+        if (userMessage.isNotBlank()) {
+            // Apply our custom higher-order censoring function with trailing lambda syntax
+            val sanitized = censorWords(userMessage) { word ->
+                word in FORBIDDEN_WORDS
+            }
+
+            // Also demonstrate myFilter by identifying and reporting any censored words
+            val detectedWords = userMessage.split(" ").myFilter { it.lowercase() in FORBIDDEN_WORDS }
+            if (detectedWords.isNotEmpty()) {
+                println("Moderated words: ${detectedWords.joinToString(", ")}".yellow() taggedWith "FILTER".yellow())
+            }
+
+            println("AI: \"$sanitized\"" taggedWith "AI".green())
+        } else {
+            println("No message provided.".yellow())
+        }
+        true
+    }
+    MenuOption.SETTINGS -> {
+        println("Entering settings... (Work in progress)" taggedWith "SYSTEM".yellow())
+        true
+    }
+    MenuOption.EXIT -> {
+        println("Goodbye, $username! See you soon.".yellow())
+        false
+    }
+    MenuOption.UNKNOWN -> {
+        println("Invalid option. Please try again.".red())
+        true
+    }
+}
+```
+
+---
+
+### Step 3: Interactive Terminal Verification
+
+Launch the application inside your terminal:
+
+```bash
+./gradlew run --console=plain -q
+```
+*(On Windows: `gradlew.bat run --console=plain -q`)*
+
+**Test scenarios to confirm:**
+1. Select option `1` (Chat).
+2. Enter a standard message: `Hello, how are you today?`.  
+   *Expected result:* The simulated AI will echo your sentence with no filter warnings.
+3. Select option `1` again and enter a message containing prohibited words: `I found a bot and a hack in the system`.  
+   *Expected result:* The application outputs a yellow `[FILTER]` badge listing `bot, hack`, and the AI response echoes: `I found a *** and a *** in the system`.
+
+Congratulations! You have embedded functional programming patterns into your application while mastering function types, trailing lambdas, and JVM bytecode optimization via `inline`.
 
 ---
 
 ## Navigation
 
-<CardGrid>
-  <LinkCard
-    title="← Course Syllabus"
-    description="Return to the full lesson curriculum."
-    href="/en/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Previous Lesson (L5)"
-    description="Extension and Infix Functions."
-    href="/en/course-2-beginners/05-extension-and-infix-functions"
-  />
-  <LinkCard
-    title="Next Lesson (L7) →"
-    description="Collections and Sequences (Lazy vs Eager)."
-    href="/en/course-2-beginners/07-collections-and-sequences"
-  />
-</CardGrid>
+<LinkCard
+  title="← Previous Lesson (L5)"
+  description="Extension and Infix Functions: extending classes with declarative syntax."
+  href="/en/course-2-beginners/05-extension-and-infix-functions"
+/>
+<LinkCard
+  title="Next Lesson (L7) →"
+  description="Collections and Sequences (Lazy vs Eager): optimizing the chat history."
+  href="/en/course-2-beginners/07-collections-and-sequences"
+/>
+
+---
+
+## Sources & Recommended Readings
+
+<LinkCard 
+  title="Official Documentation: Higher-Order Functions and Lambdas" 
+  description="Explore function types, closures, and idiomatic trailing lambda syntax." 
+  href="https://kotlinlang.org/docs/lambdas.html" 
+/>
+<LinkCard 
+  title="Official Documentation: Inline Functions" 
+  description="Learn about bytecode inlining, noinline, crossinline, and non-local returns." 
+  href="https://kotlinlang.org/docs/inline-functions.html" 
+/>
+
+---
+
+## Feedback & Questions
+
+Do you have any questions regarding how the JVM allocates `FunctionN` objects, when to use `inline`, or how `it` operates?
+
+<LinkCard
+  title="💬 Submit Feedback or Ask a Question"
+  description="Share your thoughts or suggest pedagogical refinements."
+  href="https://tally.so/r/A7geNk?lesson=L6"
+/>
