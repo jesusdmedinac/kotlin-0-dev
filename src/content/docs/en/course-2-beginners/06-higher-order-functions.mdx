@@ -333,15 +333,23 @@ try {
 ```kotlin
 // GOOD PRACTICE: Short function, accepts a lambda, and is invoked frequently
 inline fun measureExecutionTime(task: () -> Unit): Long {
-    val start = System.currentTimeMillis()
+    val start = System.nanoTime()
     task() // Inlined directly: zero Function0 objects created on the Heap
-    return System.currentTimeMillis() - start
+    return (System.nanoTime() - start) / 1_000_000 // Convert nanoseconds to milliseconds
 }
 
 val duration = measureExecutionTime {
     println("Generating AI model response...")
 }
 ```
+
+<Aside type="tip" title="Why is the lambda inlined as well?">
+Although the `inline` modifier is declared at the beginning of the function (`inline fun ...`), **in Kotlin, inlining is contagious to all functional parameters by default**.
+
+The compiler recognizes that the primary performance win of `inline` is not inlining the function body itself (which the JVM's JIT compiler already optimizes automatically at runtime), but **completely eradicating anonymous `FunctionN` object allocations on the Heap**. Consequently, the compiler physically substitutes both the outer function call and the `task()` invocation directly with the flat source code of the lambda.
+
+*(Kotlin's standard library provides a virtually identical utility named `measureTimeMillis`, alongside modern type-safe duration tools such as `measureTime` in `kotlin.time`)*.
+</Aside>
 
 ### When to avoid inline
 

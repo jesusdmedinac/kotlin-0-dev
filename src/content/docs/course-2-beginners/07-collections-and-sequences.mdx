@@ -1,41 +1,504 @@
 ---
 title: "L7: Colecciones y Secuencias (Lazy vs Eager)"
-description: "Lección en preparación. List, Set, Map, transformaciones funcionales, y evaluación perezosa con Sequence."
+description: "Aprende a procesar datos de forma idiomática: colecciones de solo lectura vs mutables, transformaciones funcionales, y optimización de memoria con Sequences."
 sidebar:
   order: 7
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
 
-<Aside type="caution" title="Lección en Construcción (WIP)">
-Esta lección se encuentra actualmente en proceso de redacción y desarrollo pedagógico. Muy pronto estará disponible con explicaciones detalladas, diagramas conceptuales y su correspondiente paso en el laboratorio incremental del **AI Chat CLI**.
+## El Problema del Procesamiento de Datos y la Memoria
+
+En el desarrollo de software moderno, prácticamente cualquier aplicación pasa la mayor parte de su tiempo transformando datos: filtrando registros de una base de datos, mapeando respuestas JSON de una API, o procesando listas de mensajes en una conversación.
+
+En lenguajes tradicionales como Java antes de la versión 8 o C++ clásico, manipular colecciones requería bucles imperativos `for` anidados con variables mutables acumuladoras:
+
+```java
+// Estilo imperativo clásico: propenso a errores y difícil de leer
+List<String> activeUserNames = new ArrayList<>();
+for (User user : users) {
+    if (user.isActive()) {
+        activeUserNames.add(user.getName().toUpperCase());
+    }
+}
+```
+
+Además del código ceremonial, existía un problema aún más grave: **la falta de separación estricta entre colecciones mutables e inmutables**. Si un método devolvía una lista interna, cualquier parte externa del código podía ejecutar `.clear()` o `.add()` y corromper el estado de la aplicación.
+
+Kotlin resuelve este dilema con dos pilares arquitectónicos:
+1. **Separación nativa de interfaces:** Diferencia estricta entre colecciones de solo lectura (`List`) y colecciones mutables (`MutableList`).
+2. **Pipelines declarativos y evaluación perezosa:** Operaciones funcionales directas (`map`, `filter`, `take`) y **`Sequence`** para evitar la creación de colecciones intermedias en memoria (*zero-allocation pipelines*).
+
+---
+
+## Analogía del Mundo Real: Eager vs Lazy
+
+Para entender la diferencia crucial entre una colección estándar (`Iterable`) y una secuencia (`Sequence`), imaginemos una fábrica de empaquetado de manzanas:
+
+```
+Proceso: Lavar -> Pelar -> Empaquetar sólo las primeras 2 manzanas de un lote de 10,000
+```
+
+### 1. Enfoque Eager (Ansioso / Colección Normal): El Almacén por Lotes
+1. **Paso 1 (Lavar):** Tomas las 10,000 manzanas del camión, las lavas todas y las guardas en un **almacén gigante intermedio** (ocupando memoria Heap).
+2. **Paso 2 (Pelar):** Tomas las 10,000 manzanas lavadas del almacén, las pelas todas y las trasladas a un **segundo almacén gigante**.
+3. **Paso 3 (Empaquetar 2):** Vas al segundo almacén, tomas las primeras 2 manzanas peladas y las guardas en la caja. Las 9,998 manzanas restantes se pudren en el almacén.
+* **Resultado:** Desperdiciaste tiempo y energía procesando 10,000 manzanas completas y construiste dos almacenes intermedios para quedarte únicamente con dos.
+
+### 2. Enfoque Lazy (Perezoso / `Sequence`): La Cinta Transportadora Continua
+1. Instalas una cinta transportadora directa que conecta las tres estaciones: [Lavadora] $\to$ [Peladora] $\to$ [Empaquetadora].
+2. Pasa la **Manzana #1**: se lava, se pela y se coloca en la caja.
+3. Pasa la **Manzana #2**: se lava, se pela y se coloca en la caja.
+4. **La máquina se detiene inmediatamente:** La caja ya tiene las 2 manzanas requeridas.
+* **Resultado:** Las 9,998 manzanas restantes jamás se tocaron, la operación fue instantánea y **nunca se necesitó un almacén intermedio**.
+
+---
+
+## La Jerarquía de Colecciones en Kotlin
+
+A diferencia de Java, donde toda colección expone métodos de modificación como `.add()` (lanzando `UnsupportedOperationException` en tiempo de ejecución si era de solo lectura), Kotlin divide la jerarquía en dos ramas a nivel de compilación:
+
+```
+           Iterable<out T> (Solo lectura)
+                  │
+          Collection<out T>
+          ╱               ╲
+     List<out T>        Set<out T>
+          ▲                 ▲
+          │                 │
+ MutableList<T>     MutableSet<T>
+          ╲                 ╱
+       MutableCollection<T>
+                  ▲
+                  │
+        MutableIterable<T>
+```
+
+### 1. `val` vs `List` vs `MutableList`
+Uno de los errores más frecuentes al iniciar en Kotlin es confundir la inmutabilidad de la **variable** con la inmutabilidad de la **colección**:
+
+```kotlin
+// 1. Variable inmutable (val) que apunta a una lista MUTABLE:
+val mutableUsers = mutableListOf("Alice", "Bob")
+// mutableUsers = mutableListOf("Charlie") // ❌ ERROR: 'val' no se puede reasignar
+mutableUsers.add("Charlie")                // ✅ VÁLIDO: El contenido de la lista sí puede mutar
+
+// 2. Variable mutable (var) que apunta a una lista de SOLO LECTURA:
+var readOnlyUsers = listOf("Alice", "Bob")
+// readOnlyUsers.add("Charlie")             // ❌ ERROR: 'List' no tiene método .add()
+readOnlyUsers = listOf("Charlie", "David")  // ✅ VÁLIDO: 'var' permite apuntar a una nueva lista
+
+// 3. Inmutabilidad total (Recomendada):
+val safeUsers = listOf("Alice", "Bob")
+// Ni la referencia puede cambiar, ni los elementos pueden modificarse.
+```
+
+<Aside type="tip" title="Bajo el capó en la JVM">
+En el bytecode de la JVM, Kotlin **no** crea clases envolventes pesadas. `List<T>` se compila directamente a la interfaz estándar `java.util.List` de Java. El compilador de Kotlin simplemente oculta los métodos mutantes (`add`, `remove`, `clear`) para que sea imposible invocarlos desde Kotlin, garantizando inmutabilidad con cero penalización de rendimiento.
 </Aside>
 
-## ¿Qué aprenderás en esta lección?
+### 2. Copias Defensivas con `.toList()`
+Cuando una clase gestiona una lista interna modificable, nunca debe exponer su `MutableList` directamente al exterior. Siempre debe exponer una vista de solo lectura o una copia defensiva:
 
-En esta lección exploraremos:
-- **Teoría a fondo:** Colecciones de solo lectura vs mutables (`List` vs `MutableList`), operaciones funcionales (`map`, `filter`, `flatMap`, `reduce`, `fold`) y streams con `Sequence`.
-- **Bajo el capó:** Asignación de memoria intermedia en cadenas de operaciones sobre colecciones (Eager) vs evaluación elemento a elemento sin colecciones intermedias con `Sequence` (Lazy).
-- **Laboratorio Incremental (AI Chat CLI):** Construcción del motor de historial de mensajes y paginación eficiente en memoria del chat.
+```kotlin
+class MessageRepository {
+    // Estado privado interno modificable
+    private val _messages = mutableListOf<String>()
+
+    // Exposición pública de solo lectura: los consumidores no pueden hacer .add()
+    val messages: List<String> get() = _messages.toList()
+
+    fun append(message: String) {
+        _messages.add(message)
+    }
+}
+```
+
+---
+
+## Operaciones Funcionales Esenciales
+
+Kotlin proporciona un abanico rico de funciones de extensión para operar sobre colecciones sin necesidad de bucles manuales:
+
+### 1. Transformación: `map`
+Proyecta cada elemento de tipo $T$ a un nuevo valor de tipo $R$:
+```kotlin
+val numbers = listOf(1, 2, 3, 4)
+val doubled = numbers.map { it * 2 }
+// Resultado: [2, 4, 6, 8]
+```
+
+### 2. Filtrado: `filter`
+Conserva únicamente los elementos que satisfacen un predicado booleano:
+```kotlin
+val names = listOf("Alice", "Bob", "Charlie", "David")
+val shortNames = names.filter { it.length <= 4 }
+// Resultado: ["Bob"]
+```
+
+### 3. Slicing Seguro: `take` y `takeLast`
+Obtiene los primeros o últimos $N$ elementos de una lista sin riesgo de excepciones `IndexOutOfBoundsException`:
+```kotlin
+val logs = listOf("Log 1", "Log 2", "Log 3", "Log 4", "Log 5")
+val recentLogs = logs.takeLast(2)
+// Resultado: ["Log 4", "Log 5"]
+```
+
+### 4. Búsqueda Defensiva: `firstOrNull` y `find`
+Busca el primer elemento que cumpla una condición o retorna `null` si no existe:
+```kotlin
+val users = listOf("Alice", "Bob", "Charlie")
+val found = users.firstOrNull { it.startsWith("Z") } // null (sin crasheos)
+```
+
+---
+
+## Eager (`Iterable`) vs Lazy (`Sequence`)
+
+Comprender cuándo una operación es **Eager** y cuándo es **Lazy** es fundamental para escribir código de alto rendimiento en Kotlin.
+
+### 1. Evaluación Horizontal (Eager / `Iterable`)
+Las operaciones estándar sobre `List` o `Set` son **ansiosas**: cada paso procesa la colección entera y genera una **nueva lista intermedia en el Heap**:
+
+```kotlin
+val result = listOf(1, 2, 3, 4, 5)
+    .filter { println("Filter: $it"); it % 2 != 0 } // Crea una List intermedia [1, 3, 5]
+    .map { println("Map: $it"); it * 10 }          // Crea otra List intermedia [10, 30, 50]
+    .take(1)                                       // Toma el primero
+```
+
+**Salida en consola:**
+```text
+Filter: 1
+Filter: 2
+Filter: 3
+Filter: 4
+Filter: 5
+Map: 1
+Map: 3
+Map: 5
+Resultado: [10]
+```
+Nota cómo se evaluaron los 5 elementos en el `filter` y los 3 elementos en el `map`, a pesar de que al final solo necesitábamos **un único elemento**.
+
+---
+
+### 2. Evaluación Vertical (Lazy / `Sequence`)
+Al convertir la colección con **`.asSequence()`**, la evaluación pasa a ser **vertical**: cada elemento recorre todo el pipeline de transformaciones de forma individual:
+
+```kotlin
+val result = listOf(1, 2, 3, 4, 5)
+    .asSequence()
+    .filter { println("Filter: $it"); it % 2 != 0 }
+    .map { println("Map: $it"); it * 10 }
+    .take(1)
+    .toList() // Operación terminal que dispara la ejecución
+```
+
+**Salida en consola:**
+```text
+Filter: 1
+Map: 1
+Resultado: [10]
+```
+¡Magia de optimización! El número `1` pasó por `filter`, pasó por `map` y satisfizo `take(1)`. La secuencia se detuvo de inmediato: los números 2, 3, 4 y 5 **nunca fueron tocados**, y **no se creó ninguna lista intermedia**.
+
+---
+
+### Operaciones Intermedias vs Operaciones Terminales
+
+Una `Sequence` opera bajo el patrón de diseño *Pipeline*:
+* **Operaciones Intermedias:** (`map`, `filter`, `take`, `drop`, `distinct`). Son perezosas. Retornan una nueva `Sequence` y **no ejecutan nada** hasta que se solicita el resultado final.
+* **Operaciones Terminales:** (`toList()`, `first()`, `count()`, `forEach()`, `sum()`). Disparan la evaluación elemento por elemento a través de toda la cadena de transformaciones.
+
+```kotlin
+// Esto no hace absolutamente nada: no hay operación terminal
+val lazyPipeline = listOf("A", "B", "C").asSequence().map { 
+    println("Transformando $it") 
+    it.lowercase() 
+}
+
+// Ahora sí se ejecuta, porque invocamos .toList():
+val resultList = lazyPipeline.toList()
+```
+
+---
+
+### Matriz de Decisión: ¿Cuándo usar `Sequence`?
+
+| Escenario | Usar `Iterable` (`List`) | Usar `Sequence` |
+| :--- | :---: | :---: |
+| Colecciones pequeñas ($< 50$ elementos) | ✅ Recomendado | ❌ Sobrecarga innecesaria de iteradores |
+| Colecciones grandes ($> 100$ elementos) con múltiples pasos encadenados | ❌ Crea listas intermedias | ✅ Recomendado (Ahorra Heap) |
+| Cadenas con operaciones de cortocircuito (`first`, `take`, `find`) | ❌ Procesa todo el lote | ✅ Se detiene en cuanto encuentra el elemento |
+| Operación única simple (`list.map { ... }`) | ✅ Más rápido y directo | ❌ No hay listas intermedias que ahorrar |
+
+---
+
+## Laboratorio Incremental: El Historial en Memoria del Chat
+
+En este hito de nuestro proyecto conectaremos el sistema de **Historial de Conversación en Memoria**. Guardaremos cada mensaje intercambiado entre el usuario y la IA, y agregaremos una nueva opción en el menú interactivo para consultar los mensajes recientes utilizando `Sequence`.
+
+### Entregables del Laboratorio
+
+<LinkCard 
+  title="🧑‍💻 Código Inicial (Plantilla L7-start)" 
+  description="Punto de partida exacto donde concluimos la Lección 6." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L7-start" 
+/>
+<LinkCard 
+  title="✅ Código Resuelto (Solución L7-done)" 
+  description="El código completo con gestión de historial en memoria, colecciones y Sequences." 
+  href="https://github.com/jesusdmedinac/kotlin-course-2-lab/tree/L7-done" 
+/>
+
+---
+
+### Instrucciones Paso a Paso
+
+#### Paso 1: Crear el Módulo `ChatHistory.kt`
+
+Crea el archivo `src/main/kotlin/ChatHistory.kt` en tu proyecto. Este módulo modelará las entradas de la conversación y gestionará la lista interna protegiéndola con una vista de solo lectura y consultas con `Sequence`:
+
+```kotlin
+/**
+ * In-memory Chat History management utilizing Kotlin Collections and Sequences.
+ *
+ * In Lesson 7 we learn about read-only vs mutable collections,
+ * functional transformations (map, filter, takeLast), and lazy Sequences.
+ */
+
+/**
+ * Represents a single message exchange recorded in the in-memory chat session.
+ */
+data class ChatEntry(
+    val sender: String,
+    val message: String
+)
+
+/**
+ * Manages the conversation history for the current interactive session.
+ *
+ * Encapsulates a private [MutableList] to protect internal state from accidental mutation,
+ * exposing immutable views and lazy [Sequence] queries to callers.
+ */
+class ChatHistory {
+    // Lista mutable privada: solo esta clase puede modificar los registros
+    private val entries = mutableListOf<ChatEntry>()
+
+    /**
+     * Appends a new message entry to the session history.
+     */
+    fun add(sender: String, message: String) {
+        entries.add(ChatEntry(sender = sender, message = message))
+    }
+
+    /**
+     * Returns a read-only list containing all recorded entries.
+     */
+    fun getAll(): List<ChatEntry> = entries.toList()
+
+    /**
+     * Retrieves the most recent [limit] entries using eager collection slicing.
+     */
+    fun getRecentEntries(limit: Int = 5): List<ChatEntry> = entries.takeLast(limit)
+
+    /**
+     * Searches messages containing [query] using a lazy [Sequence] pipeline.
+     *
+     * Evaluates elements on-demand without generating intermediate collection copies on the Heap.
+     */
+    fun search(query: String): Sequence<ChatEntry> =
+        entries.asSequence()
+            .filter { it.message.contains(query, ignoreCase = true) }
+
+    /**
+     * Returns the total count of recorded messages.
+     */
+    val size: Int get() = entries.size
+
+    /**
+     * Checks whether the session history has no recorded messages.
+     */
+    fun isEmpty(): Boolean = entries.isEmpty()
+}
+
+/**
+ * Global shared in-memory history instance for the interactive CLI session.
+ */
+val chatHistory = ChatHistory()
+```
+
+---
+
+#### Paso 2: Integrar el Historial en `Main.kt`
+
+Abre `src/main/kotlin/Main.kt`. Realizaremos cuatro adaptaciones:
+1. Agregar la opción `HISTORY` a nuestro `enum class MenuOption`.
+2. Actualizar `parseMenuOption` y `printMenu` para incluir la opción `2. History`.
+3. Grabar los mensajes del usuario y de la IA dentro de `MenuOption.CHAT`.
+4. Manejar la acción `MenuOption.HISTORY` llamando a una función `printChatHistory()` que utilice `Sequence`.
+
+```kotlin
+/**
+ * Represents the exhaustive set of selectable options in the console main menu.
+ */
+enum class MenuOption {
+    CHAT,
+    HISTORY,
+    SETTINGS,
+    EXIT,
+    UNKNOWN
+}
+
+fun parseMenuOption(raw: String?): MenuOption = when (raw?.trim()) {
+    "1" -> MenuOption.CHAT
+    "2" -> MenuOption.HISTORY
+    "3" -> MenuOption.SETTINGS
+    "4" -> MenuOption.EXIT
+    else -> MenuOption.UNKNOWN
+}
+
+fun printMenu() {
+    println("\n--- Main Menu ---".bold())
+    println("1. Chat")
+    println("2. History")
+    println("3. Settings")
+    println("4. Exit")
+    print("Choose an option: ".cyan())
+}
+
+fun executeMenuOption(option: MenuOption, username: String): Boolean = when (option) {
+    MenuOption.CHAT -> {
+        print("\n$username: ".cyan())
+        val userMessage = readlnOrNull().orEmpty()
+        if (userMessage.isNotBlank()) {
+            // Registramos el mensaje del usuario en el historial
+            chatHistory.add(sender = username, message = userMessage)
+
+            // Aplicamos nuestra función de orden superior para censurar términos
+            val sanitized = censorWords(userMessage) { word ->
+                word in FORBIDDEN_WORDS
+            }
+
+            // Usamos myFilter para identificar y reportar qué palabras fueron moderadas
+            val detectedWords = userMessage.split(" ").myFilter { it.lowercase() in FORBIDDEN_WORDS }
+            if (detectedWords.isNotEmpty()) {
+                println("Moderated words: ${detectedWords.joinToString(", ")}".yellow() taggedWith "FILTER".yellow())
+            }
+
+            println("\"$sanitized\"" taggedWith "AI".green())
+            // Registramos la respuesta de la IA en el historial
+            chatHistory.add(sender = "AI", message = sanitized)
+        } else {
+            println("No message provided.".yellow())
+        }
+        true
+    }
+    MenuOption.HISTORY -> {
+        printChatHistory()
+        true
+    }
+    MenuOption.SETTINGS -> {
+        println("Entering settings... (Work in progress)" taggedWith "SYSTEM".yellow())
+        true
+    }
+    MenuOption.EXIT -> {
+        println("Goodbye, $username! See you soon.".yellow())
+        false
+    }
+    MenuOption.UNKNOWN -> {
+        println("Invalid option. Please try again.".red())
+        true
+    }
+}
+
+/**
+ * Displays the recent chat history using Kotlin collection transformations and Sequences.
+ */
+fun printChatHistory(limit: Int = 5) {
+    if (chatHistory.isEmpty()) {
+        println("No chat history available yet. Start chatting to record messages.".yellow() taggedWith "HISTORY".yellow())
+        return
+    }
+
+    val recent = chatHistory.getRecentEntries(limit)
+    println("\n--- Chat History (Last ${recent.size} messages) ---".bold())
+
+    // Transformamos y proyectamos los elementos mediante evaluación perezosa
+    recent.asSequence()
+        .map { entry ->
+            val styledSender = if (entry.sender == "AI") entry.sender.green() else entry.sender.cyan()
+            "[$styledSender] ${entry.message}"
+        }
+        .forEach { println(it) }
+}
+```
+
+---
+
+#### Paso 3: Verificación Interactiva en Consola
+
+Ejecuta el proyecto desde tu terminal:
+
+```bash
+./gradlew run --console=plain -q
+```
+*(En Windows: `gradlew.bat run --console=plain -q`)*
+
+**Casos de prueba a verificar:**
+1. Al iniciar la aplicación y seleccionar la opción `2` (History) de inmediato:
+   * *Resultado esperado:* Aparecerá la advertencia: `[HISTORY] No chat history available yet. Start chatting to record messages.`.
+2. Selecciona la opción `1` (Chat) y escribe un mensaje: `Hola, estoy probando el chat`.
+3. Selecciona la opción `2` (History):
+   * *Resultado esperado:* Se desplegará el encabezado con el historial reciente mostrando tanto el mensaje de tu usuario como la respuesta generada por la IA:
+     ```text
+     --- Chat History (Last 2 messages) ---
+     [TuNombre] Hola, estoy probando el chat
+     [AI] Hola, estoy probando el chat
+     ```
+4. Selecciona la opción `4` para salir del programa.
+
+¡Felicidades! Has implementado un sistema de historial en memoria seguro y eficiente, dominando la inmutabilidad de colecciones en Kotlin y el poder de las secuencias perezosas.
 
 ---
 
 ## Navegación
 
-<CardGrid>
-  <LinkCard
-    title="← Temario del Curso"
-    description="Volver al índice general de lecciones."
-    href="/course-2-beginners/00-kotlin-for-begginers"
-  />
-  <LinkCard
-    title="← Lección Anterior (L6)"
-    description="Funciones de Orden Superior y Lambdas."
-    href="/course-2-beginners/06-higher-order-functions"
-  />
-  <LinkCard
-    title="Siguiente Lección (L8) →"
-    description="Funciones de Ámbito (Scope Functions)."
-    href="/course-2-beginners/08-scope-functions"
-  />
-</CardGrid>
+<LinkCard
+  title="← Lección Anterior (L6)"
+  description="Funciones de Orden Superior y Lambdas: funciones como ciudadanos de primera clase."
+  href="/course-2-beginners/06-higher-order-functions"
+/>
+<LinkCard
+  title="Siguiente Lección (L8) →"
+  description="Funciones de Ámbito (Scope Functions): let, run, with, apply y also."
+  href="/course-2-beginners/08-scope-functions"
+/>
+
+---
+
+## Fuentes y Lecturas Recomendadas
+
+<LinkCard 
+  title="Documentación Oficial: Collections Overview" 
+  description="Aprende sobre la jerarquía de colecciones mutables y de solo lectura en Kotlin." 
+  href="https://kotlinlang.org/docs/collections-overview.html" 
+/>
+<LinkCard 
+  title="Documentación Oficial: Sequences" 
+  description="Profundiza en la evaluación perezosa, operaciones intermedias y terminales." 
+  href="https://kotlinlang.org/docs/sequences.html" 
+/>
+
+---
+
+## Feedback y Dudas de la Lección
+
+¿Tienes alguna duda sobre colecciones de solo lectura, la diferencia entre `Iterable` y `Sequence`, o cuándo aplicar evaluación perezosa?
+
+<LinkCard
+  title="💬 Déjanos tu Feedback o Pregunta"
+  description="Envía tus preguntas para resolverlas o sugerir mejoras pedagógicas."
+  href="https://tally.so/r/A7geNk?lesson=L7"
+/>
