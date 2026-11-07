@@ -333,15 +333,23 @@ try {
 ```kotlin
 // BUENA PRÁCTICA: Función pequeña, recibe una lambda y se invoca frecuentemente
 inline fun measureExecutionTime(task: () -> Unit): Long {
-    val start = System.currentTimeMillis()
+    val start = System.nanoTime()
     task() // Inlined directamente: 0 objetos Function0 creados en el Heap
-    return System.currentTimeMillis() - start
+    return (System.nanoTime() - start) / 1_000_000 // Convertimos nanosegundos a milisegundos
 }
 
 val duration = measureExecutionTime {
     println("Generando respuesta del modelo de IA...")
 }
 ```
+
+<Aside type="tip" title="¿Por qué la lambda también se hace inline?">
+Aunque la palabra clave `inline` se coloca al inicio de la declaración de la función (`inline fun ...`), **en Kotlin el inlining es contagioso por defecto hacia todos sus parámetros funcionales**. 
+
+El compilador asume que el mayor cuello de botella de rendimiento no es la función en sí (el compilador JIT de la JVM ya inlínea funciones pequeñas en tiempo de ejecución), sino **erradicar por completo la instanciación de objetos `FunctionN` en el Heap**. Por lo tanto, el compilador reemplaza tanto la llamada a la función contenedora como las ejecuciones de `task()` directamente con el código fuente plano de la lambda.
+
+*(En la biblioteca estándar de Kotlin existe una función prácticamente idéntica llamada `measureTimeMillis`, y la versión moderna tipada `measureTime` dentro del paquete `kotlin.time`)*.
+</Aside>
 
 ### Cuándo evitar inline
 

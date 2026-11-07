@@ -12,7 +12,7 @@
 - [x] L4: Anatomy of Functions
 - [x] L5: Extension and Infix Functions
 - [x] L6: Custom Higher-Order Functions
-- [ ] L7: Collections and Sequences (Lazy vs Eager)
+- [x] L7: Collections and Sequences (Lazy vs Eager)
 - [ ] L8: Scope Functions (The Swiss Army Knife)
 - [ ] L9: Classes, Inheritance, and Visibility
 - [ ] L10: Companion Objects and Object Declarations
